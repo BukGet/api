@@ -1,0 +1,16 @@
+{
+        "name": "PackageName",
+     "version": "0.0.1a",   
+      "author": "Plugin Author",
+ "description": "Some details about what the plugin does.  If you want a line break use \n.",
+     "website": "http://www.website.com",
+    "pkg_type": "plugin",
+      "branch": "stable",
+  "bukkit_min": 670,
+  "bukkit_max": 688,
+"dependencies": {
+    "optional": ["PluginName", "LibraryName"],
+    "required": ["PluginName", "LibraryName"]
+},
+  "categories": ['GEN', 'ADMIN']
+}
