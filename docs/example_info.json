@@ -1,4 +1,5 @@
 {
+         "api": 'API-KEY-GOES-HERE',
         "name": "PackageName",
      "version": "0.0.1a",   
       "author": "Plugin Author",

@@ -80,3 +80,7 @@ categories    A list of categories that the plugin falls under.  Use the
               multiple categories, list all of them and do not use notation
               like GEN/SEC as that will pollute the categories field with a
               bunch of junk.
+
+api           This is the private API key that will be used to validate your
+              access to upload packages.  This will be checked against the
+              username that we have on hand.
