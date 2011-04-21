@@ -28,7 +28,7 @@ def _config(stanza, option, opt_type='string'):
   return any of the following types: string, bool, float, and int.
   '''
   config = ConfigParser.ConfigParser()
-  config.read('config.ini')
+  config.read(os.path.join(sys.path[0],'config.ini'))
   if opt_type == 'string':
     return config.get(stanza, option)
   if opt_type == 'int':
