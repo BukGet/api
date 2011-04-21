@@ -8,11 +8,12 @@ import time
 import shutil
 import hashlib
 import datetime
-import pyclamd
+#import pyclamd
 import ConfigParser
 import httplib
 import urllib2
-from BeautifulSoup              import BeautifulSoup as bsoup
+from commands                   import getstatusoutput  as run
+from BeautifulSoup              import BeautifulSoup    as bsoup
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy                 import Table, Column, Integer, String, \
                                        DateTime, Date, ForeignKey, Text, \
@@ -42,8 +43,8 @@ def _config(stanza, option, opt_type='string'):
 # Open the port to the Clamd daemon.  this will be needed to scan the
 # packages as they are initialized to make sure that therte arent any viruses
 # in the packages.
-pyclamd.init_network_socket(_config('Settings', 'clamd_host'), 
-                            _config('Settings', 'clamd_port', 'int'))
+#pyclamd.init_network_socket(_config('Settings', 'clamd_host'), 
+#                            _config('Settings', 'clamd_port', 'int'))
 
 sql_string    = _config('Settings', 'database')
 engine        = create_engine(sql_string)
@@ -146,10 +147,10 @@ class BukGetPkg(Base):
     
     # Next we will perform a quick scan of the zipfile to make sure that it
     # is clean of any malware that we are able to detect.
-    avstatus            = pyclamd.scan_file(self.filename)
-    if avstatus is not None:
+    avstatus            = run('clamscan %s' % self.filename)
+    if avstatus[0] > 0:
       self.valid        = False
-      self.status       = 'ClamAV: %s' % avstatus
+      self.status       = 'ClamAV reported a possible infection.'
       return
     
     # Now we want to make sure that the file is really a zipfile. Otherwise
