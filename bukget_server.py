@@ -258,7 +258,7 @@ class BukGetPkg(Base):
     # time to the md5 and resum and check.  This will repeat until we get an
     # unallocated name and we will use that.
     self.new_filename            = md5.hexdigest()[:5] + '.zip'
-    while os.path.exists(os.path.join(self._repo, 'pkgs', self.new_filename)):
+    while os.path.exists(os.path.join(self._repo, self.new_filename)):
       md5.update(time)
       self.new_filename = md5.hexdigest()[:5] + '.zip'
     
@@ -272,8 +272,7 @@ class BukGetPkg(Base):
       # change has already vbeen commited to the database, if there is an issue
       # here then we will have to remove the entry from the database as well.
       try:
-        shutil.move(self.filename, os.path.join(self._repo, 'pkgs', 
-                                                self.new_filename))
+        shutil.move(self.filename, os.path.join(self._repo,self.new_filename))
       except:
         self.status       = 'Package Move Failed.'
         return
@@ -455,7 +454,7 @@ def main():
   
   # Next we write the dictionary to file.
   repo = open(os.path.join(\
-      _config('Settings', 'repository', 'path'), 'repo.json'), 'w')
+      _config('Settings', 'dictionary', 'path'), 'repo.json'), 'w')
   repo.write(json.dumps(pkgs))
   repo.close()
   
