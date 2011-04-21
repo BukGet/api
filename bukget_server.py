@@ -10,6 +10,7 @@ import hashlib
 import datetime
 import pyclamd
 import ConfigParser
+import httplib
 import urllib2
 from BeautifulSoup              import BeautifulSoup as bsoup
 from sqlalchemy.ext.declarative import declarative_base
@@ -17,6 +18,7 @@ from sqlalchemy                 import Table, Column, Integer, String, \
                                        DateTime, Date, ForeignKey, \
                                        Boolean, create_engine, MetaData, and_
 from sqlalchemy.orm             import relation, backref, sessionmaker
+
 
 def _config(stanza, option, opt_type='string'):
   '''
@@ -43,8 +45,35 @@ def _config(stanza, option, opt_type='string'):
 pyclamd.init_network_socket(_config('Settings', 'clamd_host'), 
                             _config('Settings', 'clamd_port', 'int'))
 
+sql_string    = _config('Settings', 'database')
+engine        = create_engine(sql_string)
+Session       = sessionmaker(bind=engine)
 Base          = declarative_base()
 
+def get_session():
+  session       = Session()
+  return session
+
+class UserAPI(Base):
+  '''
+  This is the class supporting the user API keys that are stored in the
+  database.  This class will also handle requesting a new key for a user as
+  well.
+  '''
+  __tablename__ = 'users'
+  api           = Column(String, primary_key=True)
+  username      = Column(String, primary_key=True)
+  email         = Column(String)
+  activated     = Column(Boolean)
+  
+  def __init__(self, name, email):
+    self.username   = name
+    self.email      = email
+    md5             = hashlib.md5()
+    md5.update(name + email + datetime.datetime.now().ctime())
+    self.api        = md5.hexdigest()
+    self.activated  = False
+    
 class BukGetPkg(Base):
   '''
   This is the generic bukget package object.  Everything from verification,
@@ -58,6 +87,7 @@ class BukGetPkg(Base):
   _base         = None
   _repo         = None
   filename      = None
+  new_filename  = None
   _engine       = None
   _session      = None
   name          = Column(String, primary_key=True)
@@ -113,8 +143,6 @@ class BukGetPkg(Base):
     self._base          = _config('Settings', 'urlbase')
     self._repo          = _config('Settings', 'repository', 'path')
     self.filename       = os.path.join(_config('Settings', 'uploads'), filename)
-    self._engine        = create_engine(_config('Settings', 'database'))
-    self._session       = sessionmaker(bind=self._engine)
     
     # Next we will perform a quick scan of the zipfile to make sure that it
     # is clean of any malware that we are able to detect.
@@ -133,7 +161,7 @@ class BukGetPkg(Base):
     
     # Lets go ahead and generate a ZipFile object with the package file so
     # we can start parsing. :)
-    package             = zipfile.ZipFile(self.filename)
+    package             = zipfile.ZipFile(self.filename, 'a')
     
     # Next we need to make sure that there is at leats a basic structure in
     # the package and that there is at least 1 jar file in the package in
@@ -162,6 +190,7 @@ class BukGetPkg(Base):
       self.branch       = self.dictionary['branch']
       self.bukkit_min   = int(self.dictionary['bukkit_min'])
       self.bukkit_max   = int(self.dictionary['bukkit_max'])
+      papi              = self.dictionary['api']
       self.set_deps(self.dictionary['dependencies'])
       self.set_cats(self.dictionary['categories'])
     except:
@@ -171,14 +200,35 @@ class BukGetPkg(Base):
       self.status       = 'Malformed information dictionary.'
       return
     
+    # Now we need to make sure that the API key that is in the package is
+    # both valid and tied to the author.  If it passes we will need to remove
+    # it from the dictionary.
+    session             = get_session()
+    user              = session.query(UserAPI).filter_by(api = papi).first()
+    session.close()
+    
+    try:
+      if user.username == self.author:
+        new_json        = self.dictionary
+        del new_json['api']
+        package.writestr('info.json', json.dumps(new_json))
+      else:
+        self.valid      = False
+        self.status     = 'Invalid or Missing API Key'
+        return
+    except:
+      self.valid        = False
+      self.status       = 'Package would not accept modified dictionary.'
+      return
+    
     # If we made it this far then the package has to be valid.  We need to
     # mark the object as such and set the status to an appropriate message :D
     self.valid          = True
     self.status         = 'Valid Package.'
   
-  def add(self):
+  def prep(self):
     '''
-    This function will add the package to the repository.  This includes
+    This function will prep the package to the repository.  This includes
     adding the information to the database and moving the file into the
     right location.  Some extra prepping will be performed as well, such as
     checksumming the file so that we can compare it later on with the client
@@ -201,43 +251,32 @@ class BukGetPkg(Base):
     # that we just generated.  If the filename exists, we will simply add the
     # time to the md5 and resum and check.  This will repeat until we get an
     # unallocated name and we will use that.
-    filename            = md5.hexdigest()[:5] + '.zip'
-    while os.path.exists(os.path.join(self._repo, 'pkgs', filename)):
+    self.new_filename            = md5.hexdigest()[:5] + '.zip'
+    while os.path.exists(os.path.join(self._repo, 'pkgs', self.new_filename)):
       md5.update(time)
-      filename          = md5.hexdigest()[:5] + '.zip'
+      self.new_filename = md5.hexdigest()[:5] + '.zip'
     
     # Next we simply need to slap the filename on the end of the url base
     # that was derrived from the config file when we initialized the object.
     # this should provide a valid URL to point directly to this package.
-    self.location       = self._base + filename
-    
-    # Now we will try to add the package to the repository.  If the database
-    # change sticks (i.e. there are no conflicts and the database is up), then
-    # the row will be commited.
-    session             = self._session()
-    try:
-      session.add(self)
-      session.commit()
-    except:
-      self.status       = 'Package Add Failed.'
-      session.close()
-      return
-    
+    self.location       = self._base + self.new_filename
+
+  def move(self):
     # Finally we will move the file into the proper location.  Because the
     # change has already vbeen commited to the database, if there is an issue
     # here then we will have to remove the entry from the database as well.
     try:
-      shutil.move(self.filename, os.path.join(self._repo, 'pkgs', filename))
+      shutil.move(self.filename, os.path.join(self._repo, 'pkgs', 
+                                              self.new_filename))
     except:
       self.status       = 'Package Move Failed.'
-      session.delete(self)
-      session.commit()
-      session.close()
       return
     
     # Yayz the package is now part of the repository!
     self.status         = 'Package Added to repository.'
-    session.close()
+  
+  def remove(self):
+    os.remove(self.filename)
   
   def dump(self):
     '''
@@ -277,7 +316,8 @@ def generate_bukkit_packages():
   artifact  = 'artifact/target/craftbukkit-0.0.1-SNAPSHOT.jar'
   branches  = {
     'stable': '%s/promotion/latest/Recommended' % burl,
-       'dev': '%s/lastStableBuild' % burl,
+      'test': '%s/lastStableBuild' % burl,
+       'dev': '%s/lastSuccessfulBuild' % burl,
   }
   
   # For every defined branch, we will create a package.  It is understood
@@ -286,12 +326,19 @@ def generate_bukkit_packages():
   # that is perfectly ok.
   # NOTE: Some of this code is more than likely NOT win32 safe!!!!
   for branch in branches:
-     url     = branches[branch]
-     zf      = open(os.path.join(_config('Settings', 'uploads', 'path'), 
+     url      = branches[branch]
+     zf       = open(os.path.join(_config('Settings', 'uploads', 'path'), 
                                          'craftbukkit-%s.zip' % branch), 'wb')
-     zfile   = zipfile.ZipFile(zf, 'w')
-     page    = bsoup(urllib2.urlopen(url).read())
-     build   = int(page.find(name='title').text.split()[1].strip('#'))
+     zfile    = zipfile.ZipFile(zf, 'w')
+     try:
+       page   = bsoup(urllib2.urlopen(url).read())
+     except:
+       return  
+     build    = int(page.find(name='title').text.split()[1].strip('#'))
+     session  = get_session()
+     query    = session.query(UserAPI).filter_by(username = 'Bukkit Team').first()
+     api      = query.api
+     session.close()
 
      # Generate file info and download craftbukkit.
      cb                = zipfile.ZipInfo()
@@ -317,7 +364,8 @@ def generate_bukkit_packages():
              'branch': branch,
          'categories': ['SERVER',],
        'dependencies': {'required': [], 'optional': []},
-           'pkg_type': 'server'
+           'pkg_type': 'server',
+                'api': api
      })
      zfile.writestr(ij, ijdata)
      
@@ -338,17 +386,24 @@ def generate_bukkit_packages():
 
 def log(level, msg):
   logfile = open(_config('Settings', 'logfile', 'path'), 'a')
-  logfile.write('[%7s] %s\n' % (level.upper(), msg))
+  logfile.write('[%15s][%7s] %s\n' % (datetime.datetime.now().ctime(),
+                                      level.upper(), msg))
   logfile.close()
 
 def main():
   # First we need to initialize the database if it hasnt been already.  This
   # will create the database table if it doesn't exist.
-  sql_string    = _config('Settings', 'database')
-  engine        = create_engine(sql_string)
-  Session       = sessionmaker(bind=engine)
   BukGetPkg.metadata.create_all(engine)
-  
+  UserAPI.metadata.create_all(engine)
+
+  session       = get_session()
+  if session.query(UserAPI).filter_by(username = 'Bukkit Team').first() is None:
+    bukkit_api  = UserAPI('Bukkit Team', 'bukkit@bukkit.org')
+    bukkit_api.activated = True
+    print 'New Bukkit Team API Generated: %s' % bukkit_api.api
+    session.add(bukkit_api)
+    session.commit()
+  session.close()
   
   # Next we need to generate the bukkit server packages and place them into
   # the uploads directory.
@@ -356,19 +411,33 @@ def main():
   
   # Now we work through all of the packages that are in the uploads directory
   # and try to import them into the repository.
+  session       = get_session()
   for item in os.listdir(_config('Settings', 'uploads', 'path')):
-    package = BukGetPkg(item)
+    package     = BukGetPkg(item)
     log('info', '[%s] %s version %s returned with status: %s.' %\
         (item, package.name, package.version, package.status))
     if package.valid:
-      package.add()
-      log('info', '%s version %s %s' %\
-          (package.name, package.version, package.status))
+      # Now we will try to add the package to the repository.  If the database
+      # change sticks (i.e. there are no conflicts and the database is up), then
+      # the row will be commited.
+      package.prep()
+      try:
+        session.add(package)
+        session.commit()
+      except:
+        log('info', '%s version %s %s' %\
+            (package.name, package.version, 'Existing Package Error'))
+        package.remove()
+      else:
+        package.move()
+        log('info', '%s version %s %s' %\
+            (package.name, package.version, package.status))
+  session.close()
   
   # Now we need to generate the repo.json dictionary.  We will query the
   # database for all of the packages and then iterate through them, running
   # the json function within the object to generate the dictionary.
-  session       = Session()
+  session       = get_session()
   packages      = session.query(BukGetPkg)
   session.close()
   log('info', 'Generating New Repository Dictionary...')
