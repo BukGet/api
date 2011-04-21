@@ -15,7 +15,7 @@ import urllib2
 from BeautifulSoup              import BeautifulSoup as bsoup
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy                 import Table, Column, Integer, String, \
-                                       DateTime, Date, ForeignKey, \
+                                       DateTime, Date, ForeignKey, Text, \
                                        Boolean, create_engine, MetaData, and_
 from sqlalchemy.orm             import relation, backref, sessionmaker
 
