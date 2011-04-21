@@ -61,9 +61,9 @@ class UserAPI(Base):
   well.
   '''
   __tablename__ = 'users'
-  api           = Column(String, primary_key=True)
-  username      = Column(String, primary_key=True)
-  email         = Column(String)
+  api           = Column(String(255), primary_key=True)
+  username      = Column(String(255), primary_key=True)
+  email         = Column(String(255))
   activated     = Column(Boolean)
   
   def __init__(self, name, email):
@@ -90,20 +90,20 @@ class BukGetPkg(Base):
   new_filename  = None
   _engine       = None
   _session      = None
-  name          = Column(String, primary_key=True)
-  version       = Column(String, primary_key=True)
-  branch        = Column(String)
-  pkg_type      = Column(String)
-  author        = Column(String)
-  description   = Column(String)
-  website       = Column(String)
-  location      = Column(String)
-  checksum      = Column(String)
-  categories    = Column(String)
+  name          = Column(String(64), primary_key=True)
+  version       = Column(String(15), primary_key=True)
+  branch        = Column(String(10))
+  pkg_type      = Column(String(10))
+  author        = Column(String(255))
+  description   = Column(Text)
+  website       = Column(String(255))
+  location      = Column(String(255))
+  checksum      = Column(String(255))
+  categories    = Column(Text)
   bukkit_min    = Column(Integer)
   bukkit_max    = Column(Integer)
-  required_deps = Column(String)
-  optional_deps = Column(String)
+  required_deps = Column(Text)
+  optional_deps = Column(Text)
   
   def get_deps(self):
     '''
