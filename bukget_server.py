@@ -206,19 +206,9 @@ class BukGetPkg(Base):
     session             = get_session()
     user              = session.query(UserAPI).filter_by(api = papi).first()
     session.close()
-    
-    try:
-      if user.username == self.author:
-        new_json        = self.dictionary
-        del new_json['api']
-        package.writestr('info.json', json.dumps(new_json))
-      else:
-        self.valid      = False
-        self.status     = 'Invalid or Missing API Key'
-        return
-    except:
-      self.valid        = False
-      self.status       = 'Package would not accept modified dictionary.'
+    if user.username != self.author:
+      self.valid      = False
+      self.status     = 'Invalid or Missing API Key'
       return
     
     # If we made it this far then the package has to be valid.  We need to
@@ -239,6 +229,21 @@ class BukGetPkg(Base):
     # use them in a little bit.
     md5                 = hashlib.md5()
     time                = datetime.datetime.now()
+    
+    # Before we do anything else, we need to repack the zip file so the the
+    # info.json has all the additional information that we may need.
+    tmpfile             = '%s-tmp'% self.filename
+    repack              = zipfile.ZipFile(tmpfile, 'w')
+    package             = zipfile.ZipFile(self.filename, 'r')
+    for item in package.infolist():
+      if item.filename == 'info.json':
+        dictionary      = self.dictionary
+        del dictionary['api']
+        repack.writestr(item, json.dumps(dictionary))
+      else:
+        repack.writestr(item, package.read(item.filename))
+    self.remove()
+    shutil.move(tmpfile, self.filename)
     
     # Open the package file and read the whole thing into the md5 object so
     # that we can generate a md5sum that we can use to check against.  Once
@@ -262,18 +267,18 @@ class BukGetPkg(Base):
     self.location       = self._base + self.new_filename
 
   def move(self):
-    # Finally we will move the file into the proper location.  Because the
-    # change has already vbeen commited to the database, if there is an issue
-    # here then we will have to remove the entry from the database as well.
-    try:
-      shutil.move(self.filename, os.path.join(self._repo, 'pkgs', 
-                                              self.new_filename))
-    except:
-      self.status       = 'Package Move Failed.'
-      return
-    
-    # Yayz the package is now part of the repository!
-    self.status         = 'Package Added to repository.'
+      # Finally we will move the file into the proper location.  Because the
+      # change has already vbeen commited to the database, if there is an issue
+      # here then we will have to remove the entry from the database as well.
+      try:
+        shutil.move(self.filename, os.path.join(self._repo, 'pkgs', 
+                                                self.new_filename))
+      except:
+        self.status       = 'Package Move Failed.'
+        return
+
+      # Yayz the package is now part of the repository!
+      self.status         = 'Package Added to repository.'
   
   def remove(self):
     os.remove(self.filename)
