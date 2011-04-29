@@ -21,12 +21,9 @@ BukGet Packaging Howto
 LAYOUT:
 -------
 
-bin/      Plugin Jar files go here
-etc/      Any Configuration files go here.  These will be moved to
-          plugins/PluginName/ during installation.
-lib/      Supporting Libraries go here
-info.json Information Dictionary for the package.
-
+env/
+env/plugins/
+env/libs/
 
 
 FIELD INFORMATION FOR info.json:
@@ -50,11 +47,6 @@ description   A text field that allows the developer to say a few words about
               add line breaks with \n however.
 
 website       Whats the plugin homepage?
-
-pkg_type      In most cases this will be plugin.  plugin, library, and server
-              are the three valid values here.  The server type is used to
-              generate the craftbukkit packages however and should not be
-              used.
               
 bukkit_min    The minimum build number that this plugin supports. Must be
               larger than 0.  Keep in mind that this is used to present
@@ -66,12 +58,7 @@ bukkit_max    The maximum build number that the plugin supports.  Must be
               present plugins that the user is able to run with their current 
               bukkit binary that they installed.
               
-depoendencies 
-  optional    This is a list (by name) of any packages that the plugin
-              is optionally dependent on.  If the user wants, this will also
-              be pulled into their install.
-              
-  required    Thus is a list (by name) of any packages that the plugin is
+depoendencies This is a list (by name) of any packages that the plugin is
               dependent on in order to run.  These plugins need to be
               installed in order to make your plugin work.
 
@@ -80,7 +67,3 @@ categories    A list of categories that the plugin falls under.  Use the
               multiple categories, list all of them and do not use notation
               like GEN/SEC as that will pollute the categories field with a
               bunch of junk.
-
-api           This is the private API key that will be used to validate your
-              access to upload packages.  This will be checked against the
-              username that we have on hand.
