@@ -36,9 +36,12 @@ class RepoLink(Base):
   id            = Column(Integer(6), primary_key=True)
   author        = Column(String(32))
   email         = Column(String(128))
-  url           = Column(String(255))
+  url           = Column(Text)
   plugin        = Column(String(32))
   activated     = Column(Boolean)
+  validated     = Column(Boolean)
+  ip_address    = Column(String(15))
+  created       = Column(DateTime)
   
   def __init__(self, username, url):
     self.username = username
@@ -80,6 +83,7 @@ class RepoLink(Base):
       return False
 
 def generate_repository():
+  # if need to validate, sleep 1 sec.
   session = Session()
   links   = session.query(RepoLink)
   repo    = []
