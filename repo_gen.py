@@ -47,6 +47,20 @@ class RepoLink(Base):
     self.username = username
     self.url      = url
   
+  def activate(self):
+    plu_dict      = json.loads(\
+                      urllib2.urlopen(\
+                        'http://plugins.bukkit.org/data.php').read())
+    name          = re.compile(r'^(?:\[.+?\]){0,1}\s(\w+[^ ])')
+    for item in plu_dict:
+      plugin      = name.findall(item['title'])[0]
+      if plugin.lower() == self.plugin.lower():
+        if item['author'].lower() == self.author.lower():
+          self.activated  = True
+          return True
+    return False
+    
+  
   def fetch(self):
     if self.activated:
       try:
@@ -88,6 +102,8 @@ def generate_repository():
   links   = session.query(RepoLink)
   repo    = []
   for link in links:
+    if not link.activated:
+      link.activate()
     if link.fetch():
       repo.append(link.data)
   rfile   = open('repo.json', 'w')
