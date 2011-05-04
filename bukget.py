@@ -8,7 +8,7 @@ import shutil
 import urllib2
 from   commands      import getoutput     as run
 
-motd  = '''BukGet Client Version 0.0.1b1
+motd  = '''BukGet Client Version 0.0.1-git
 '''
 
 class Package(object):
@@ -174,9 +174,9 @@ class BukkitServer(object):
   def time(self, time_of_day):
     times = {
       'dawn': 00000,
-    'midday': 00000,
-      'dusk': 00000,
-  'midnight': 00000,
+    'midday': 06000,
+      'dusk': 12000,
+  'midnight': 18000,
     }
     if time_of_day in times:
       time_of_day = times[time_of_day]
@@ -253,29 +253,174 @@ class CLI(cmd.Cmd):
   def do_quit(self, s):
     '''Exits the CLI interface'''
     sys.exit()
+  
+  def do_pkg(self, s):
+    '''pkg [command] [options]
     
+    The pkg command handles all package management for things like plugins and
+    libraries.  This includes installing, updating, and removing plugins.  As
+    plugin developers have yet to conform to any standard for configuration
+    types and naming conventions, you must manually configure any plugins.
+    
+    NOTE: CURRENTLY NON-FUNCTIONAL!
+    
+    Available Commands
+    ------------------
+      search [criteria]   Searches the package repository for any matching
+                          information based on the criteria specified.
+      list                Lists all installed packages.
+      update              Updates the locally cached repository
+      upgrade             Upgrades all packages to the ost current versions
+                          that support the current bukkit build.
+      install             Installs a package.
+      remove              Removes a package.
+    '''
+    if len(s) > 1:
+      options     = s.split()
+      command     = options[0].lower()
+      print 'None of the packaging commands are active yet!'
+  
+  def do_message(self, s):
+    '''message [message]
+    
+    Sends a message to all players on the server.
+    '''
+    if self.server.running():
+      self.server.message(s)
+  
+  def do_time(self, s):
+    '''time [time-of-day]
+    
+    Sets the in-game time to the specified time.  You can either set the time
+    based on numeric time (00000-24000) where 00000 represents dawn, or you
+    can use one of the pre-determined times: dawn, midday, dusk, and midnight.
+    '''
+    if self.server.running():
+      self.server.time(s)
+  
+  def do_ip(self, s):
+    '''ip [command] [options]
+    
+    Performs any actions that pertain to a specific IP.  Currently the only
+    available functions are banning and unbanning a IP from bring able to
+    login to the server.
+    
+    Available Commands
+    ------------------
+      ip ban [ADDRESS]    Bans an IP Address from being able to login.
+    
+      ip pardon [ADDRESS] Removes a ban on an IP Address.
+    '''
+    if self.server.running():
+      if len(s) > 1:
+        options     = s.split()
+        command     = options[0].lower()
+        
+        if command == 'ban' and len(options) >= 2:
+          self.server.ip_ban(options[1])
+        elif command == 'pardion' and len(options) >= 2:
+          self.server.ip_pardon(options[1])
+        else:
+          print 'Invalid ip Command.'
+      
+  def do_player(self, s):
+    '''player [command] [options]
+    
+    The player command handles any functions pertaining to players on the
+    server.  This includes private messages, banning, kicking, 
+    operator status, movement, and items.  Also getting the player list is
+    handled here.
+    
+    Available Commands
+    ------------------
+      list         Lists all the online players. CURRENTLY BROKEN!
+      
+      message [PLAYER] [MESSAGE]
+                          Sends the player a private message.
+                          
+      give [PLAYER] [ITEM] [AMOUNT]
+                          Gives the specified player the item specified in the
+                          amount specified.
+                          
+      teleport [PLAYER TO TELEPORT] [PLAYER TO TELEPORT TO]
+                          Teleports the first player to the second player.
+                          
+      op [PLAYER]         Grants player operator (op) status.
+      
+      deop [PLAYER]       Removes operator status from a player.
+      
+      kick [PLAYER]       Kicks a player from the server.
+      
+      ban [PLAYER]        Bans a player from being able to login.
+      
+      pardon [PLAYER]     Removes a player ban.
+    '''
+    if self.server.running():
+      if len(s) > 1:
+        options     = s.split()
+        command     = options[0].lower()
+      
+        if command == 'list':
+          self.server.player_list()
+        elif command == 'message' and len(options) >= 3:
+          self.server.player_message(options[1], ' '.join(options[2:]))
+        elif command == 'give' and len(options) >= 4:
+          self.server.player_give(options[1], options[2], options[3])
+        elif command == 'teleport' and len(options) >= 3:
+          self.server.player_teleport(options[1], options[2])
+        elif command == 'op' and len(options) >= 2:
+          self.server.player_op(options[1])
+        elif command == 'deop' and len(options) >= 2:
+          self.server.player_deop(options[1])
+        elif command == 'kick' and len(options) >= 2:
+          self.server.player_kick(options[1])
+        elif command == 'ban' and len(options) >= 2:
+          self.server.player_ban(options[1])
+        elif command == 'pardon' and len(optiions) >= 2:
+          self.server.player_pardon(options[1])
+        else:
+          print 'Invalid player Command.'
+  
+  def do_snapshot(self, s):
+    '''snapshot
+    
+    Snapshotting will take a complete backup of the server, including
+    configurations, plugins, bukkit version, and world map.  The result will
+    be a tarball of the entire environment.  Please not that this will require
+    that the server be stopped before the operation can be performed.
+    
+    NOTE: Not Coded Yet.
+    '''
+    print 'Not Coded yet!'
+  
   def do_bukkit(self, s):
     '''bukkit [command] [options]
+    
+    The Bukkit command handles anything pertaining to the server binary
+    itself.  This includes starting, stopping, updating, and configuring the
+    server.
     
     Available Commands
     ------------------
       info                Returns all available information on the current
                           bukkit server build.  This includes version, branch,
                           and running status.
-      
-      path                Sets the path for the server environment.  The
-                          default is ./env.
                           
+      path                Sets the path for the server environment.  The
+                          default is ./env.    
+                                  
       upgrade [branch]    Upgrades the bukkit Binary to the current build. By
                           default upgrading will update within the same branch
                           the current build is in.
-                          
       start               Starts the bukkit server instance.
       
       stop                Stops the bukkit server instance.
       
-      configure           Reconfigures the bukkit server.
-                          Note: DOES NOT WORK YET
+      console             Connects to the screen console. In order to
+                          disconnect fromt he console, you will need to press
+                          CTRL+a then press d.
+      
+      configure           Reconfigures the bukkit server. DOES NOT WORK YET
     '''
     if len(s) > 1:
       options     = s.split()
@@ -304,6 +449,17 @@ class CLI(cmd.Cmd):
           if len(options) > 1:
             branch  = options[1]
           print self.server.upgrade_binary(branch)
+      elif command == 'message':
+        if self.server.running():
+          self.server.message()
+      elif command == 'console':
+        if self.server.running():
+          os.system('screen -DRS bukkit_server')
+      elif command == 'configure':
+        # need to add configuration stuff here...
+        pass
+      else:
+        print 'Invalid bukkit Command.'
 
 if __name__ == '__main__':
   if len(sys.argv) > 1:
