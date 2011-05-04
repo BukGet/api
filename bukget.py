@@ -3,9 +3,11 @@ import cmd
 import os
 import sys
 import ConfigParser
+import time
 import re
 import shutil
 import urllib2
+import datetime
 from   commands      import getoutput     as run
 
 motd  = '''BukGet Client Version 0.0.1-git
@@ -20,7 +22,7 @@ class BukkitServer(object):
   
   def _command(self, command):
     if self.running():
-      run('screen -S bukkit_server -p0 -X stuff \'%s\n\n\'' % command)
+      run('screen -S bukkit_server -p0 -X stuff \'%s\n\'' % command)
   
   def _set_defaults(self):
     '''
@@ -155,7 +157,7 @@ class BukkitServer(object):
     logfile       = open(os.path.join(self.env, 'server.log'), 'r')
     size          = os.stat(name)[6]
     logfile.seek(size)    
-    need_players  = False
+    need_players  = True
     while need_players:
       where       = logfile.tell()
       line        = logfile.readline()
@@ -165,7 +167,7 @@ class BukkitServer(object):
       else:
         plist     = plistr.findall(line)
         if len(plist) > 0:
-          need_players  = True
+          need_players  = False
           players       = plist[0]
     logfile.close()
     return players
@@ -214,6 +216,33 @@ class BukkitServer(object):
   
   def ip_pardon(self, address):
     self._command('pardon-ip %s' % address)
+  
+  def save_all(self):
+    self._command('save-all')
+    # need to check to see when this is completed.  watch the logfile.
+    # Save complete.
+    name          = os.path.join(self.env, 'server.log')
+    complete      = re.compile(r'Save complete\.$')
+    logfile       = open(name, 'r')
+    size          = os.stat(name)[6]
+    logfile.seek(size)    
+    done          = False
+    while not done:
+      where       = logfile.tell()
+      line        = logfile.readline()
+      if not line:
+        time.sleep(0.1)
+        logfile.seek(where)
+      else:
+        if len(complete.findall(line)) > 0:
+          done    = True
+    logfile.close()
+  
+  def save_off(self):
+    self._command('save-off')
+  
+  def save_on(self):
+    self._command('save-on')
 
 
 class CLI(cmd.Cmd):
@@ -234,6 +263,11 @@ class CLI(cmd.Cmd):
       os.makedirs(self.server.env)
     if not os.path.exists(os.path.join(self.server.env, 'plugins')):
       os.makedirs(os.path.join(self.server.env, 'plugins'))
+    if not os.path.exists('backup'):
+      os.makedirs(os.path.join('backup', 'worlds'))
+      os.makedirs(os.path.join('backup', 'snapshots'))
+    if not os.path.exists('repository'):
+      os.makedirs(os.path.join('repository'))
     
     if sys.platform == 'darwin':
       # Configuration options that are specific to OSX
@@ -392,6 +426,25 @@ class CLI(cmd.Cmd):
     NOTE: Not Coded Yet.
     '''
     print 'Not Coded yet!'
+  
+  def do_backup(self, s):
+    '''backup [worldname]
+    
+    This command will backup the world specified to a tarball. Backing up the 
+    world will not require the server to stop, however disk i/o will be higher
+    than normal during the backup and slowdowns can occur.
+    '''
+    if self.server.running():
+      self.server.message('Starting Server-Wide World Save')
+      self.server.save_all()
+      self.server.save_off()
+      self.server.message('Backing up World...')
+      run('tar czvf backup/worlds/%s-%s.tar.gz %s/%s' % 
+            (s,datetime.datetime.now().strftime('%y%m%d-%H%M%S'), 
+             self.server.env, s))
+      self.server.save_on()
+      self.server.message('Backup Complete.')
+      
   
   def do_bukkit(self, s):
     '''bukkit [command] [options]
