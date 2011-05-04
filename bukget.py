@@ -11,11 +11,18 @@ from   commands      import getoutput     as run
 motd  = '''BukGet Client Version 0.0.1b1
 '''
 
+class Package(object):
+  pass
+
 class BukkitServer(object):
   def __init__(self):
     self.reload_config()
   
-  def __set_defaults(self):
+  def _command(self, command):
+    if self.running():
+      run('screen -S bukkit_server -p0 -X stuff \'%s\n\n\'' % command)
+  
+  def _set_defaults(self):
     '''
     Sets some sane default values needed for for the server to know
     what it is using.
@@ -25,9 +32,9 @@ class BukkitServer(object):
     self.version    = 0
     self.branch     = 'stable'
     self.env        = os.path.join(sys.path[0], 'env')
-    self.__artifact = 'artifact/target/craftbukkit-0.0.1-SNAPSHOT.jar'
+    self._artifact = 'artifact/target/craftbukkit-0.0.1-SNAPSHOT.jar'
     burl            = 'http://ci.bukkit.org/job/dev-CraftBukkit'
-    self.__branches = {
+    self._branches = {
     'stable': '%s/promotion/latest/Recommended' % burl,
       'test': '%s/lastStableBuild' % burl,
        'dev': '%s/lastSuccessfulBuild' % burl,
@@ -53,11 +60,11 @@ class BukkitServer(object):
     config.set('Bukkit', 'java_maximum_memory', self.mem_max)
     config.set('Bukkit', 'bukkit_version', self.version)
     config.set('Bukkit', 'code_branch', self.branch)
-    config.set('Bukkit', 'artifact', self.__artifact)
+    config.set('Bukkit', 'artifact', self._artifact)
     config.set('Bukkit', 'environment_location', self.env)
-    config.set('Bukkit', 'stable_branch_slug', self.__branches['stable'])
-    config.set('Bukkit', 'test_branch_slug', self.__branches['test'])
-    config.set('Bukkit', 'dev_branch_slug', self.__branches['dev'])
+    config.set('Bukkit', 'stable_branch_slug', self._branches['stable'])
+    config.set('Bukkit', 'test_branch_slug', self._branches['test'])
+    config.set('Bukkit', 'dev_branch_slug', self._branches['dev'])
     with open(configfile, 'wb') as confdump:
       config.write(confdump)
   
@@ -80,16 +87,16 @@ class BukkitServer(object):
         self.version    = config.getint('Bukkit', 'bukkit_version')
         self.env        = config.get('Bukkit', 'environment_location')
         self.branch     = config.get('Bukkit', 'code_branch')
-        self.__artifact = config.get('Bukkit', 'artifact')
-        self.__branches = {
+        self._artifact = config.get('Bukkit', 'artifact')
+        self._branches = {
           'stable': config.get('Bukkit', 'stable_branch_slug'),
             'test': config.get('Bukkit', 'test_branch_slug'),
              'dev': config.get('Bukkit', 'dev_branch_slug')
         }
       else:
-        self.__set_defaults()
+        self._set_defaults()
     else:
-      self.__set_defaults()
+      self._set_defaults()
       
   def upgrade_binary(self, branch=None):
     if not self.running():
@@ -99,13 +106,13 @@ class BukkitServer(object):
       # version number is that we are pulling down.  The 
       try:
         title         = re.compile("<title>.*#(\d+).*<\/title>",re.DOTALL|re.M)
-        page          = urllib2.urlopen(self.__branches[branch]).read()
+        page          = urllib2.urlopen(self._branches[branch]).read()
         build_no      = int(title.findall(page)[0])
       except:
         return '[!] HTMLError: branch slug does not contain version number'
       if build_no > self.version:
         try:
-          url           = '%s/%s' % (self.__branches[branch], self.__artifact)
+          url           = '%s/%s' % (self._branches[branch], self._artifact)
           cb_data       = urllib2.urlopen(url).read()
           cb_binary     = open(os.path.join(self.env, '.craftbukkit.jar'), 'wb')
           cb_binary.write(cb_data)
@@ -132,7 +139,7 @@ class BukkitServer(object):
   
   def stop(self):
     if self.running():
-      run('screen -S bukkit_server -p0 -X stuff \'stop\n\n\'')
+      self._command('stop')
   
   def running(self):
     output = run('screen -wipe bukkit_server')
@@ -140,6 +147,73 @@ class BukkitServer(object):
       return True
     else:
       return False
+  
+  def players(self):
+    # look for Connected players:
+    players       = []
+    plistr        = re.compile(r'Connected players: .*')
+    logfile       = open(os.path.join(self.env, 'server.log'), 'r')
+    size          = os.stat(name)[6]
+    logfile.seek(size)    
+    need_players  = False
+    while need_players:
+      where       = logfile.tell()
+      line        = logfile.readline()
+      if not line:
+        time.sleep(0.1)
+        logfile.seek(where)
+      else:
+        plist     = plistr.findall(line)
+        if len(plist) > 0:
+          need_players  = True
+          players       = plist[0]
+    logfile.close()
+    return players
+      
+  
+  def time(self, time_of_day):
+    times = {
+      'dawn': 00000,
+    'midday': 00000,
+      'dusk': 00000,
+  'midnight': 00000,
+    }
+    if time_of_day in times:
+      time_of_day = times[time_of_day]
+    self._command('time set %s' % time_of_day)
+  
+  def message(self, message):
+    self._command('say %s' % message)
+  
+  def player_op(self, player):
+    self._command('op %s' % player)
+  
+  def player_deop(self, player):
+    self._command('deop %s' % player)
+  
+  def player_pm(self, player, message):
+    self._command('tell %s %s' % (player, message))
+  
+  def player_give(self, player, item_id, item_num=64):
+    self._command('give %s %s %s' % (player, item_id, item_num))
+  
+  def player_teleport(self, player, dest_player):
+    self._command('tp %s %s' % (player, dest_player))
+  
+  def player_kick(self, player):
+    self._command('kick %s' % player)
+  
+  def player_ban(self, player):
+    self._command('ban %s' % player)
+  
+  def player_pardon(self, player):
+    self._command('pardon %s' % player)
+  
+  def ip_ban(self, address):
+    self._command('ban-ip %s' % address)
+  
+  def ip_pardon(self, address):
+    self._command('pardon-ip %s' % address)
 
 
 class CLI(cmd.Cmd):
