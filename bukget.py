@@ -6,6 +6,7 @@ import ConfigParser
 import time
 import re
 import shutil
+import json
 import urllib2
 import datetime
 from   commands      import getoutput     as run
@@ -249,7 +250,7 @@ class BukkitServer(object):
 class CLI(cmd.Cmd):
   intro   = motd
   prompt  = 'bukget> '
-  server  = BukkitServer()
+  server  = None
   _cdefs  = None
   _idefs  = None
   _repo   = None
@@ -258,6 +259,7 @@ class CLI(cmd.Cmd):
     cmd.Cmd.__init__(self)
     self._prepare()
     self._refresh()
+    self.server = BukkitServer()
   
   def do_update(self, s):
     '''update
@@ -267,11 +269,11 @@ class CLI(cmd.Cmd):
     base        = 'https://github.com/SteveMcGrath/bukget/raw/master'
     urls        = {
         'item': {
-         'url': '%s/definitions/item_defs.json' % base,
+         'url': '%s/definitions/item_definitions.json' % base,
         'file': os.path.join(sys.path[0], 'config', 'item_definitions.json')
       },
       'config': {
-         'url': '%s/definitions/config_defs.json' % base,
+         'url': '%s/definitions/configuration_definitions.json' % base,
         'file': os.path.join(sys.path[0], 'config', 'config_definitions.json')
       },
         'repo': {
@@ -308,17 +310,15 @@ class CLI(cmd.Cmd):
     '''
     
     # Sets up the directory tree
-    if not os.path.exists(self.server.env):
-      os.makedirs(self.server.env)
-    if not os.path.exists(os.path.join(self.server.env, 'plugins')):
-      os.makedirs(os.path.join(self.server.env, 'plugins'))
-    if not os.path.exists(sys.path[0], 'backup'):
-      os.makedirs(os.path.join('backup', 'worlds'))
-      os.makedirs(os.path.join('backup', 'snapshots'))
-    if not os.path.exists(sys.path[0], 'repository'):
-      os.makedirs(os.path.join('repository'))
-    if not os.path.exists(sys.path[0], 'config'):
-      os.makedirs(os.path.join('config'))
+    if not os.path.exists(os.path.join(sys.path[0], 'env')):
+       os.makedirs(os.path.join(sys.path[0], 'env'))
+    if not os.path.exists(os.path.join(sys.path[0], 'env', 'plugins')):
+      os.makedirs(os.path.join(sys.path[0], 'env', 'plugins'))
+    if not os.path.exists(os.path.join(sys.path[0], 'backup')):
+      os.makedirs(os.path.join(sys.path[0], 'backup', 'worlds'))
+      os.makedirs(os.path.join(sys.path[0], 'backup', 'snapshots'))
+    if not os.path.exists(os.path.join(sys.path[0], 'config')):
+      os.makedirs(os.path.join(sys.path[0], 'config'))
       self.do_update(None)
     
     # Checks to see if screen and java is installed.
