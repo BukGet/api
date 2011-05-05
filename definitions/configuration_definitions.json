@@ -1,0 +1,54 @@
+{
+  "server-ip": {
+    "description": "The IP Address the server will bind to.  Specifying no\nvalue here will bind the server to all IPs.",
+        "default": ""
+  },
+  "server-port": {
+    "description": "The TCP Port that the server will listen on.",
+        "default": 25565
+  },
+  "online-mode": {
+    "description": "Determines if the server will check with Mojang if the\nusers are legitimate owners of the game.",
+        "default": "true"
+  },
+  "white-list": {
+    "description": "Enables whitelisting of players on the server.",
+        "default": "false"
+  },
+  "max-players": {
+    "description": "Determines the maximum number of players allowed online at any one time.",
+        "default": 20
+  },
+  "level-name": {
+    "description": "Name of the default world.  This is also used as a folder location.",
+        "default": "world"
+  },
+  "hellworld": {
+    "description": "Determins if the world is a hell world or a normal world.",
+        "default": "false"
+  },
+  "level-seed": {
+    "description": "A randomization seed for world generation.",
+        "defailt": ""
+  },
+  "allow-flight": {
+    "description": "This flag will determine if users are allowed to fly on the server.",
+        "default": "false"
+  },
+  "spawn-protection": {
+    "description": "The number of blocks around the spawn area that are considered \"protected\".\nOnly an admin can edit these blocks.",
+        "default": 16
+  },
+  "pvp": {
+    "description": "Determines whether players can hurt each other.",
+        "default": "true"
+  },
+  "spawn-animals": {
+    "description": "Tells the server whether to allow animals to spawn in the server.",
+        "default": "true"
+  },
+  "spawn-monsters": {
+    "description": "Tells the server wther to allow monsters to spawn in the server.",
+        "default": "true"
+  }
+}
