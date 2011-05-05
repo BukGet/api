@@ -266,14 +266,14 @@ class CLI(cmd.Cmd):
 
     Updates the repository, configuration definitions, and item definitions.
     '''
-    base        = 'https://github.com/SteveMcGrath/bukget/raw/master'
-    urls        = {
+    base  = 'https://github.com/SteveMcGrath/bukget/raw/master/definitions/'
+    urls  = {
         'item': {
-         'url': '%s/definitions/item_definitions.json' % base,
+         'url': '%s/item_definitions.json' % base,
         'file': os.path.join(sys.path[0], 'config', 'item_definitions.json')
       },
       'config': {
-         'url': '%s/definitions/configuration_definitions.json' % base,
+         'url': '%s/configuration_definitions.json' % base,
         'file': os.path.join(sys.path[0], 'config', 'config_definitions.json')
       },
         'repo': {
@@ -295,7 +295,7 @@ class CLI(cmd.Cmd):
   
   def _refresh(self):
     self._cdefs = json.load(open(os.path.join(sys.path[0], 'config', 
-                                  'configuration_definitions.json'), 'r'))
+                                  'config_definitions.json'), 'r'))
     self._idefs = json.load(open(os.path.join(sys.path[0], 'config', 
                                   'item_definitions.json'), 'r'))
     self._repo  = json.load(open(os.path.join(sys.path[0], 'config',
