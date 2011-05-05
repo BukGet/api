@@ -49,7 +49,7 @@ class BukkitServer(object):
     Updates the configuration file to match the object.
     '''
     config            = ConfigParser.ConfigParser()
-    configfile        = os.path.join(sys.path[0], 'config.ini')
+    configfile        = os.path.join(sys.path[0], 'config', 'bukget.ini')
     # If the configuration file exists, then go ahead and load it into the
     # the config object.  Then go ahead to check to see if the Bukkit section
     # exists, and if it doesn't then add the section intot he loaded config.
@@ -76,7 +76,7 @@ class BukkitServer(object):
     Updates the object to match the configuration file.
     '''
     config            = ConfigParser.ConfigParser()
-    configfile        = os.path.join(sys.path[0], 'config.ini')
+    configfile        = os.path.join(sys.path[0], 'config', 'bukget.ini')
     # If the configuration file exists and the Bukkit section exists within
     # the configuration file, then go ahead and import all of ths settings.
     # If either of these conditions do not match, then we will need to set
@@ -250,11 +250,55 @@ class CLI(cmd.Cmd):
   intro   = motd
   prompt  = 'bukget> '
   server  = BukkitServer()
+  _cdefs  = None
+  _idefs  = None
+  _repo   = None
   
   def __init__(self):
     cmd.Cmd.__init__(self)
     self._prepare()
-    
+    self._refresh()
+  
+  def do_update(self, s):
+    '''update
+
+    Updates the repository, configuration definitions, and item definitions.
+    '''
+    base        = 'https://github.com/SteveMcGrath/bukget/raw/master'
+    urls        = {
+        'item': {
+         'url': '%s/definitions/item_defs.json' % base,
+        'file': os.path.join(sys.path[0], 'config', 'item_definitions.json')
+      },
+      'config': {
+         'url': '%s/definitions/config_defs.json' % base,
+        'file': os.path.join(sys.path[0], 'config', 'config_definitions.json')
+      },
+        'repo': {
+         'url': 'http://bukget.org/repo.json',
+        'file': os.path.join(sys.path[0], 'config', 'repository.json')
+      }
+    }
+
+    for item in urls:
+      print '[*] Attempting to Update %s' % urls[item]['file']
+      try:
+        ufile = open(urls[item]['file'], 'w')
+        ufile.write(urllib2.urlopen(urls[item]['url']).read())
+        ufile.close()
+      except:
+        print '[!] Update Failed for %s' % urls[item]['file']
+      else:
+        print '[*] Update Successful for %s' % urls[item]['file']
+  
+  def _refresh(self):
+    self._cdefs = json.load(open(os.path.join(sys.path[0], 'config', 
+                                  'configuration_definitions.json'), 'r'))
+    self._idefs = json.load(open(os.path.join(sys.path[0], 'config', 
+                                  'item_definitions.json'), 'r'))
+    self._repo  = json.load(open(os.path.join(sys.path[0], 'config',
+                                  'repository.json'), 'r'))
+  
   def _prepare(self):
     '''prepare
     
@@ -268,11 +312,14 @@ class CLI(cmd.Cmd):
       os.makedirs(self.server.env)
     if not os.path.exists(os.path.join(self.server.env, 'plugins')):
       os.makedirs(os.path.join(self.server.env, 'plugins'))
-    if not os.path.exists('backup'):
+    if not os.path.exists(sys.path[0], 'backup'):
       os.makedirs(os.path.join('backup', 'worlds'))
       os.makedirs(os.path.join('backup', 'snapshots'))
-    if not os.path.exists('repository'):
+    if not os.path.exists(sys.path[0], 'repository'):
       os.makedirs(os.path.join('repository'))
+    if not os.path.exists(sys.path[0], 'config'):
+      os.makedirs(os.path.join('config'))
+      self.do_update(None)
     
     # Checks to see if screen and java is installed.
     need_deps   = False
@@ -311,8 +358,8 @@ class CLI(cmd.Cmd):
       pass
     else:
       pass
-      
-  def do_quit(self, s):
+  
+  def do_exit(self, s):
     '''Exits the CLI interface'''
     sys.exit()
   
@@ -501,7 +548,7 @@ class CLI(cmd.Cmd):
                           disconnect fromt he console, you will need to press
                           CTRL+a then press d.
       
-      configure           Reconfigures the bukkit server. DOES NOT WORK YET
+      config              Reconfigures the bukkit server. DOES NOT WORK YET
     '''
     if len(s) > 1:
       options     = s.split()
@@ -536,7 +583,14 @@ class CLI(cmd.Cmd):
       elif command == 'console':
         if self.server.running():
           os.system('screen -DRS bukkit_server')
-      elif command == 'configure':
+      elif command == 'config':
+        opt       = None
+        value     = None
+        if len(options) > 1:
+          opt     = options[1].lower()
+          if len(options) > 2:
+            value = options[2].lower()
+        
         # need to add configuration stuff here...
         pass
       else:
