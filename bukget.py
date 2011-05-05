@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.6
 import cmd
 import os
 import sys
@@ -11,6 +11,7 @@ import datetime
 from   commands      import getoutput     as run
 
 motd  = '''BukGet Client Version 0.0.1-git
+use the 'help' command for documentation.
 '''
 
 class Package(object):
@@ -250,7 +251,11 @@ class CLI(cmd.Cmd):
   prompt  = 'bukget> '
   server  = BukkitServer()
   
-  def do_prepare(self, s):
+  def __init__(self):
+    cmd.Cmd.__init__(self)
+    self._prepare()
+    
+  def _prepare(self):
     '''prepare
     
     Prepares a stock server to be able to run bukkit.  This includes
@@ -269,16 +274,39 @@ class CLI(cmd.Cmd):
     if not os.path.exists('repository'):
       os.makedirs(os.path.join('repository'))
     
+    # Checks to see if screen and java is installed.
+    need_deps   = False
+    for package in ['java', 'screen']:
+      output    = run('which %s' % package)
+      rhel      = re.compile(r'which:\sno\s%s' % package)
+      if len(rhel.findall(output)) > 0:
+        need_deps = True
+      if output == '':
+        need_deps = True
+    
+    if need_deps:
+      print '\nWARNING\n-------\n'
+      print 'Before you continue, please perform the following operations\n'+\
+            'to install the needed software to get bukget working.  We\n'+\
+            'depend on this software in order to properly background and\n'+\
+            'and run the bukkit server.  As it is expected for this\n'+\
+            'script to be run as a non-privileged user, we should not\n'+\
+            'be able to run these commands on our own.\n'
+      
     if sys.platform == 'darwin':
-      # Configuration options that are specific to OSX
+      # Nothing should be needed here at the moment.  Apple provides screen
+      # and a JVM that works.
       pass
     if sys.platform == 'linux2':
-      if run('which apt-get') is not None:
-        pass
-      elif run('which yum') is not None:
-        pass
+      if run('which apt-get') == '/usr/bin/apt-get':
+        if need_deps:
+          print 'sudo apt-get -y install openjdk-6-jre screen\n'
+      elif run('which yum') == '/usr/bin/yum' :
+        if need_deps:
+          print 'yum -y install java-1.6.0-openjdk screen\n'
       else:
-       pass
+        if need_deps:
+          print 'Please install java & screen.\n'
       # Configuration options that are specific to Linux
       pass
     else:
