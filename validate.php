@@ -27,10 +27,10 @@ mysql_select_db($dbname, $dbcon);
 
 # New we need to build the query that we will be using to check to see if the
 # information provided in the get is valid.
-$checkquery = "SELECT id FROM repositories 
-                WHERE email = '{$email}' 
-                  AND ip = '{$ip}' 
-                  AND plugin = '{$name}'";
+$checkquery = "SELECT `id` FROM repositories 
+                WHERE `email` = '{$email}' 
+                  AND `ip` = '{$ip}' 
+                  AND `plugin` = '{$name}'";
                
 # Get the results of the query and check to see if we were able to run the
 # query without issues.  If there was an issue, then throw up an error and die   
