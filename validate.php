@@ -29,7 +29,7 @@ mysql_select_db($dbname, $dbcon);
 # information provided in the get is valid.
 $checkquery = "SELECT `id` FROM repositories 
                 WHERE `email` = '{$email}' 
-                  AND `ip` = '{$ip}' 
+                  AND `ip_address` = '{$ip}' 
                   AND `plugin` = '{$name}'";
                
 # Get the results of the query and check to see if we were able to run the
