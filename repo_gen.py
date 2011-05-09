@@ -20,7 +20,7 @@ from sqlalchemy                 import Table, Column, Integer, String, \
 from sqlalchemy.orm             import relation, backref, sessionmaker
 
 
-sql_string    = _config('Settings', 'database')
+sql_string    = ''
 engine        = create_engine(sql_string)
 Session       = sessionmaker(bind=engine)
 Base          = declarative_base()
@@ -48,26 +48,33 @@ class RepoLink(Base):
     self.url      = url
   
   def activate(self):
-    plu_dict      = json.loads(\
-                      urllib2.urlopen(\
-                        'http://plugins.bukkit.org/data.php').read())
-    name          = re.compile(r'^(?:\[.+?\]){0,1}\s(\w+[^ ])')
-    for item in plu_dict:
-      plugin      = name.findall(item['title'])[0]
-      if plugin.lower() == self.plugin.lower():
-        if item['author'].lower() == self.author.lower():
-          self.activated  = True
-          return True
+    #plu_dict      = json.loads(\
+    #                  urllib2.urlopen(\
+    #                    'http://plugins.bukkit.org/data.php').read())
+    #name          = re.compile(r'^(?:\[.+?\]){0,1}\s(\w+[^ ])')
+    #for item in plu_dict:
+    #  plugin      = name.findall(item['title'])[0]
+    #  if plugin.lower() == self.plugin.lower():
+    #    if item['author'].lower() == self.author.lower():
+    #      self.activated  = True
+    #      return True
     return False
     
   
   def fetch(self):
     if self.activated:
       try:
-        data            = json.loads(urllib2.urlopen(self.url).read())
+        jdata           = urllib2.urlopen(self.url).read()
       except:
         self.status     = 'Could not Fetch Remote Repository Entries'
         return False
+      
+      try:
+        data            = json.loads(jdata)
+      except:
+        self.status     = 'JSON Dictionary format invalid.'
+        return False
+      
       reqd_items        = ['name', 'author', 'website', 'categories', 
                            'dependencies', 'versions']
       for item in reqd_items:
@@ -106,6 +113,9 @@ def generate_repository():
       link.activate()
     if link.fetch():
       repo.append(link.data)
+      print '%s added to canonical repository.' % link.plugin
+    else:
+      print '%s failed with status: %s' % (link.plugin, link.status)
   rfile   = open('repo.json', 'w')
   rfile.write(json.dumps(repo))
   rfile.close()
