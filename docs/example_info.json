@@ -3,7 +3,7 @@
       "author": "Plugin Author",
  "description": "Some details about what the plugin does.  If you want a line break use \n.",
      "website": "http://www.website.com",
-  "categories": ['GEN', 'ADMIN'],
+  "categories": ["GEN", "ADMIN"],
 "dependencies": ["iConomy", "mysqldb"],
     "versions": [
     {
