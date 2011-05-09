@@ -9,7 +9,7 @@
     {
      "version": "0.0.1a",
     "location": "http://www.website.com/location/to/zipfile.zip",
-    "checksum": "MD5-CHECKSUM-GOES-HERE"
+    "checksum": "MD5-CHECKSUM-GOES-HERE",
       "branch": "stable",
   "bukkit_min": 670,
   "bukkit_max": 733
@@ -18,7 +18,7 @@
     {
      "version": "0.0.1b",
     "location": "http://www.website.com/location/to/zipfile.zip",
-    "checksum": "MD5-CHECKSUM-GOES-HERE"
+    "checksum": "MD5-CHECKSUM-GOES-HERE",
       "branch": "dev",
   "bukkit_min": 700,
   "bukkit_max": 733
