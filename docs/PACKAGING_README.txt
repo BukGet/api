@@ -7,13 +7,10 @@ BukGet Packaging Howto
    package root.  These folder can be empty, however are needed in order to
    pass the check.
 
-3) All BukGet packages contain an info.json file in the root of the package
-   folder.  an example info.json file can be found along with this file.
-
-4) There must be at least 1 jar file within the package.  If there is no java
+3) There must be at least 1 jar file within the package.  If there is no java
    binary then what are you generating a package for? :-p
 
-5) It is preferable to package in any libraries you may need into the package.
+4) It is preferable to package in any libraries you may need into the package.
    if you would prefer to alternatively package the libraries separately, make
    sure that the library doesn't already exist in the repository.
 
@@ -21,12 +18,11 @@ BukGet Packaging Howto
 LAYOUT:
 -------
 
-env/
-env/plugins/
-env/libs/
+/plugins/
+/libs/
 
 
-FIELD INFORMATION FOR info.json:
+FIELD INFORMATION FOR repo.json:
 --------------------------------
 
 name          This is reserved for the plugin name.  The name cannot have any
