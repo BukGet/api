@@ -84,13 +84,13 @@ class XenForo(object):
     newloc        = resp.getheader('location')
     if newloc is not None:
       print 'Chasing Referral: %s' % newloc
-      page        = self.__get(newloc)
+      page        = self._get(newloc)
     else:
       page        = resp.read()
     return page
   
   def login(self):
-    self.__get('/')
+    self._get('/')
     formdata  = {
          'login': self.username,
       'register': 0,
