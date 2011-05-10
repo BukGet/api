@@ -4,7 +4,7 @@ Here are some general tips and information.
 
 1) All BukGet Packages are Zip files.
 
-2) BukGet Packages are required to have plugins, lib, and lib folders in the
+2) BukGet Packages are required to have plugins, lib, and etc folders in the
    package root.  These folder can be empty, however are needed in order to
    pass the check.
 
