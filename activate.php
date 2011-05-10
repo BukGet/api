@@ -2,9 +2,7 @@
 
 /* First we need to make sure we strip out any nasty stuff from the values
  that we are accepting from the browser. */
-$email      = mysql_real_escape_string($_GET['verification']);
-$ip         = mysql_real_escape_string($_SERVER['REMOTE_ADDR']);
-$name       = mysql_real_escape_string($_GET['plugin']);
+$hash      = mysql_real_escape_string($_GET['hash']);
 
 /* Next we need to tell the script what the database is so we can properly
  connect to it. */
@@ -28,9 +26,7 @@ mysql_select_db($dbname, $dbcon);
 /* New we need to build the query that we will be using to check to see if the
    information provided in the get is valid. */
 $checkquery = "SELECT `id` FROM repositories 
-                WHERE `email` = '{$email}' 
-                  AND `ip_address` = '{$ip}' 
-                  AND `plugin` = '{$name}'";
+                WHERE `hash` = '{$hash}'";
                
 /* Get the results of the query and check to see if we were able to run the
    query without issues.  If there was an issue, then throw up an error and die   */
