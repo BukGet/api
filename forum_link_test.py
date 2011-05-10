@@ -11,8 +11,10 @@ class XenForo(object):
    'Cache-Control': 'max-age=0',
  'Accept-Language': 'en-US,en;q=0.8',
   'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-          'Accept': 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
-      'User-Agent': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_7; en-US) '+\
+          'Accept': 'application/xml,application/xhtml+xml,' +\
+                    'text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
+      'User-Agent': 'Mozilla/5.0 '+\
+                    '(Macintosh; U; Intel Mac OS X 10_6_7; en-US) '+\
                     'AppleWebKit/534.16 (KHTML, like Gecko) '+\
                     'Chrome/10.0.648.205 Safari/534.16',
   }
@@ -23,7 +25,6 @@ class XenForo(object):
     self.host     = host
   
   def _update_cookies(self, cookies):
-    print cookies
     if cookies is not None:
       for cookie in cookies.split(';'):
         dset        = cookie.split('=')
@@ -71,9 +72,6 @@ class XenForo(object):
     payload       = urllib.urlencode(formdata)
     if cookies is not '':
       headers['Cookie']       = cookies
-    headers['Host']           = 'forums.bukkit.org'
-    headers['Origin']         = 'http://forums.bukkit.org/'
-    headers['Referer']        = 'http://forums.bukkit.org/'
     headers['Content-Type']   = 'application/x-www-form-urlencoded'
     headers['Content-Length'] = len(payload)
     print headers
@@ -100,7 +98,9 @@ class XenForo(object):
       'redirect': '/',
       '_xfToken': '',
     }
-    page = self._post('/login/login', formdata)
+    token = self._post('/login/csrf-token-refresh', {'_xfToken': ''})
+    print token
+    page  = self._post('/login/login', formdata)
     return self._logged_in(page)
   
   def private_message(self, user, message, locked=False):
