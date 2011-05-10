@@ -20,7 +20,26 @@ from sqlalchemy                 import Table, Column, Integer, String, \
 from sqlalchemy.orm             import relation, backref, sessionmaker
 
 
-sql_string    = ''
+def _config(stanza, option, opt_type='string'):
+  '''
+  Open the configuration file and pull the value fromt he stanza and option
+  specified.  Optionally the option type can be overriden with opt_type to
+  return any of the following types: string, bool, float, and int.
+  '''
+  config = ConfigParser.ConfigParser()
+  config.read(os.path.join(sys.path[0],'config.ini'))
+  if opt_type == 'string':
+    return config.get(stanza, option)
+  if opt_type == 'int':
+    return config.getint(stanza, option)
+  if opt_type == 'bool':
+    return config.getboolean(stanza, option)
+  if opt_type == 'float':
+    return config.getfloat(stanza, option)
+  if opt_type == 'path':
+    return os.path.normpath(config.get(stanza, option))
+
+sql_string    = _config('Settings', 'db_string')
 engine        = create_engine(sql_string)
 Session       = sessionmaker(bind=engine)
 Base          = declarative_base()
@@ -108,17 +127,24 @@ def generate_repository():
   session = Session()
   links   = session.query(RepoLink)
   repo    = []
+  logfile = open(_config('Settings', 'log_file'), 'a')
   for link in links:
     if not link.activated:
       link.activate()
     if link.fetch():
       repo.append(link.data)
-      print '%s added to canonical repository.' % link.plugin
+      logfile.write('%s: %s added to canonical repository.' %\
+        (datetime.datetime.now().ctime(), link.plugin))
     else:
-      print '%s failed with status: %s' % (link.plugin, link.status)
-  rfile   = open('repo.json', 'w')
+      print '%s: %s failed with status: %s' %\
+       (datetime.datetime.now().ctime(), link.plugin, link.status)
+  rfile   = open(_config('Settings', 'repo_file'), 'w')
+  logfile.write('%s: Writing out new canonical repository file.' %\
+    datetime.datetime.now().ctime())
   rfile.write(json.dumps(repo))
   rfile.close()
+  logfile.write('%s: Complete.' % datetime.datetime.now().ctime())
+  logfile.close()
 
 if __name__ == '__main__':
   sys.exit(generate_repository())
