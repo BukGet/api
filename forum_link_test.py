@@ -2,8 +2,8 @@
  
 import httplib, urllib
 
-class BukkitForum(object):
-  host      = 'forums.bukkit.org'
+class XenForo(object):
+  host      = None
   username  = None
   password  = None
   cookies   = {}
@@ -17,11 +17,12 @@ class BukkitForum(object):
                     'Chrome/10.0.648.205 Safari/534.16',
   }
   
-  def __init__(self, username, password):
+  def __init__(self, username, password, host):
     self.username = username
     self.password = password
+    self.host     = host
   
-  def __update_cookies(self, cookies):
+  def _update_cookies(self, cookies):
     print cookies
     if cookies is not None:
       for cookie in cookies.split(';'):
@@ -30,7 +31,7 @@ class BukkitForum(object):
           if dset[0] in ['f_user', 'f_session', 'IDstack']:
             self.cookies[dset[0]] = dset[1]
   
-  def __logged_in(self, page):
+  def _logged_in(self, page):
     if page[:100].find('class="Public LoggedOut"') > -1:
       return False
     elif page[:100].find('class="Public LoggedIn"') > -1:
@@ -38,34 +39,34 @@ class BukkitForum(object):
     else:
       return 'UNKNOWN'
   
-  def __get_cookies(self):
+  def _get_cookies(self):
     cookies = []
     for cookie in self.cookies:
       cookies.append('%s=%s; ' % (cookie, self.cookies[cookie]))
     print '; '.join(cookies)
     return '; '.join(cookies)
   
-  def __get(self, loc):
+  def _get(self, loc):
     con           = httplib.HTTPConnection(self.host)
-    cookies       = self.__get_cookies()
+    cookies       = self._get_cookies()
     headers       = self.headers
     if cookies is not '':
       headers['Cookie'] = cookies
     con.request('GET', loc, headers=headers)
     resp          = con.getresponse()
     print resp.getheaders()
-    self.__update_cookies(resp.getheader('set-cookie'))
+    self._update_cookies(resp.getheader('set-cookie'))
     newloc        = resp.getheader('location')
     if newloc is not None:
       print 'Chasing Referral: %s' % newloc
-      page        = self.__get(newloc)
+      page        = self._get(newloc)
     else:
       page        = resp.read()
     return page
   
-  def __post(self, loc, formdata):
+  def _post(self, loc, formdata):
     con           = httplib.HTTPConnection(self.host)
-    cookies       = self.__get_cookies()
+    cookies       = self._get_cookies()
     headers       = self.headers
     payload       = urllib.urlencode(formdata)
     if cookies is not '':
@@ -79,7 +80,7 @@ class BukkitForum(object):
     con.request('POST', loc, headers=headers, body=payload)
     resp          = con.getresponse()
     print resp.getheaders()
-    self.__update_cookies(resp.getheader('set-cookie'))
+    self._update_cookies(resp.getheader('set-cookie'))
     newloc        = resp.getheader('location')
     if newloc is not None:
       print 'Chasing Referral: %s' % newloc
@@ -89,7 +90,7 @@ class BukkitForum(object):
     return page
   
   def login(self):
-    #self.__get('/')
+    self.__get('/')
     formdata  = {
          'login': self.username,
       'register': 0,
@@ -99,8 +100,8 @@ class BukkitForum(object):
       'redirect': '/',
       '_xfToken': '',
     }
-    page = self.__post('/login', formdata)
-    return self.__logged_in(page)
+    page = self._post('/login/login', formdata)
+    return self._logged_in(page)
   
   def private_message(self, user, message, locked=False):
     pass
@@ -108,6 +109,6 @@ class BukkitForum(object):
     
 
 if __name__ == '__main__':
-  forum   = BukkitForum('XXX', 'XXX')
+  forum   = XenForo('XXX', 'XXX', 'forums.bukkit.org')
   print forum.login()
   print forum.cookies
