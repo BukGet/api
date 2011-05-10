@@ -1,6 +1,9 @@
 #!/usr/bin/env python
  
-import httplib, urllib
+import httplib, urllib, re
+
+DEBUG = False
+VERSION = '0.0.1'
 
 class XenForo(object):
   host      = None
@@ -16,7 +19,8 @@ class XenForo(object):
       'User-Agent': 'Mozilla/5.0 '+\
                     '(Macintosh; U; Intel Mac OS X 10_6_7; en-US) '+\
                     'AppleWebKit/534.16 (KHTML, like Gecko) '+\
-                    'Chrome/10.0.648.205 Safari/534.16',
+                    'Chrome/10.0.648.205 Safari/534.16 ' +\
+                    'pyXenForo %s' % VERSION,
   }
   
   def __init__(self, username, password, host):
@@ -44,7 +48,6 @@ class XenForo(object):
     cookies = []
     for cookie in self.cookies:
       cookies.append('%s=%s; ' % (cookie, self.cookies[cookie]))
-    print '; '.join(cookies)
     return '; '.join(cookies)
   
   def _get(self, loc):
@@ -53,13 +56,17 @@ class XenForo(object):
     headers       = self.headers
     if cookies is not '':
       headers['Cookie'] = cookies
+    if DEBUG:
+      print '\nRequest\n----------\n%s' % headers
     con.request('GET', loc, headers=headers)
     resp          = con.getresponse()
-    print resp.getheaders()
+    if DEBUG:
+      print '\nResponse\n----------\n%s' % resp.getheaders()
     self._update_cookies(resp.getheader('set-cookie'))
     newloc        = resp.getheader('location')
     if newloc is not None:
-      print 'Chasing Referral: %s' % newloc
+      if DEBUG:
+        print 'Chasing Referral: %s' % newloc
       page        = self._get(newloc)
     else:
       page        = resp.read()
@@ -74,18 +81,27 @@ class XenForo(object):
       headers['Cookie']       = cookies
     headers['Content-Type']   = 'application/x-www-form-urlencoded'
     headers['Content-Length'] = len(payload)
-    print headers
+    if DEBUG:
+      print '\nRequest\n----------\n%s' % headers
     con.request('POST', loc, headers=headers, body=payload)
     resp          = con.getresponse()
-    print resp.getheaders()
+    if DEBUG:
+      print '\nResponse\n----------\n%s' % resp.getheaders()
     self._update_cookies(resp.getheader('set-cookie'))
     newloc        = resp.getheader('location')
     if newloc is not None:
-      print 'Chasing Referral: %s' % newloc
+      if DEBUG:
+        print 'Chasing Referral: %s' % newloc
       page        = self._get(newloc)
     else:
       page        = resp.read()
     return page
+  
+  def _get_token(self, page):
+    token_rex = re.compile(r'\<a href\=\"logout/\?_xfToken\=(.+?[^\"])"')
+    token     = token_rex.findall(page)[0]
+    token     = token.replace('%2C',',')
+    return token
   
   def login(self):
     self._get('/')
@@ -93,22 +109,27 @@ class XenForo(object):
          'login': self.username,
       'register': 0,
       'password': self.password,
-      'remember': 0,
+      'remember': 1,
   'cookie_check': 1,
       'redirect': '/',
       '_xfToken': '',
     }
-    token = self._post('/login/csrf-token-refresh', {'_xfToken': ''})
-    print token
     page  = self._post('/login/login', formdata)
     return self._logged_in(page)
   
-  def private_message(self, user, message, locked=False):
-    pass
-    
-    
-
-if __name__ == '__main__':
-  forum   = XenForo('XXX', 'XXX', 'forums.bukkit.org')
-  print forum.login()
-  print forum.cookies
+  def private_message(self, user, subject, message, locked=False):
+    res_rex   = re.compile(r'name\=\"_xfRelativeResolver\" value\=\"(.+[^\"])\"')
+    page      = self._get('/conversations/add')
+    token     = self._get_token(page)
+    resolver  = res_rex.findall(page)[0]
+    formdata  = {
+               'recipients': user,
+                    'title': subject,
+             'message_html': message,
+      '_xfRelativeResolver': resolver,
+      'conversation_locked': int(locked),
+                 '_xfToken': token
+    }
+    print formdata
+    page  = self._post('/conversations/insert', formdata)
+    return page
