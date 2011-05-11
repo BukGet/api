@@ -1,28 +1,23 @@
 {
-        "name": "PackageName",
-      "author": "Plugin Author",
- "description": "Some details about what the plugin does.  If you want a line break use \n.",
-     "website": "http://www.website.com",
-  "categories": ["GEN", "ADMIN"],
-"dependencies": ["iConomy", "mysqldb"],
-    "versions": [
-    {
-     "version": "0.0.1a",
-    "location": "http://www.website.com/location/to/zipfile.zip",
-    "checksum": "MD5-CHECKSUM-GOES-HERE",
-      "branch": "stable",
-  "bukkit_min": 670,
-  "bukkit_max": 733
-      
-    },
-    {
-     "version": "0.0.1b",
-    "location": "http://www.website.com/location/to/zipfile.zip",
-    "checksum": "MD5-CHECKSUM-GOES-HERE",
-      "branch": "dev",
-  "bukkit_min": 700,
-  "bukkit_max": 733
-      
-    }
-     ]
+    "name": "PackageName",
+    "author": "Plugin Author",
+    "description": "Some details about what the plugin does.  If you want a line break use \n.",
+    "website": "http://www.website.com",
+    "categories": ["GEN", "ADMIN"],
+    "dependencies": ["iConomy", "mysqldb"],
+    "versions": [{
+        "version": "0.0.1a",
+        "location": "http://www.website.com/location/to/zipfile.zip",
+        "checksum": "MD5-CHECKSUM-GOES-HERE",
+        "branch": "stable",
+        "bukkit_min": 670,
+        "bukkit_max": 733
+    }, {
+        "version": "0.0.1b",
+        "location": "http://www.website.com/location/to/zipfile.zip",
+        "checksum": "MD5-CHECKSUM-GOES-HERE",
+        "branch": "dev",
+        "bukkit_min": 700,
+        "bukkit_max": 733
+    }]
 }
