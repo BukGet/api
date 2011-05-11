@@ -122,8 +122,9 @@ class RepoLink(Base):
         self.status     = 'JSON Dictionary format invalid.'
         return False
       
-      reqd_items        = ['name', 'author', 'website', 'categories', 
-                           'dependencies', 'versions']
+      reqd_items        = ['name', 'author', 'website', 
+                           'categories', 'versions',
+                           'required_dependencies', 'optional_dependencies',]
       for item in reqd_items:
         if item not in data:
           self.status   = 'Dictionary Base Items not Valid'
