@@ -1,13 +1,9 @@
 <?php
 
-/* First we need to make sure we strip out any nasty stuff from the values
- that we are accepting from the browser. */
-$hash      = mysql_real_escape_string($_GET['hash']);
-
-/* Next we need to tell the script what the database is so we can properly
+/* First we need to tell the script what the database is so we can properly
  connect to it. */
-$dbuser     = 'USERNAME';
-$dbpass     = 'PASSWORD';
+$dbuser     = 'bukget';
+$dbpass     = 'bukg3tpassw0rd';
 $dbhost     = 'localhost';
 $dbname     = 'bukget';
 
@@ -22,6 +18,10 @@ if (!$dbcon) {
 
 // Select the database
 mysql_select_db($dbname, $dbcon);
+
+/* Next we need to make sure we strip out any nasty stuff from the values
+ that we are accepting from the browser. */
+$hash      = mysql_real_escape_string($_GET["hash"]);
 
 /* New we need to build the query that we will be using to check to see if the
    information provided in the get is valid. */
@@ -44,7 +44,7 @@ if ($numrows > 0) {
 // Get the row ID and then update the row to mark it validated.
   $row      = mysql_fetch_row($result);
   $repo_id  = $row[0];
-  $up_query = "UPDATE repositories SET validated = 1 WHERE id = {$repo_id}";
+  $up_query = "UPDATE repositories SET activated = 1 WHERE id = {$repo_id}";
   $update   = mysql_query($up_query, $dbcon);
   
 // if the insert didnt work, then we need to die here.
@@ -53,9 +53,10 @@ if ($numrows > 0) {
   }
   
 // if we got this far then everything worked! yayz!
-  header('Location: http://bukget.org/add/valid.html');
+  header('Location: http://bukget.org');
 } else {
 // Looks like this was not a valid request, send the user somewhwre not nice.
-  header('Location: http://bukget.org/add/invalid.html');
+  echo '<h1><i>Activation code Invalid.</i></h1>';
+  //header('Location: http://bukget.org/add/invalid.html');
 }
 ?>
