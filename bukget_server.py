@@ -181,8 +181,8 @@ def run_activations():
     if not link.activated:
       if link.hash is '':
         val = link.send_activation()
-        logfile.write('Attempted activation for %s resulted in %s.\n' %\
-                      (link.plugin, resp[val]))
+        logfile.write('%s: Attempted activation for %s resulted in %s.\n' %\
+                    (datetime.datetime.now().ctime(), link.plugin, resp[val]))
         session.merge(link)
   logfile.close()
         
