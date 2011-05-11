@@ -159,13 +159,13 @@ def generate_repository():
     if link.activated:
       if link.fetch():
         repo.append(link.data)
-        logfile.write('%s: %s added to canonical repository.' %\
+        logfile.write('%s: %s added to canonical repository.\n' %\
           (datetime.datetime.now().ctime(), link.plugin))
       else:
         print '%s: %s failed with status: %s' %\
          (datetime.datetime.now().ctime(), link.plugin, link.status)
   rfile   = open(_config('Settings', 'repo_file'), 'w')
-  logfile.write('%s: Writing out new canonical repository file.' %\
+  logfile.write('%s: Writing out new canonical repository file.\n' %\
     datetime.datetime.now().ctime())
   rfile.write(json.dumps(repo))
   rfile.close()
@@ -181,7 +181,7 @@ def run_activations():
     if not link.activated:
       if link.hash is '':
         val = link.send_activation()
-        logfile.write('Attempted activation for %s resulted in %s.' %\
+        logfile.write('Attempted activation for %s resulted in %s.\n' %\
                       (link.plugin, resp[val]))
         session.merge(link)
   logfile.close()
