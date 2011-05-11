@@ -32,16 +32,16 @@ repository.
 2.  Create 3 folders named `plugins`, `lib`, and `etc` within the `package`
     folder.
 
-3.  Place your plugin binary in the "plugins" folder.  Any information in this
+3.  Place your plugin binary in the `plugins` folder.  Any information in this
     location will be automatically overwritten on upgrades, so it is not
     recommended to put any config files in here.
 
 4.  Place any configuration information you want to be dropped into a new
-    installation into the "etc" folder.  Any files that exist here will first 
+    installation into the `etc` folder.  Any files that exist here will first 
     be checked to see if they exist before being dropped in.
   
-5.  Any libraries that you need should be placed in the "lib" folder.  Just as
-    with the "etc" folder if a library exists it will not be overwritten.
+5.  Any libraries that you need should be placed in the `lib` folder.  Just as
+    with the `etc` folder if a library exists it will not be overwritten.
 
 6.  Zip up the contents of the `package` folder so that the package
     folder does not exist in the zip file.  
@@ -64,15 +64,16 @@ repository.
     
     This means that sites like Megaupload will not work.
 
-10. Fill out the form on `http://bukget.org/add` with all the requested 
-    information, including the location of the `package.json` file.  A verification 
-    email will then be sent to verify that your email address is valid and 
-    then the an activation request will be sent to your bukkit.org address to 
-    make sure you are who you say you are.  Lastly your name will be checked 
-    against the plugin forum to make sure you's username really did write the 
-    package.  If all of these checks pass, then your plugin dictionary will be 
-    added to the canonical repository that the clients will use to pull the 
-    packages.
+10. Fill out the form on `http://bukget.org/add` with all the requested information, 
+    including the location of the `package.json` file.  
+    
+    A verification email will then be sent to verify that your email address is valid and 
+    then the an activation request will be pm'd to you on the bukkit forums to make sure 
+    you are who you say you are.  
+    
+    Lastly your name will be checked against the plugin forum to make sure your username 
+    really did write the package. If all of these checks pass, then your plugin dictionary will be 
+    added to the canonical repository that the clients will use to pull the packages.
 
 Field information in package.json
 --
@@ -97,7 +98,8 @@ A text field that allows the developer to say a few words about what the plugin 
 It is recommended to keep this short as this will be displayed when the user searches for plugins.  
 
 Also due to limitations of json, this has to be on 1 line. 
-You can add line breaks with \n however.
+
+You can add line breaks with `\n` however.
 
 **website**
 
