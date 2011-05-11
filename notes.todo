@@ -15,6 +15,7 @@ Client TODO:
 - add memory output to info command
 - write integration code into the repository system.
 - Add ability to pull a specific build of bukkit.
+- Add ability to inform the user of package updates after a repo update.
 
 Repository TODO:
 - File Bug with YabDab about issues with equals signs in formloom @done @fixed
