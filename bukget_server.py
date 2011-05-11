@@ -8,11 +8,14 @@ Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 """
 
 import sys
+import os
 import getopt
 import urllib2
 import json
 import re
 import hashlib
+import ConfigParser
+import datetime
 from pyxenforo                  import XenForo
 from BeautifulSoup              import BeautifulSoup    as bsoup
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,7 +30,7 @@ def _gen_act_msg(plugin, code):
 <p>Dear Plugin Developer</p>
 <p>Your account has recently been tagged with a new plugin repository on our
 server.  In order to validate that you really did request a new repository
-antry for %s, we are asking you to click the link below to validate
+entry for %s, we are asking you to click the link below to validate
 yourself so that we may activate this entry in our records.</p>
 <p><a href="http://bukget.org/activate.php?hash=%s">ACTIVATION LINK</a></p>
 ''' % (plugin, code)
@@ -71,7 +74,6 @@ class RepoLink(Base):
   plugin        = Column(String(32))
   hash          = Column(String(32))
   activated     = Column(Boolean)
-  ip_address    = Column(String(15))
   created       = Column(DateTime)
   
   def __init__(self, username, url):
@@ -87,16 +89,16 @@ class RepoLink(Base):
       return False
     name_rex      = re.compile(r'^(?:\[.+?\]){0,1}\s(\w+[^ ])')
     for plugin in plugins:
-      name        = name_rex.findall(plugin['title'])[0]
-      if name is not None:
-        if name.lower() == self.plugin.lower():
+      name        = name_rex.findall(plugin['title'])
+      if len(name) > 0:
+        if name[0].lower() == self.plugin.lower():
           if plugin['author'].lower() == self.author.lower():
             forum = XenForo(_config('Forum', 'username'),
                             _config('Forum', 'password'),
                             _config('Forum', 'hostname'))
             if forum.login():
               md5 = hashlib.md5()
-              md5.update(self.name + self.author +\
+              md5.update(self.plugin + self.author +\
                          datetime.datetime.now().ctime())
               self.hash = md5.hexdigest()
               forum.private_message(self.author,
@@ -149,7 +151,6 @@ class RepoLink(Base):
       return False
 
 def generate_repository():
-  # if need to validate, sleep 1 sec.
   session = Session()
   links   = session.query(RepoLink)
   repo    = []
@@ -172,12 +173,19 @@ def generate_repository():
   logfile.close()
 
 def run_activations():
+  resp    = {True: 'SUCCESS', False: 'FAULIRE'}
+  logfile = open(_config('Settings', 'log_file'), 'a')
   session = Session()
   links   = session.query(RepoLink)
   for link in links:
     if not link.activated:
-      if link.hash is None:
-        link.send_activation()
+      if link.hash is '':
+        val = link.send_activation()
+        logfile.write('Attempted activation for %s resulted in %s.' %\
+                      (link.plugin, resp[val]))
+        session.merge(link)
+  logfile.close()
+        
 
 if __name__ == '__main__':
   if len(sys.argv) > 1:
