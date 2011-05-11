@@ -80,65 +80,64 @@ Field information in package.json
 
 **name**
 
-This is reserved for the plugin name. The name cannot have any spaces. 
-This is used to generate the folder names and to properly name the jar file when it is placed in the plugins folder.
+    This is reserved for the plugin name. The name cannot have any spaces. 
+    This is used to generate the folder names and to properly name the jar file when it is placed in the plugins folder.
 
 **version**
 
-Simple text string denoting the version of the package. 
-Note that if you with you update your plugin in the repository this field *has* to be different than the any previous versions.
+    Simple text string denoting the version of the package. 
+    Note that if you with you update your plugin in the repository this field *has* to be different than the any previous versions.
 
 **author**
 
-The plugin author's name goes here. Can really be anything. ;)
+    The plugin author's name goes here. Can really be anything. ;)
 
 **description**
 
-A text field that allows the developer to say a few words about what the plugin does.  
-It is recommended to keep this short as this will be displayed when the user searches for plugins.  
+    A text field that allows the developer to say a few words about what the plugin does.  
+    It is recommended to keep this short as this will be displayed when the user searches for plugins.  
 
-Also due to limitations of json, this has to be on 1 line. 
-
-You can add line breaks with `\n` however.
+    Also due to limitations of json, this has to be on 1 line. 
+    You can add line breaks with `\n` however.
 
 **website**
 
-Whats the plugin homepage?
+    Whats the plugin homepage?
 
 **bukkit_min**
 
-The minimum build number that this plugin supports. Must be larger than 0. 
+    The minimum build number that this plugin supports. Must be larger than 0. 
 
-Keep in mind that this is used to present plugins that the user is able to 
-run with their current bukkit binary that they installed.
+    Keep in mind that this is used to present plugins that the user is able to 
+    run with their current bukkit binary that they installed.
 
 **bukkit_max**
 
-The maximum build number that the plugin supports.  Must be larger than the minimum.  
+    The maximum build number that the plugin supports.  Must be larger than the minimum.  
 
-Keep in mind that this is used to present plugins that the user is able to 
-run with their current bukkit binary that they installed.
+    Keep in mind that this is used to present plugins that the user is able to 
+    run with their current bukkit binary that they installed.
 
 **branch**
 
-Specifies the status of the package. 
+    Specifies the status of the package. 
 
-This should be either: `stable`, `test`, or `dev`.
+    This should be either: `stable`, `test`, or `dev`.
 
 **required_dependencies**
 
-This is a list (by name) of any packages that the plugin is dependent on in order to run.
-These plugins need to be installed in order to make your plugin work.  
+    This is a list (by name) of any packages that the plugin is dependent on in order to run.
+    These plugins need to be installed in order to make your plugin work.  
 
-If there are no dependencies then an empty list `[]` must be used.
+    If there are no dependencies then an empty list `[]` must be used.
 
 **optional_dependencies**
 
-This is a list (by name) of any packages that the plugin is optionally dependant on.
+    This is a list (by name) of any packages that the plugin is optionally dependant on.
 
 **categories**
 
-A list of categories that the plugin falls under. Use the standard set int he forum for this use. 
-Also if there are multiple categories, list *all* of them inside brackets `[]` seperated by spaces encased in quotes (").
+    A list of categories that the plugin falls under. Use the standard set int he forum for this use. 
+    Also if there are multiple categories, list *all* of them inside brackets `[]` seperated by spaces encased in quotes (").
 
-*Note:* do not use notation like GEN/SEC as that will pollute the categories field with a bunch of junk.
+    Note: do not use notation like GEN/SEC as that will pollute the categories field with a bunch of junk.
