@@ -72,14 +72,15 @@ repository.
    github repository.  All of the uploads must however be directly
    downloadable.  This means that sites like Megaupload will not work.
 
-10) Fill out the form on http://bukget/add with all the requested information,
-    including the location of the json file.  A verification email will then
-    be sent to verify that your email address is valid and then the an
-    activation request will be sent to your bukkit.org address to make sure
-    you are who you say you are.  Lastly your name will be checked against the
-    plugin forum to make sure you's username really did write the package.  If
-    all of these checks pass, then your plugin dictionary will be added to the
-    canonical repository that the clients will use to pull the packages.
+10) Fill out the form on http://bukget.org/add with all the requested 
+    information, including the location of the json file.  A verification 
+    email will then be sent to verify that your email address is valid and 
+    then the an activation request will be sent to your bukkit.org address to 
+    make sure you are who you say you are.  Lastly your name will be checked 
+    against the plugin forum to make sure you's username really did write the 
+    package.  If all of these checks pass, then your plugin dictionary will be 
+    added to the canonical repository that the clients will use to pull the 
+    packages.
 
 FIELD INFORMATION FOR repo.json:
 --------------------------------
@@ -112,6 +113,9 @@ bukkit_max    The maximum build number that the plugin supports.  Must be
               larger than the minimum.  Keep in mind that this is used to 
               present plugins that the user is able to run with their current 
               bukkit binary that they installed.
+
+branch        Specifies the status of the package.  This should be either:
+              stable, test, or dev.
               
 dependencies  This is a list (by name) of any packages that the plugin is
               dependent on in order to run.  These plugins need to be
