@@ -94,7 +94,10 @@ class Package(object):
     to reference these files at a later date.  The optional purge flag will
     overwrite the behaviour and any configuration data will also be deleted. 
     '''
-    pass
+    plugins             = os.path.join(config.get('Paths', 'env'), 'plugins')
+    os.remove(os.path.join(plugins, '%s.jar' % self.name))
+    if purge:
+      shutil.rmtree(os.path.join(plugins, self.name))
   
   def usable(self, bukkit_version):
     '''
@@ -193,6 +196,61 @@ class PkgVersion(object):
       zfile             = zipfile.ZipFile(tmp_filename)
       os.mkdir(tmp_folder)
       zfile.extractall(tmp_folder)
+      zfile.close()
+      
+      # First thing we need to find the plugin jar file and move that into
+      # the proper location. If the file exists and neither the upgrade or
+      # force flags are set, then we need to error out and log the problem.
+      for plugfile in os.listdir(os.path.join(tmp_folder, 'plugins')):
+        if plugfile.lower() == '%s.jar' % self.name.lower():
+          tmp_plug      = os.path.join(tmp_folder, 'plugins', plugfile)
+          final_loc     = os.path.join(plugins, '%s.jar' % self.name)
+          if not os.path.exists(final_loc) or\
+                 force == True or\
+                 upgrade == True:
+            logging.log('INFO: Moving %s into place.' % plugfile)
+            shutil.move(tmp_plug, final_loc)
+          else:
+            logging.log('ERROR: Installation of %s failed.'+\
+                        'File %s already exists' % (self.name, final_loc))
+            return False
+      
+      # Now we need to move on to the libraries that are bundled.  We will
+      # simply iterate through all of the files in the folder and check to
+      # see if they exist and move them as needed.
+      for libfile in os.listdir(os.path.join(tmp_folder, 'lib')):
+        tmp_lib       = os.path.join(tmp_folder, 'lib', libfile)
+        final_loc     = os.path.join(plugins, libfile)
+        if not os.path.exists(final_loc) or\
+               force == True or\
+               upgrade == True:
+          logging.log('INFO: Moving %s into place.' % libfile)
+          shutil.move(tmp_lib, final_loc)
+      
+      # Lastly we need to move any configuration files that are bundled to
+      # their final resting place.  In order to do this we will first check
+      # to see if the configuration directory even exists.  if it does then
+      # we will run through the same checks to make sure we even want to
+      # continue.  If so we will operate using the same method used for the
+      # other two folders in the package.
+      if not os.path.exists(os.path.join(plugins, self.name)) or\
+             force == True or\
+             upgrade == True:
+        for configfile in os.listdir(os.path.join(tmp_folder, 'etc')):
+          tmp_config    = os.path.join(tmp_folder, 'etc', configfile)
+          final_loc     = os.path.join(plugins, self.name, configfile)
+          if not os.path.exists(final_loc) or\
+                 force == True or\
+                 upgrade == True:
+            logging.log('INFO: Moving %s into place.' % configfile)
+            shutil.move(tmp_config, final_loc)
+      
+      # Now we need to clean up the mess we made for the package.  This is
+      # fairly simple as we can just delete the zipfile and the extracted
+      # directory.
+      os.remove(tmp_filename)
+      shutil.rmtree(tmp_folder)
+      return True
     else:
       # If the file is not a zip file, we will assume that the file we
       # downloaded was a jarfile and move it into the proper location.  I need
@@ -207,4 +265,68 @@ class PkgVersion(object):
                     'File %s already exists' % (self.name, final_loc))
         return False
 
+def _gen_num_version(version):
+  '''
+  This function will take a version number and generate a numeric value based
+  off of what it is able to pull.  Limitations require that the version format
+  match any of the following:
+  
+  Without Varients
+  ----------------
+  X
+  X.Y
+  X.Y.Z
+  
+  With Varients
+  -------------
+  Xa
+  X.Ya
+  X.Y.Za
+  
+  Please note that it will only pull the first character of the varient. so in
+  this case 0.0.1aa and 0.0.1.ab would equal the same number.
+  '''
+  vrex  = re.compile(r'(\d{1,3})')
+  vmin  = re.compile(r'\d([a-z])')
+  num   = 0
+  pwr   = 1000000000
+  for item in vrex.findall(version):
+    num += int(int(item) * pwr)
+    pwr = int(pwr / 1000)
+  var   = vmin.findall(version.lower())
+  if len(var) > 0:
+    num += ord(var[0])
+  return num
 
+def is_ver_newer(orig, new):
+  '''
+  A simple function to compare the original version number to the new one and
+  determine if the new one is really newer than the old one.  This will be
+  useful to determine if an upgrade is needed.
+  '''
+  if _gen_num_version(orig) < _gen_num_version(new):
+    return True
+  else:
+    return False
+
+def is_ver_same(orig, new):
+  '''
+  A simple function to compare the original version number to the new one and
+  determine if the new one is really the same than the old one.  This will be
+  useful to determine if an upgrade is needed.
+  '''
+  if _gen_num_version(orig) == _gen_num_version(new):
+    return True
+  else:
+    return False
+
+def is_ver_older(orig, new):
+  '''
+  A simple function to compare the original version number to the new one and
+  determine if the new one is really older than the old one.  This will be
+  useful to determine if an upgrade is needed.
+  '''
+  if _gen_num_version(orig) > _gen_num_version(new):
+    return True
+  else:
+    return False
