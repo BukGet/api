@@ -90,7 +90,7 @@ Field information in package.json
 
 **author**
 
-    The plugin author's name goes here. Can really be anything. ;)
+    The plugin author's name goes here. It must match the name of the developer that started the forum thread.
 
 **description**
 
