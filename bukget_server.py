@@ -170,11 +170,11 @@ def generate_repository():
     datetime.datetime.now().ctime())
   rfile.write(json.dumps(repo))
   rfile.close()
-  logfile.write('%s: Complete.' % datetime.datetime.now().ctime())
+  logfile.write('%s: Complete.\n' % datetime.datetime.now().ctime())
   logfile.close()
 
 def run_activations():
-  resp    = {True: 'SUCCESS', False: 'FAULIRE'}
+  resp    = {True: 'SUCCESS', False: 'FAILURE'}
   logfile = open(_config('Settings', 'log_file'), 'a')
   session = Session()
   links   = session.query(RepoLink)
@@ -182,7 +182,7 @@ def run_activations():
     if not link.activated:
       if link.hash is '':
         val = link.send_activation()
-        logfile.write('%s: Attempted activation for %s resulted in %s.\n' %\
+        logfile.write('%s: Attempted activation request for %s resulted in %s.\n' %\
                     (datetime.datetime.now().ctime(), link.plugin, resp[val]))
         session.merge(link)
   logfile.close()
