@@ -1,7 +1,7 @@
 from ConfigParser import ConfigParser
 import os, sys
 
-def get(stanza, option):
+def get(stanza, option, opt_type='string'):
   '''
   Open the configuration file and pull the value fromt he stanza and option
   specified.  Optionally the option type can be overriden with opt_type to
