@@ -16,7 +16,67 @@ use the 'help' command for documentation.
 '''
 
 class Package(object):
-  pass
+  name          = None
+  description   = None
+  author        = None
+  website       = None
+  categories    = []
+  required_deps = []
+  optional_deps = []
+  versions      = []
+  installed     = False
+  installed_ver = None
+  
+  def __init__(self, json_dict):
+    if self._valid(json_dict):
+      self.name           = json_dict['name']
+      self.author         = json_dict['author']
+      self.description    = json_dict['description']
+      self.website        = json_dict['website']
+      self.categories     = json_dict['categories']
+      self.required_deps  = json_dict['required_dependencies']
+      self.optional_deps  = json_dict['optional_dependencies']
+      for version in json_dict['versions']:
+        self.versions.append(PkgVersion(version))
+      if 'installed': in json_dict:
+        self.installed    = json_dict['installed']
+        self.installed_ver= json_dict['installed_version']
+  
+  def _valid(self, json_dict):
+    pass
+  
+  def install(self, version_number):
+    pass
+  
+  def upgrade(self, version_number):
+    pass
+  
+  def remove(self):
+    pass
+  
+  def usable(self, bukkit_version):
+    is_able     = False
+    for version in self.versions:
+      if version.usable(bukkit_version):
+        is_able = True
+    return is_able
+  
+  def export(self):
+    vers = []
+    for version in self.versions:
+      vers.append(version.export())
+    return {
+                       'name': self.name,
+                     'author': self.author,
+                'description': self.description,
+                    'website': self.website,
+                 'categories': self.categories,
+      'required_dependencies': self.required_deps,
+      'optional_dependencies': self.optional_deps,
+                   'versions': vers,
+                  'installed': self.installed,
+          'installed_version': self.installed_ver,
+    }
 
 class BukkitServer(object):
   def __init__(self):
@@ -379,7 +439,7 @@ class CLI(cmd.Cmd):
                           information based on the criteria specified.
       list                Lists all installed packages.
       update              Updates the locally cached repository
-      upgrade             Upgrades all packages to the ost current versions
+      upgrade             Upgrades all packages to the most current versions
                           that support the current bukkit build.
       install             Installs a package.
       remove              Removes a package.
