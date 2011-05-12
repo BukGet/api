@@ -155,11 +155,18 @@ class PkgVersion(object):
     '''
     Installs the package version into the bukkit environment.
     '''
-    
-    # First we will try to download the package fromt he URL that we have on
+    # First we will try to download the package from the URL that we have on
     # hand.  If there is any issues then abort the install and log the event.
+    # We will also go ahead and check the md5sum on file to make sure that
+    # the file that we pulled is both the right file and not corrupt.
     try:
       package_file      = urllib2.urlopen(self.location).read()
+      md5               = hashlib.md5()
+      md5.update(package_file)
+      if md5.hexdump() != self.checksum:
+        logging.log('ERROR: Download of %s using %s was not valid.' %\
+                    (self.name, self.location))
+        return False
     except:
       logging.log('ERROR: Download of %s using %s failed.' %\
                   (self.name, self.location))
@@ -180,7 +187,12 @@ class PkgVersion(object):
     # New we need to determine if the package is a zip file or a naked jar
     # file.
     if zipfile.is_zipfile(tmp_filename):
-      pass
+      # if the file is a zipfile, we will need to extract the file and then
+      # parse out the data into the right locations.
+      tmp_folder        = os.path.join(config.get('Paths','cache',self.name))
+      zfile             = zipfile.ZipFile(tmp_filename)
+      os.mkdir(tmp_folder)
+      zfile.extractall(tmp_folder)
     else:
       # If the file is not a zip file, we will assume that the file we
       # downloaded was a jarfile and move it into the proper location.  I need
