@@ -163,8 +163,8 @@ def generate_repository():
         logfile.write('%s: %s added to canonical repository.\n' %\
           (datetime.datetime.now().ctime(), link.plugin))
       else:
-        print '%s: %s failed with status: %s' %\
-         (datetime.datetime.now().ctime(), link.plugin, link.status)
+        logfile.write('%s: %s failed with status: %s.\n' %\
+         (datetime.datetime.now().ctime(), link.plugin, link.status))
   rfile   = open(_config('Settings', 'repo_file'), 'w')
   logfile.write('%s: Writing out new canonical repository file.\n' %\
     datetime.datetime.now().ctime())
