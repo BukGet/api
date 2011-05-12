@@ -14,7 +14,7 @@ class Package(object):
   '''
   name          = None
   description   = None
-  author        = None
+  authors       = []
   website       = None
   categories    = []
   required_deps = []
@@ -31,7 +31,7 @@ class Package(object):
     # valid ;)
     if self._valid(json_dict):
       self.name           = json_dict['name']
-      self.author         = json_dict['author']
+      self.authors        = json_dict['authors']
       self.description    = json_dict['description']
       self.website        = json_dict['website']
       self.categories     = json_dict['categories']
