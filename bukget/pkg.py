@@ -23,6 +23,7 @@ class Package(object):
   installed     = False
   installed_ver = None
   valid         = False
+  stanza        = None
   
   def __init__(self, json_dict):
     # First thing we need to do is check to make sure the dictionary that has
@@ -44,18 +45,64 @@ class Package(object):
       for version in json_dict['versions']:
         self.versions.append(PkgVersion(version, self.name))
       
+      # The stanza variable is used in writing and reading the config file.
+      # the current format simply adds PKG: before the package name.
+      self.stanza         = 'PKG: %s' % self.name
+      
       # As these 2 entries will only be present if the package is installed,
       # we cant force these.
-      if 'installed': in json_dict:
-        self.installed    = json_dict['installed']
-        self.installed_ver= json_dict['installed_version']
+      try:
+        self.installed_ver = config.get(self.stanza, 'version')
+        self.installed     = True
+      except:
+        pass
   
-  def _valid(self, json_dict):
+  def _valid(self, d):
     '''
     This function will check to see if the dictionary that we were given is
     valid and usable to import all the information we need.
     '''
-    pass
+    # before we start its worth noting that we will be stepping through all
+    # of the definitions that should exist within the json dictionary.  If
+    # there are any missing items or malformed items, we should be returning
+    # false.  If everything does check out, then True should be returned.
+    
+    # This block checks to see if name exists and that it is a string.
+    if 'name' not in d:                                   return False
+    if not isinstance(d['name'], str):                    return False
+    
+    # This block checks to see if authors exists and that it is a list.
+    if 'authors' not in d:                                return False
+    if not isinstance(d['authors'], list):                return False
+    
+    # Now lets check to see that decription is here and that it is a string
+    if 'description' not in d:                            return False
+    if not isinstance(d['description'], str):             return False
+    
+    # Checking to see if website exists and that it is a string.
+    if 'website' not in d:                                return False
+    if not isinstance(d['website'], str):                 return False
+    
+    # Checking to make sure that categories  exists and that it is a list.
+    if 'categories' not in d:                             return False
+    if not isinstance(d['categories'], list):             return False
+    
+    # Moving on to required_dependencies.  This should also be a list.
+    if 'required_dependencies' not in d:                  return False
+    if not isinstance(d['required_dependencies'], list):  return False
+    
+    # And nor for optional_dependencies.  Again should be a list.
+    if 'optional_dependencies' not in d:                  return False
+    if not isinstance(d['optional_dependencies'], list):  return False
+    
+    # and for our last check, we wanna make sure versions exists and that
+    # it is also a list object.  Validation for the individual versions will
+    # be handled by the child class.
+    if 'versions' not in d:                               return False
+    if not isinstance(d['versions'], list):               return False
+    
+    # If we made it all the way here, then it looks to be a valid dictionary!
+    return True
   
   def _get_version(self, version_number):
     '''
@@ -74,18 +121,22 @@ class Package(object):
     Optionally the force flag can be set, which will overwrite any existing
     files should they exist. 
     '''
-    version   = self._get_version(version_number)
+    version = self._get_version(version_number)
     if version is not None:
       version.install(force=force)
+      config.set(self.stanza, 'version', version_number)
+      self.installed = True
   
   def upgrade(self, version_number):
     '''
     Similar to install, however will only install the new java binary.  This
     function will not touch any existing configurations.
     '''
-    version   = self._get_version(version_number)
+    version = self._get_version(version_number)
     if version is not None:
       version.install(upgrade=True)
+      config.set(self.stanza, 'version', version_number)
+      self.installed = True
   
   def remove(self, purge=False):
     '''
@@ -94,10 +145,14 @@ class Package(object):
     to reference these files at a later date.  The optional purge flag will
     overwrite the behaviour and any configuration data will also be deleted. 
     '''
-    plugins             = os.path.join(config.get('Paths', 'env'), 'plugins')
+    plugins = os.path.join(config.get('Paths', 'env'), 'plugins')
     os.remove(os.path.join(plugins, '%s.jar' % self.name))
     if purge:
       shutil.rmtree(os.path.join(plugins, self.name))
+    config.stanza_remove('PKG: %s' % self.name)
+    self.installed = False
+    
+    
   
   def usable(self, bukkit_version):
     '''
@@ -137,12 +192,51 @@ class PkgVersion(object):
       self.bukkit_min = json_dict['bukkit_min']
       self.bukkit_max = json_dict['bukkit_max']
   
-  def _valid(self, json_dict):
+  def _valid(self, d):
     '''
     This function will check to see if the dictionary that we were given is
     valid and usable to import all the information we need.
     '''
-    pass
+    # just like with the parent class, we will be working through all of the
+    # definitions that should exist within the version dictionary.  Ideally
+    # we always want this to pass, however we cant trust the plugin developers
+    # to be infalable :-p
+    
+    # To start we shoudl check to see that the version definition exists and
+    # that it is a string type.
+    if 'version' not in d:                          return False
+    if not isinstance(d['version'], str):           return False
+    
+    # Next up is the location definition.  There should really be some extra
+    # checking here eventually to make sure this is a URL as well.
+    if 'location' not in d:                         return False
+    if not isinstance(d['location'], str)           return False
+    
+    # And now for the checksum.  Same as the other two we just need to check
+    # to make sure it exists and that it's a string.
+    if 'checksum' not in d:                         return False
+    if not isinstance(d['checksum'], str):          return False
+    
+    # And now for the branch.  With branch we actually have 3 checks.  we need
+    # to make sure it exists, is a string, and is one of the valid options.
+    if 'branch' not in d:                           return False
+    if not isinstance(d['branch'], str):            return False
+    if d['branch'] not in ['stable','test','dev']:  return False
+    
+    # This is the bukkit build lower bounds check.  Needs to be an integer.
+    if 'bukkit_min' not in d:                       return False
+    if not isinstance(d['bukkit_min'], int):        return False
+    
+    # And the previous items counterpart, this is the bukkit build upper 
+    # bounds check.  As before it needs to be an integer.  One last added
+    # here is simple to make sure that max really is less than or equal to
+    # the minimum.
+    if 'bukkit_max' not in d:                       return False
+    if not isinstance(d['bukkit_max'], int):        return False
+    if not d['bukkit_min'] <= d['bukkit_max']:      return False
+    
+    # Yayz! it's all valid!
+    return True
   
   def usable(self, bukkit_version):
     '''
