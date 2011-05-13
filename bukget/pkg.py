@@ -102,6 +102,7 @@ class Package(object):
     if not isinstance(d['versions'], list):               return False
     
     # If we made it all the way here, then it looks to be a valid dictionary!
+    self.valid  = True
     return True
   
   def _get_version(self, version_number):
@@ -236,6 +237,7 @@ class PkgVersion(object):
     if not d['bukkit_min'] <= d['bukkit_max']:      return False
     
     # Yayz! it's all valid!
+    self.valid  = True
     return True
   
   def usable(self, bukkit_version):
