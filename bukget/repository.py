@@ -73,7 +73,7 @@ class PackageRepository(Base):
       
       # Everything looks good.  Lets set the objects json dictionary and
       # return a positive result ;)
-      self.json     = dictionary
+      self.json     = json.dumps(dictionary)
       return True
     else:
       logging.log('INFO: %s is not activated.' % self.plugin)
