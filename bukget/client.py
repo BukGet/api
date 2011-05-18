@@ -14,7 +14,9 @@ class Commands(cmd.Cmd):
   def do_bukkit(self, s):
     '''bukkit [command] [options]
     This command houses all the functions related to the bukkit server
-    itself.  this includes starting, stopping, updating, '''
+    itself.  This includes starting, stopping, updating, etc.  For help on
+    the available commands, type "bukkit help" and "bukkit help [command]"
+    '''
     cmd = s.split()
     if len(cmd) > 1:
       BukkitCommands().onecmd(s)
@@ -22,6 +24,11 @@ class Commands(cmd.Cmd):
       BukkitCommands().cmdloop()
   
   def do_pkg(self, s):
+    '''pkg [command] [options]
+    This command houses all the functions related to plugin and library
+    packages.  This includes installing, upgrading, removing, etc.  For help
+    on the available commands, type "pkg help" and "pkg help [command]"
+    '''
     cmd = s.split()
     if len(cmd) > 1:
       PackageCommands().onecmd(s)
@@ -29,6 +36,11 @@ class Commands(cmd.Cmd):
       PackageCommands().cmdloop()
   
   def do_player(self, s):
+    '''player [command] [options]
+    This command houses all the functions related to player control.  This
+    includes banning, giving, opping, etc.  For help on the available
+    commands, type "player help" and "player help command"
+    '''
     cmd = s.split()
     if len(cmd) > 1:
       PlayerCommands().onecmd(s)
@@ -116,5 +128,65 @@ class BukkitCommands(cmd.Cmd):
 class PlayerCommands(cmd.Cmd):
   prompt  = 'bukget[PLAYER]>'
   server  = bukkit.Bukkit()
+  
+  def do_list(self, s):
+    '''list
+    Returns the list of players online.
+    '''
+    print 'Players online: %s' % ', '.join(self.server.player_list())
+  
+  def do_msg(self, s):
+    '''msg [player] [message]
+    Sends the message to the specified player.
+    '''
+    dset      = s.split()
+    if len(dset) > 1:
+      msg     = ' '.join(dset[1:])
+      player  = dset[0]
+      self.server.player_msg(player, msg)
+      print 'Message sent to %s' % player
+    else:
+      print 'Not enough arguments.'
+  
+  def do_give(self, s):
+    '''give [player] [item-id] [amount]
+    Will give the player specified the amount (default 64) of the item
+    requested.  The command will first parse the item definitions to see if
+    the item-id is a known item within the system.  If not then it will fall
+    back on simply sending the item-id given directly to the server.  For
+    example:
+    
+      player give ManiacM4c stone
+    
+    is the same as:
+    
+      player give ManiacM4c 1
+    '''
+    dset = s.split()
+    if len(dset) <= 2:
+      print 'Not enough arguments.'
+      return
+    
+    # Loading the item definition dictionary and parsing out the options
+    idefs   = json.loads(open(os.path.join(config.get('Paths', 'config'),
+                        'item_definitions.json'), 'r'))
+    player  = dset[0]
+    item_id = dset[1]
+    
+    # If the item id exists within the idem definition, then we need to get
+    # the real item id and set that instead.
+    if item_id in idefs:
+      item_id = idefs[item_id]
+    
+    # if there is amount specified use that, otherwise wet it to 64.
+    if len(dset) <= 3:
+      amount = dset[3]
+    else:
+      amount = 64
+    
+    # Now to send the command to the server.
+    self.server.player_give(player, item_id, amount)
+    print 'Server instructed to give %s %s to %s' % (amount, item_id, player)
+  
   
   
