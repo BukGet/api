@@ -4,12 +4,23 @@ import config
 import bukkit
 import pkg
 
+def prepare(self):
+  '''
+  This private function will check to make sure that all the pre-requisites
+  to running a bukget installation are in place and will either create the
+  folders as needed or error out and inform the user what needs to be done
+  in order to make the installation work.  If everything was either able to
+  be created or checked out ok then we should be returning True, else we will
+  return False.
+  '''
+  pass
+
 class Commands(cmd.Cmd):
   intro   = motd
   prompt  = 'bukget>'
   
   def __init__(self):
-    self._parse_repository()
+    cmd.Cmd.__init__(self)
   
   def do_bukkit(self, s):
     '''bukkit [command] [options]
@@ -250,3 +261,20 @@ class PlayerCommands(cmd.Cmd):
       return
     self.server.player_pardon(s)
     print 'Server instructed to pardon %s.' % s
+  
+  def do_return(self, s):
+    '''return
+    Returns the user to the main command prompt.
+    '''
+
+class PackageCommands(cmd.Cmd):
+  prompt  = 'bukget[PKG]>'
+  pkgs    = []
+  local   = []
+  
+  def __init__(self):
+    cmd.Cmd.__init__(self)
+    self._get_pkgs()
+  
+  def _get_pkgs(self):
+    pass
