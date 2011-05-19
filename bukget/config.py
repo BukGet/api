@@ -1,6 +1,8 @@
 from ConfigParser import ConfigParser
 import os, sys
 
+config_file = os.path.join(sys.path[0],'config.ini'))
+
 def get(stanza, option, opt_type='string'):
   '''
   Open the configuration file and pull the value fromt he stanza and option
@@ -8,7 +10,7 @@ def get(stanza, option, opt_type='string'):
   return any of the following types: string, bool, float, and int.
   '''
   config = ConfigParser.ConfigParser()
-  config.read(os.path.join(sys.path[0],'config.ini'))
+  config.read(config_file)
   if opt_type == 'string':
     return config.get(stanza, option)
   if opt_type == 'int':
@@ -26,7 +28,7 @@ def set(stanza, option, value):
   given within the stanza.  If the stanza does not exist, it will create it.
   '''
   config = ConfigParser.ConfigParser()
-  config.read(os.path.join(sys.path[0],'config.ini'))
+  config.read(config_file)
   if not config.has_section(stanza):
     config.add_section(stanza)
   config.set(stanza, option, value)
