@@ -163,7 +163,7 @@ class PlayerCommands(cmd.Cmd):
       player give ManiacM4c 1
     '''
     dset = s.split()
-    if len(dset) <= 2:
+    if len(dset) < 2:
       print 'Not enough arguments.'
       return
     
@@ -173,7 +173,7 @@ class PlayerCommands(cmd.Cmd):
     player  = dset[0]
     item_id = dset[1]
     
-    # If the item id exists within the idem definition, then we need to get
+    # If the item id exists within the item definition, then we need to get
     # the real item id and set that instead.
     if item_id in idefs:
       item_id = idefs[item_id]
@@ -188,5 +188,65 @@ class PlayerCommands(cmd.Cmd):
     self.server.player_give(player, item_id, amount)
     print 'Server instructed to give %s %s to %s' % (amount, item_id, player)
   
+  def do_teleport(self, s):
+    '''teleport [player to teleport] [destination player]
+    Teleports the player to the destination player's location.
+    '''
+    dset = s.split()
+    if len(dset) < 2:
+      print 'Not enough parameters.'
+      return
+    player_tp   = dset[0]
+    player_dest = dset[1]
+    self.server.player_teleport(player_tp, player_dest)
+    print 'Server instructed to teleport %s to %s.' % (player_tp, player_dest)
   
+  def do_op(self, s):
+    '''op [player]
+    Gives the player operator (op) priviledges.
+    '''
+    if len(s) < 3:
+      print 'Not a valid user.  Must be 3 characters or greater.'
+      return
+    self.server.player_op(s)
+    print 'Server instructed to op %s.' % s
   
+  def do_deop(self, s):
+    '''deop [player]
+    Removed the player's operator (op) priviledges.
+    '''
+    if len(s) < 3:
+      print 'Not a valid user.  Must be 3 characters or greater.'
+      return
+    self.server.player_deop(s)
+    print 'Server instructed to deop %s.' % s
+  
+  def do_kick(self, s):
+    '''kick [player]
+    Kicks the player from the server.
+    '''
+    if len(s) < 3:
+      print 'Not a valid user.  Must be 3 characters or greater.'
+      return
+    self.server.player_kick(s)
+    print 'Server instructed to kick %s.' % s
+  
+  def do_ban(self, s):
+    '''ban [player]
+    Bans the player from being able to play on the server.
+    '''
+    if len(s) < 3:
+      print 'Not a valid user.  Must be 3 characters or greater.'
+      return
+    self.server.player_ban(s)
+    print 'Server instructed to ban %s.' % s
+  
+  def do_pardon(self, s):
+    '''pardon [player]
+    Removes the player ban so that theplayer can play on the server.
+    '''
+    if len(s) < 3:
+      print 'Not a valid user.  Must be 3 characters or greater.'
+      return
+    self.server.player_pardon(s)
+    print 'Server instructed to pardon %s.' % s
