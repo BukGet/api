@@ -1,7 +1,7 @@
 {
     "name": "PackageName",
     "authors": ["Author1", "Author2"],
-    "maintainer": "PluginBukkit.org Account"
+    "maintainer": "Bukkit.org Account",
     "description": "Some details about what the plugin does.  If you want a line break use \n.",
     "website": "http://www.website.com",
     "categories": ["GEN", "ADMIN"],
