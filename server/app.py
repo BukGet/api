@@ -380,7 +380,7 @@ def add_repo():
     # validate the fields then check to make sure that they get exactly 1
     # response back from each of them.  If we don't, then we need to tell
     # the user what failed and allow them to fix their input.
-    remail = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Z0-9-]+\.)+[A-Z]{2,4}$')
+    remail = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$')
     rurl = re.compile(r'^(?:http|https|ftp)\://[a-zA-Z0-9\-\./\?\=\;\%]+')
     ruser = re.compile(r'^[A-Za-z0-9\_\.]+$')
     rname = re.compile(r'^[A-Za-z0-9\_]+$')
@@ -449,6 +449,8 @@ def generate_repository():
     rfile = open(config.get('Settings', 'repo_file'), 'w')
     rfile.write(json.dumps('\n'.join(rdict)))
     rfile.close()
+    return '{"plugins": %s}' % len(repos)
+  return '{"error": "Not an allowed address"}'
 
 # And here we set everything up for Apache to understand what to do with this
 # mess of code ;)
