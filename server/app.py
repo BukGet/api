@@ -392,6 +392,14 @@ def get_repo_file():
 def help_page():
   return template('help_page')
 
+@route('/search')
+def search_page():
+  return template('search_page')
+
+@route('/static/:filename')
+def route_static_files(filename):
+  return static_file(filename, root=config.get('Settings', 'static_files'))
+
 @route('/generate')
 def generate_repository():
   '''
