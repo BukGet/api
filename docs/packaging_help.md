@@ -19,6 +19,7 @@ Getting Started with Packaging Manually
 For the sake of argument, lets say you have a simple bukkit plugin that has no configuration file that need to be installed along with it and does not depend on any other plugins.  In many cases this is one of the most common types of plugins available for bukkit and is also the easiest to package up for BukGet.
 
 Our first task is to get the md5sum of the plugin.  Depending on what OS your writing on will depend on how you will do this.
+
 * Max OSX
   * Open the Terminal.app
   * type: md5 /path/to/plugin.jar
@@ -40,7 +41,7 @@ The second step will be to upload the plugin.jar file somewhere and get it's url
 
 Our next step is to generate the plugin dictionary.  For this example all we really need is a skeleton dictionary that can tell the BukGet what the plugin is and where we can find it.
 
-`{
+  {
     "name": "PackageName",
     "authors": ["Author1"],
     "maintainer": "Author1",
@@ -48,20 +49,20 @@ Our next step is to generate the plugin dictionary.  For this example all we rea
     "website": "http://www.website.com",
     "categories": ["GEN", "ADMN"],
     "versions": [{
-        "version": "0.0.1a",
-        "required_dependencies": [],
-        "optional_dependencies": [],
-        "conflicts": [],
-        "location": "http://www.website.com/location/to/zipfile.zip",
-        "checksum": "MD5-CHECKSUM-GOES-HERE",
-        "branch": "stable",
-        "engines": [{
-          "engine": "craftbukkit",
-          "build_min": 800,
-          "build_max": 900
-        }]
+      "version": "0.0.1a",
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "location": "http://www.website.com/location/to/zipfile.zip",
+      "checksum": "MD5-CHECKSUM-GOES-HERE",
+      "branch": "stable",
+      "engines": [{
+        "engine": "craftbukkit",
+        "build_min": 800,
+        "build_max": 900
+      }]
     }]
-}`
+  }
 For information about what each of these fields are, please review the definitions at the end of this document.
 
 Once you have the dictionary filled out, save the file and upload it to your hosting solution and get the URL.  Once you have the URL, simply goto the [bukget.org][bukget] website and fill out the "Add Plugin" page with the URL of the plugin dictionary.  After you submit, the BukGet server will try to validate the information you sent us with what is available on the [bukkit plugins list][b_plugs] page.  Once we are can tie this information together, the server will send you a private message to your [bukkit.org][bukkit] account with a link to click.  Once you click on the link, your new entry will be considered active and will be added to the repository dictionary at the next generation.
