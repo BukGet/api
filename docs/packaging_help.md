@@ -1,3 +1,5 @@
+[TOC]
+
 Packaging
 =========
 
@@ -41,7 +43,7 @@ The second step will be to upload the plugin.jar file somewhere and get it's url
 
 Our next step is to generate the plugin dictionary.  For this example all we really need is a skeleton dictionary that can tell the BukGet what the plugin is and where we can find it.
 
-`
+```
   {
     "name": "PackageName",
     "authors": ["Author1"],
@@ -64,7 +66,7 @@ Our next step is to generate the plugin dictionary.  For this example all we rea
       }]
     }]
   }
-`
+```
 
 For information about what each of these fields are, please review the definitions at the end of this document.
 
@@ -74,3 +76,8 @@ Once you have the dictionary filled out, save the file and upload it to your hos
 [bukget]:   http://bukget.org
 [md51]:     http://www.toast442.org/md5/
 [md52]:     http://www.md5summer.org/
+
+Building Compliant Zip Packages Manually
+----------------------------------------
+
+Not everyone will 
