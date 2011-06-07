@@ -41,6 +41,7 @@ The second step will be to upload the plugin.jar file somewhere and get it's url
 
 Our next step is to generate the plugin dictionary.  For this example all we really need is a skeleton dictionary that can tell the BukGet what the plugin is and where we can find it.
 
+`
   {
     "name": "PackageName",
     "authors": ["Author1"],
@@ -63,6 +64,8 @@ Our next step is to generate the plugin dictionary.  For this example all we rea
       }]
     }]
   }
+`
+
 For information about what each of these fields are, please review the definitions at the end of this document.
 
 Once you have the dictionary filled out, save the file and upload it to your hosting solution and get the URL.  Once you have the URL, simply goto the [bukget.org][bukget] website and fill out the "Add Plugin" page with the URL of the plugin dictionary.  After you submit, the BukGet server will try to validate the information you sent us with what is available on the [bukkit plugins list][b_plugs] page.  Once we are can tie this information together, the server will send you a private message to your [bukkit.org][bukkit] account with a link to click.  Once you click on the link, your new entry will be considered active and will be added to the repository dictionary at the next generation.
