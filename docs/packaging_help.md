@@ -187,43 +187,45 @@ Plugin Dictionary Definitions
   * *Description*: The maximum build number that this plugin will work with this engine.
 
 Expanded Example JSON Dictionary
+--------------------------------
+
 ```
-    {
-      "name": "PackageName",
-      "authors": ["Author1"],
-      "maintainer": "Author1",
-      "description": "Some details about what the plugin does.  If you want a line break use \n.",
-      "website": "http://www.website.com",
-      "categories": ["GEN", "ADMN"],
-      "versions": [{
-        "version": "0.0.1a",
-        "required_dependencies": [["Permissions","GroupManager"],"Help"],
-        "optional_dependencies": [],
-        "conflicts": [],
-        "location": "http://www.website.com/location/to/zipfile.zip",
-        "checksum": "MD5-CHECKSUM-GOES-HERE",
-        "branch": "stable",
-        "engines": [{
-          "engine": "craftbukkit",
-          "build_min": 800,
-          "build_max": 900
-        }, {
-          "engine": "glowstone",
-          "build_min": 0,
-          "build_max": 0
-        }]
-      },   {
-        "version": "0.0.1a",
-        "required_dependencies": [],
-        "optional_dependencies": [],
-        "conflicts": [],
-        "location": "http://www.website.com/location/to/zipfile.zip",
-        "checksum": "MD5-CHECKSUM-GOES-HERE",
-        "branch": "stable",
-        "engines": [{
-          "engine": "craftbukkit",
-          "build_min": 800,
-          "build_max": 900
-        }]
-    }
+  {
+    "name": "PackageName",
+    "authors": ["Author1"],
+    "maintainer": "Author1",
+    "description": "Some details about what the plugin does.  If you want a line break use \n.",
+    "website": "http://www.website.com",
+    "categories": ["GEN", "ADMN"],
+    "versions": [{
+      "version": "0.0.1a",
+      "required_dependencies": [["Permissions","GroupManager"],"Help"],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "location": "http://www.website.com/location/to/zipfile.zip",
+      "checksum": "MD5-CHECKSUM-GOES-HERE",
+      "branch": "stable",
+      "engines": [{
+        "engine": "craftbukkit",
+        "build_min": 800,
+        "build_max": 900
+      }, {
+        "engine": "glowstone",
+        "build_min": 0,
+        "build_max": 0
+      }]
+    },   {
+      "version": "0.0.1a",
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "location": "http://www.website.com/location/to/zipfile.zip",
+      "checksum": "MD5-CHECKSUM-GOES-HERE",
+      "branch": "stable",
+      "engines": [{
+        "engine": "craftbukkit",
+        "build_min": 800,
+        "build_max": 900
+      }]
+  }
 ```
