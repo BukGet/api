@@ -70,11 +70,11 @@ def main(argv=None):
       'location': version['location'],
       'checksum': version['checksum'],
       'branch': version['branch'],
-      'engines': {
+      'engines': [{
         'engine': 'craftbukkit',
         'build_min': version['bukkit_min'],
         'build_max': version['bukkit_max'],
-      },
+      }],
     })
   
   open(new_file, 'w').write(json.dumps(new, indent=4))
