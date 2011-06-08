@@ -22,15 +22,15 @@ One of the most common cases is a simple Bukkit plugin with no configuration fil
 Our first task is to get the md5sum of the plugin.  The steps vary by OS:
 
 * Max OSX
-  * Open the Terminal.app
-  * type: md5 /path/to/plugin.jar
-  * You should get a response similar to below.  The md5 hash is everything
+  1. Open the Terminal.app
+  2. type: md5 /path/to/plugin.jar
+  3. You should get a response similar to below.  The md5 hash is everything
     after the equals sign.
     `MD5 (plugin.jar) = 9d92a8d4190944cf075c8ecdd56788e8`
 * Linux
-  * Open a Terminal
-  * type: md5sum /path/to/plugin.jar
-  * You should get a response similar to below.  The md5 hash is the string
+  1. Open a Terminal
+  2. type: md5sum /path/to/plugin.jar
+  3. You should get a response similar to below.  The md5 hash is the string
     before the filename.
     `9d92a8d4190944cf075c8ecdd56788e8 /path/to/plugin.jar`
 * Windows
@@ -79,4 +79,151 @@ Once you have the dictionary filled out, save the file, upload it to your hostin
 Building Compliant Zip Packages Manually
 ----------------------------------------
 
-Not all plugins are that simple...
+Not all plugins can be simple enough to be a singular jar file.  Some plugins rely on other libraries or have configuration files.  Because of this there is also format for generating a plugin package for BukGet using a Zip container.  The Zip folder layout is pretty simple and is described below:
+
+```
+    /lib
+    /plugins
+    /plugins/PLUGINNAME
+```
+
+* **/lib**: This location is where any java libraries that Bukkit is required to load will go.  For example if your plugin relies on the mysql library then you can place it here.
+* **/plugins**: This location is where your plugin jar file goes.  Keep in mind that any files in this location will be overwritten whenever a user updates their package.
+* **/plugins/PLUGINNAME**: This location is where any configuration data or auxiliary data that the plugin needs will go.  Any data in this location that already exists in the bukkit environment will not be overwritten.
+
+There are no dictionaries stored in the package itself, as the package relies on BukGet's canonical plugin listing to know what a package is.
+
+Plugin Dictionary Definitions
+-----------------------------
+
+**name**
+
+  * *Type*: Unicode String
+  * *Description*: The package name.  This field must both not have any spaces and must match the name used for packaging and in the Bukkit forums.
+
+**authors**
+
+  * *Type*: List of Unicode Strings
+  * *Description*: List of all the author names for the plugin.
+
+**maintainer**
+
+  * *Type*: Unicode String
+  * *Description*: This is name of the user that is maintaining the plugin.  This name must be a valid Bukkit.org account and must also be the same name as the one who had started the forum thread on the Bukkit forums.
+
+**description**
+
+  * *Type*: Unicode String
+  * *Description*: A brief description of what the plugin is, what it does, and maybe even how to use it.
+
+**website**
+
+  * *Type*: Unicode String
+  * *Description*: The URL of the plugin homepage.
+
+**categories**
+
+  * *Type*: List of Unicode Strings
+  * *Description*: List of the categories the plugin falls under.  This should match what is on for Bukkit forum page.  Please note that we are requesting that you submit each catagory as an item in the string.  The means categories should not be formatted like `GEN/ADMN/FUN` but shoudl instead be `['GEN','ADMN','FUN']`.
+
+**versions**
+
+  * *Type*: List of Version Dictionaries
+  * *Description*: This is a container for all version objects.
+
+**version**
+
+  * *Type*: Unicode String
+  * *Description*: Version number of the plugin.
+
+**required_dependencies**
+
+  * *Type*: Nested List of Unicode Strings
+  * *Description*: A list of the required plugin dependencies needed to make this plugin work.  Typically this should be a simple list of plugin names that are needed to make the plugin work.  There is one addition however; if you need to specify one plugin OR another, then set them within their own list.  For example: If you need Permissions or GroupManager, then instead of listing them both at the base list, then nest them as their own list. In this example:  `[["Permissions","GroupManager"], "Help"]` would mean that we need Help and either Permissions or GroupManager.
+
+**optional_dependencies**
+
+  * *Type*: Nested List of Unicode Strings
+  * *Description*: Same as required_dependencies, however these items aren't required for the plugin to run and can only enhance functionality.
+
+**conflicts**
+
+  * *Type*: List of Unicode Strings
+  * *Destription*: A list of Plugins that conflict with this version of this plugin.
+
+**location**
+
+  * *Type*: Unicode String
+  * *Description*: The URL of the location of the plugin version.
+
+**checksum**
+
+  * *Type*: Unicode String
+  * *Description*: The MD5 checksum of the plugin package.  This is used to validate that the package the client download is the right package and is not corrupt.
+
+**branch**
+
+  * *Type*: Unicode String
+  * *Description*: Denotes the status of the plugin version.  The allowed values for this field is *stable*, *test*, and *dev*.  Plugin versions with the *dev* tag are to be considered development works-in-progress and no stability should be expected of them.  Plugin versions with *stable* are considered to be stable plugins with relatively few known bugs.  The *test* tag is an intermediate between *dev* and *stable*.
+
+**engines**
+
+  * *Type*: List of engine Dictionaries
+  * *Description*: This is a container for all the engine specifications.  This was added late in the spec to account for the possibility of alternative server builds to the craftbukkit server.  Notable works-in-progress here include the glowstone server.
+
+**engine**
+
+  * *Type*: Unicode String
+  * *Description*: Denotes what engine the build restrictions pertain to.  currently the only value accepted here is *craftbukkit*.
+
+**build_min**
+
+  * *Type*: Integer
+  * *Description*: The minimum build number that this plugin will work with this engine.
+
+**build_max**
+
+  * *Type*: Integer
+  * *Description*: The maximum build number that this plugin will work with this engine.
+
+Expanded Example JSON Dictionary
+```
+    {
+      "name": "PackageName",
+      "authors": ["Author1"],
+      "maintainer": "Author1",
+      "description": "Some details about what the plugin does.  If you want a line break use \n.",
+      "website": "http://www.website.com",
+      "categories": ["GEN", "ADMN"],
+      "versions": [{
+        "version": "0.0.1a",
+        "required_dependencies": [["Permissions","GroupManager"],"Help"],
+        "optional_dependencies": [],
+        "conflicts": [],
+        "location": "http://www.website.com/location/to/zipfile.zip",
+        "checksum": "MD5-CHECKSUM-GOES-HERE",
+        "branch": "stable",
+        "engines": [{
+          "engine": "craftbukkit",
+          "build_min": 800,
+          "build_max": 900
+        }, {
+          "engine": "glowstone",
+          "build_min": 0,
+          "build_max": 0
+        }]
+      },   {
+        "version": "0.0.1a",
+        "required_dependencies": [],
+        "optional_dependencies": [],
+        "conflicts": [],
+        "location": "http://www.website.com/location/to/zipfile.zip",
+        "checksum": "MD5-CHECKSUM-GOES-HERE",
+        "branch": "stable",
+        "engines": [{
+          "engine": "craftbukkit",
+          "build_min": 800,
+          "build_max": 900
+        }]
+    }
+```
