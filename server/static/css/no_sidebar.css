@@ -1,0 +1,8 @@
+#sidebar {
+  visibility: hidden;
+  height: 0px;
+}
+
+#content {
+  width: 900px;
+}

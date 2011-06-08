@@ -1,0 +1,196 @@
+/*
+      Created by Keith Donegan of Code-Sucks.com
+	  
+	  E-Mail: Keithdonegan@gmail.com
+	  
+	  You can do whatever you want with these layouts,
+	  but it would be greatly appreciated if you gave a link
+	  back to http://www.code-sucks.com
+	  
+*/
+
+* { padding: 0; margin: 0; }
+
+body {
+    font-family: 'Lucida Grande',Geneva,Arial,Verdana,sans-serif;
+    font-size: 13px;
+    background: #E7E6D9 url('/static/images/bg.gif');
+}
+
+a {
+    text-decoration: none;
+    color: #106FD4;
+}
+
+a:hover { 
+  color: #888; 
+}
+
+p { 
+  color: #666; 
+}
+
+h1 { 
+  color: #000; 
+}
+
+h2 { 
+  color: #000; 
+}
+
+#wrapper { 
+ margin: 0 auto;
+ width: 922px;
+}
+
+/* Header */
+#header {
+ color: #333;
+ width: 922px;
+ float: left;
+ padding: 0px;
+ margin: 10px 0px 10px 0px;
+ background: #106FD4;
+ filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#106FD4', endColorstr='#034C9B');
+ background: -webkit-gradient(linear, left top, left bottom, from(#106FD4), to(#034C9B));
+ background: -moz-linear-gradient(top,  #106FD4,  #034C9B);
+}
+
+#logo { 
+  background: url('/static/images/logo.png'); 
+  color: #fff;
+  font: bold 14px 'Lucida Grande',Geneva,Arial,Verdana,sans-serif;
+  margin: 10px 18px 8px;
+  padding: 0px 16px;
+  height: 24px;
+  float: left;
+  width: 50px;
+  text-indent: -99999px;
+}
+
+#navigation {
+    float: left;
+}
+
+#navigation ul {
+    list-style: none; 
+    margin-top: 13px; 
+}
+
+#navigation ul li {
+    display: inline-block;
+}
+
+#navigation ul li a {
+    font-size: 13px; 
+    font-weight: bold;
+    padding: 12px 15px 14px;
+    margin-top: 3px;
+    margin-right: -3px;
+    color: #fff;
+    -webkit-transition: background .4s ease-in;
+    -moz-transition: background .4s ease-in;
+    -o-transition: background .4s ease-in;
+    transition: background .4s ease-in;
+    box-shadow: -1px 0px 0px rgba(0,0,0,0.2), inset 1px 0px rgba(255,255,255,0.2);
+    -moz-box-shadow: -1px 0px 0px rgba(0,0,0,0.2), inset 1px 0px rgba(255,255,255,0.2);
+    -webkit-box-shadow: -1px 0px 0px rgba(0,0,0,0.2), inset 1px 0px rgba(255,255,255,0.2);
+}
+
+#navigation ul li a.active, 
+#navigation ul li a.active:hover,
+#navigation ul li a:hover { 
+  background: #003977; 
+  color: #fff; 
+}
+
+#navigation ul li a.e:hover { 
+  background: none; 
+}
+
+/* Content Pane */
+#content { 
+ color: #333;
+ border: 1px solid #ccc;
+ background: #fff;
+ margin: 0px 5px 10px 0px;
+ padding: 10px;
+ width: 668px;
+ float: left;
+}
+
+/* Sidebar Pane */
+#sidebar { 
+ float: right;
+ color: #333;
+ border: 1px solid #ccc;
+ background: #fff;
+ margin: 0px 0px 10px 5px;
+ padding: 10px;
+ width: 200px;
+ display: inline;
+}
+
+/* Footer */
+#footer { 
+ width: 900px;
+ height: 15px;
+ clear: both;
+ color: #333;
+ border: 1px solid #ccc;
+ background: #fff;
+ margin: 0px 0px 10px 0px;
+ padding: 10px;
+}
+
+/* Corners */
+#header, #sidebar, #content, #footer {
+  border-radius: 5px 5px 5px 5px; 
+  -moz-border-radius: 5px 5px 5px 5px;
+  -khtml-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+}
+
+#footer_copy {
+  float: left;
+}
+
+#footer_nav {
+  float: right;
+}
+
+#footer_nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#footer_nav li
+{
+  border-left: 1px solid #000;
+  float: left;
+  line-height: 1.1em;
+  margin: 0 .5em 0 -.5em;
+  padding: 0 .5em 0 .5em;
+}
+
+.alert { 
+  background: #fff6bf url('/static/images/exclamation.png') 15px 50% no-repeat; 
+  padding: 5px 20px 5px 45px; 
+  border-top: 2px solid #ffd324; 
+  border-bottom: 2px solid #ffd324; 
+}
+
+.info { 
+  background: #f8fafc url('/static/images/information.png') 15px 50% no-repeat; 
+  padding: 5px 20px 5px 45px; 
+  border-top: 2px solid #b5d4fe; 
+  border-bottom: 2px solid #b5d4fe; 
+}
+
+.download { 
+  background: #cfc url('/static/images/download.png') 15px 50% no-repeat; 
+  padding: 5px 20px 5px 45px; 
+  border-top: 2px solid #3C6; 
+  border-bottom: 2px solid #3C6; 
+}
