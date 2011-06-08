@@ -33,8 +33,6 @@ allowed_hosts = config.get('Settings','allowed_hosts').split(',')
 
 # Now we setup the logging
 LOG_FORMAT = logging.Formatter('%(name)s: %(levelname)s %(message)s')
-#LOG_FILE = logging.FileHandler(config.get('Settings', 'log_file'))
-#LOG_FILE.setFormatter(LOG_FORMAT)
 SYSLOG = SysLogHandler(address='/dev/log')
 SYSLOG.setFormatter(LOG_FORMAT)
 log = logging.getLogger('bukget')
@@ -49,98 +47,6 @@ Session = sessionmaker(bind=engine)
 # database with SQLAlchemy.
 Base = declarative_base()
 #### END CONFIGURATION AND PRE-PROCESSING
-
-## These are still in dev and are not used for now...
-# class Plugin(Base):
-#   '''
-#   Base class to define plugins.
-#   '''
-#   __tablename__ = 'plugin'
-#   id            = Column(Integer(8), primary_key=True)
-#   name          = Column(String(32))
-#   description   = Column(Text)
-#   website       = Column(String(128))
-#   authors       = relationship('AuthorRT',  backref='plugins')
-#   categories    = relationship('CatRT',     backref='plugins')
-#   version       = relationship('Version',   backref='plugin')
-# Plugin.metadata.create_all(engine)
-# 
-# class Version(Base):
-#   '''
-#   Base class for a plugin version.
-#   '''
-#   __tablename__ = 'version'
-#   id            = Column(Integer(8), primary_key=True)
-#   plugin_id     = Column(String(32), ForeignKey('plugins.id'))
-#   version       = Column(String(10))
-#   checksum      = Column(String(32))
-#   branch        = Column(String(10))
-#   bukkit_min    = Column(Integer(6))
-#   bukkit_max    = Column(Integer(6))
-#   dependencies  = relationship('Dependency', backref='dependents')
-#   conflictions  = relationship('Conflict', backref='conflictors')
-# Version.metadata.create_all(engine)
-# 
-# 
-# class Category(Base):
-#   __tablename__ = 'category'
-#   id            = Column(Integer(8), primary_key=True)
-#   name          = Column(String(16))
-#   plugins       = relationship('CatRT', backref='categories')
-# Category.metadata.create_all(engine)
-# 
-# class User(Base):
-#   '''
-#   Base class for users.
-#   '''
-#   __tablename__ = 'user'
-#   id            = Column(Integer(8), primary_key=True)
-#   name          = Column(String(32))
-#   key           = Column(String(32))
-#   email         = Column(String(64))
-#   plugins       = relationship('AuthorRT', backref='authors')
-# User.metadata.create_all(engine)
-# 
-# class AuthorRT(Base):
-#   '''
-#   Relational table for Authors.
-#   '''
-#   __tablename__ = 'author_rt'
-#   user_id       = Column(Integer(8), ForeignKey('user.id'), primary_key=True)
-#   plugin_id     = Column(Integer(8), ForeignKey('plugin.id'), primary_key=True)
-# AuthorRT.metadata.create_all(engine)
-# 
-# class CatRT(Base):
-#   '''
-#   Relational Table for Categories.
-#   '''
-#   __tablename__ = 'cat_rt'
-#   category_id   = Column(Integer(8), ForeignKey('category.id'), primary_key=True)
-#   plugin_id     = Column(Integer(8), ForeignKey('plugin.id'), primary_key=True)
-# CatRT.metadata.create_all(engine)
-# 
-# class Dependency(Base):
-#   '''
-#   Dependency class to link dependencies back to other plugins.
-#   '''
-#   __tablename__ = 'dependency'
-#   id            = Column(Integer(8), primary_key=True)
-#   plugin_id     = Column(Integer(8), ForeignKey('plugin.id'), primary_key=True)
-#   dependent_id  = Column(Integer(8), ForeignKey('version.id'), primary_key=True)
-#   restrictions  = Column(Text)
-#   hard          = Column(Boolean)
-# Dependency.metadata.create_all(engine)
-# 
-# class Conflict(Base):
-#   '''
-#   Conflict class to link conflicting plugins together.
-#   '''
-#   __tablename__ = 'conflict'
-#   id            = Column(Integer(8), primary_key=True)
-#   plugin_id     = Column(Integer(8), ForeignKey('plugin.id'), primary_key=True)
-#   conflictor_id = Column(Integer(8), ForeignKey('version.id'), primary_key=True)
-#   restrictions  = Column(Text)
-# Conflict.metadata.create_all(engine)
 
 class NewsArticle(Base):
   '''
@@ -211,11 +117,14 @@ class Repository(Base):
       if 'branch' not in v: return False
       if not isinstance(v['branch'], unicode): return False
       if v['branch'] not in ['stable','test','dev']: return False
-      if 'bukkit_min' not in v: return False
-      if not isinstance(v['bukkit_min'], int): return False
-      if 'bukkit_max' not in v: return False
-      if not isinstance(v['bukkit_max'], int): return False
-      if not v['bukkit_min'] <= v['bukkit_max']: return False
+      for e in v['engines']:
+        if 'engine' not in e: return False
+        if not isinstance(e['engine'], unicode): return False
+        if 'build_min' not in e: return False
+        if not isinstance(e['build_min'], int): return False
+        if 'build_max' not in e: return False
+        if not isinstance(e['build_max'], int): return False
+        if not e['build_min'] <= e['build_max']: return False
     
     # If we made it all the way here, then it looks to be a valid dictionary!
     return True
