@@ -6,11 +6,15 @@ Dev2, a complete recode of the backend systems, is now the primary site for BukG
 
 As this is a new site, and that there have been some significant changes to the plugin.json format, we are asking all current plugin devs to re-submit their plugins through the new site.
 
+* * *
+
 BukGet Backend Redesign Underway
 --------------------------------
 *May 31, 2011*
 
 After a short break from working on BukGet to get a new perspective and a long vacation.  A couple of us looked at the current code and it was decided that the BukGet backend should be in 1 language (vs. 2 currently) and should be integrated instead of all over the place.  So I started working on moving the site over to python using bottle and tying that into the current python batch scripts.  Ideally most of the batch processing will then go away so updates can happen more frequently.
+
+* * *
 
 BukGet Repository Testing has started!
 --------------------------------------
@@ -30,6 +34,8 @@ Follow the plugin repository guidelines:
 
 At this stage I don't see this process changing much. If something does change I will make sure to inform everyone. However progress is being made!
 Tags: server, python, php, website
+
+* * *
 
 BukGet Client Released!
 -----------------------
@@ -72,6 +78,8 @@ TODO & Bugs:
 * pkg command set completely unwritten
 * Need to clean up code.
 * Code needs to be documented better.
+
+* * *
 
 BukGet Entering Alpha State
 ---------------------------
