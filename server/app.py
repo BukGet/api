@@ -349,7 +349,7 @@ def github_redirect():
 
 @route('/about')
 def about_us():
-  template('page_about')
+  return template('page_about')
 
 @route('/repo.json')
 def get_repo_file():
@@ -359,9 +359,9 @@ def get_repo_file():
 def help_page():
   return template('page_markdown', data=get_from_github('help.md'), title='Help')
 
-@route('/search')
+@route('/plugins')
 def search_page():
-  return template('page_search')
+  return template('page_plugins')
 
 @route('/static/:filename#.+#')
 def route_static_files(filename):
