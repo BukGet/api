@@ -10,6 +10,7 @@ import logging
 import re
 import urllib
 import httplib
+import markdown2
 from ConfigParser import ConfigParser
 from xenforo import XenForo
 from logging.handlers import SysLogHandler
@@ -77,18 +78,6 @@ class BukkitDB(object):
     form_data = '='
     db = self._post('/data.php?%s' % urllib.urlencode(query_data), form_data)
     return json.loads(db)
-    
-
-class NewsArticle(Base):
-  '''
-  News article class for the site.
-  '''
-  __tablename__ = 'news'
-  id    = Column(Integer(8), primary_key=True)
-  title = Column(String(128))
-  date  = Column(DateTime)
-  data  = Column(Text)
-NewsArticle.metadata.create_all(engine)
 
 class Repository(Base):
   __tablename__ = 'repository'
@@ -232,14 +221,11 @@ class Repository(Base):
     return False
 Repository.metadata.create_all(engine)
     
-
-
-@route('/')
-@route('/index.html')
-def home_page():
-  s = Session()
-  news = s.query(NewsArticle).all()
-  return template('page_news', news=news)
+def get_from_github(filename):
+  url = 'https://raw.github.com/SteveMcGrath/bukget/master/docs/%s' % filename
+  markdown = markdown2.Markdown()
+  raw_file = urllib2.urlopen(url).read()
+  return markdown.convert(raw_file)
 
 @route('/add', method='GET')
 @route('/add', method='POST')
@@ -314,6 +300,15 @@ def add_repo():
   s.close()
   return template('page_add', notes=notes, errors=errors)
 
+@route('/')
+@route('/index.html')
+def home_page():
+  return template('page_markdown', data=get_from_github('homepage.md'), title='Home')
+
+@route('/news')
+def news_page()::
+  return template('page_markdown', data=get_from_github('news.md'), title='News')
+
 @route('/log')
 def display_logs():
   logfile = open(config.get('Settings', 'log_file'), 'r')
@@ -331,7 +326,7 @@ def get_repo_file():
 
 @route('/help')
 def help_page():
-  return template('page_help')
+  return template('page_markdown', data=get_from_github('help.md'), title='Help')
 
 @route('/search')
 def search_page():
