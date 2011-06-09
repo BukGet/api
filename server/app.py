@@ -347,6 +347,10 @@ def display_logs():
 def github_redirect():
   redirect('https://github.com/SteveMcGrath/bukget')
 
+@route('/about')
+def about_us():
+  template('page_about')
+
 @route('/repo.json')
 def get_repo_file():
   return static_file('repo.json', config.get('Settings','static_files'))
