@@ -70,6 +70,7 @@ For additional information about what each of these fields are, please review th
 Once you have the dictionary filled out, save the file, upload it to your hosting solution, and get the URL.  Once you have the URL, go to the [bukget.org][BukGet] website and fill out the "Add Plugin" page with the URL of the plugin dictionary.  After you submit, the BukGet server will try to validate the information you sent us with what is available on the [Bukkit plugins list][b_plugs] page.  Within a few minutes the server will send a private message to your [bukkit.org][Bukkit] account with an activation link.  Once you click on the link, your new entry will be considered active and will be added to the repository dictionary when it is next generated.
 
 [b_plugs]:  http://plugins.bukkit.org
+[Bukkit]:   http://bukkit.org
 [BukGet]:   http://bukget.org
 [md51]:     http://www.toast442.org/md5/
 [md52]:     http://www.md5summer.org/
