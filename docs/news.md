@@ -1,21 +1,22 @@
-BukGet Backend dev2 Goes Live
------------------------------
+<div id="post">
+<h2>BukGet Backend dev2 Goes Live</h2>
+
 *June 09, 2011*
 
 Dev2, a complete recode of the backend systems, is now the primary site for BukGet.  This signals a departure from using a hodgepodge of languages, tools, and technologies as all of the backend code is now written in python using Bottle and SQLAlchemy.  This allows for a lot of flexibility as well, as bottle opens us up to performing upgrades to the code in a faster, more flexible, and more gradual way.  This means that overall the code is easier to maintain as well, so we can respond to issues more quickly.
 
 As this is a new site, and since there have been some significant changes to the plugin.json format, we are asking all current plugin devs to re-submit their plugins through the new site.
+</div>
+<div id="post">
+<h2>BukGet Backend Redesign Underway
 
-
-BukGet Backend Redesign Underway
---------------------------------
 *May 31, 2011*
 
 After a short break from working on BukGet to get a new perspective and a long vacation, a couple of us looked at the current code and it was decided that the BukGet backend should be in 1 language (vs. 2 currently) and should be integrated instead of all over the place.  So I started working on moving the site over to python using bottle and tying that into the current python batch scripts.  Ideally most of the batch processing will then go away so updates can happen more frequently.
+</div>
+<div id="post">
+<h2>BukGet Repository Testing has started!</h2>
 
-
-BukGet Repository Testing has started!
---------------------------------------
 *May 05, 2011*
 
 With some help from the community we should be able to start accepting plugin submissions soon. I expect there to be many bugs and issues to work out, however hopefully by the end of the week most of the issues should be ironed out. as it sits currently, here is the submission process:
@@ -32,10 +33,10 @@ Follow the plugin repository guidelines:
 
 At this stage I don't see this process changing much. If something does change I will make sure to inform everyone. However progress is being made!
 Tags: server, python, php, website
+</div>
+<div id="post">
+<h2>BukGet Client Released!</h2>
 
-
-BukGet Client Released!
------------------------
 *May 04, 2011*
 
 The first build of the bukget is now available! This first version does have a lot of non-working parts, however they should all be labeled as such in the help documentation. I am still working on getting the help page online to help support the code, however I think that for the time being that current code should should be able to support itself.
@@ -75,10 +76,10 @@ TODO & Bugs:
 * pkg command set completely unwritten
 * Need to clean up code.
 * Code needs to be documented better.
+</div>
+<div id="post">
+<h2>BukGet Entering Alpha State</h2>
 
-
-BukGet Entering Alpha State
----------------------------
 *May 02, 2011*
 
 After a few revisions and rewrites, we are almost ready to enter an alpha state. While there is still a long way to go from here and I'm sure there will be more than a few bugs to work out, I think we are at the point where we need to reach out to the community to try to get some input and support to continue this project. As a result of that, we are asking everyone for any comments, concerns, help, and input in order to help bring this project to fruition.
@@ -91,3 +92,4 @@ The server version 0.0.1a was written and is already being used as a basis for 0
 
 **Website Status:**
 I know some people have commended on the bare site currently. Most of my focus has been on coding the client and server and not on getting this site up and running. As a result of that many of the pages are either only half-complete or not functioning all-together. My plan is to have all of this rectified however somewhat shortly.
+</div>
