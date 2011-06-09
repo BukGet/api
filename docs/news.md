@@ -1,6 +1,7 @@
 <div id="post">
+
 BukGet Backend dev2 Goes Live
-----------
+------------
 *June 09, 2011*
 
 Dev2, a complete recode of the backend systems, is now the primary site for BukGet.  This signals a departure from using a hodgepodge of languages, tools, and technologies as all of the backend code is now written in python using Bottle and SQLAlchemy.  This allows for a lot of flexibility as well, as bottle opens us up to performing upgrades to the code in a faster, more flexible, and more gradual way.  This means that overall the code is easier to maintain as well, so we can respond to issues more quickly.
