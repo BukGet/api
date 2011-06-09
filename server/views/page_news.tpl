@@ -3,7 +3,7 @@
   <h2 class="title">{{item.title}}</h2>
   <p class="meta">{{item.date}}</p>
   <div class="entry">
-    {{item.data}}
+    {{!item.get_html()}}
   </div>
 </div>
 %end
