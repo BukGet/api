@@ -40,7 +40,7 @@ The second step will be to upload the plugin.jar file somewhere and get its URL.
 
 Our next step is to generate the plugin dictionary.  For this example all we really need is a skeleton dictionary that can tell BukGet what the plugin is and where we can find it.
 
-```
+<pre class="brush: js">
   {
     "name": "PackageName",
     "authors": ["Author1"],
@@ -63,7 +63,7 @@ Our next step is to generate the plugin dictionary.  For this example all we rea
       }]
     }]
   }
-```
+</pre>
 
 For additional information about what each of these fields are, please review the definitions at the end of this document.
 
@@ -79,11 +79,11 @@ Building Compliant Zip Packages Manually
 
 Not all plugins can be distributed as a single jar file.  Some plugins rely on other libraries or have configuration files.  For these plugins there is a simple format for generating a plugin package for BukGet using a Zip container.  The Zip folder layout is described below:
 
-```
+<pre class="brush: bash">
     /lib
     /plugins
     /plugins/PLUGINNAME
-```
+</pre>
 
 * **/lib**: This folder contains any external libraries Bukkit must load.  SQL libraries go here.
 * **/plugins**: This folder contains your plugin.  Files in this location WILL be overwritten when a package is updated.
@@ -187,7 +187,7 @@ Plugin Dictionary Definitions
 Expanded Example JSON Dictionary
 --------------------------------
 
-```
+<pre class="brush: js">
   {
     "name": "PackageName",
     "authors": ["Author1"],
@@ -227,4 +227,4 @@ Expanded Example JSON Dictionary
       }]
 	}]
   }
-```
+</pre>
