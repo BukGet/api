@@ -77,13 +77,13 @@ BukGet Entering Alpha State
 ---------------------------
 *May 02, 2011*
 
-After a few revisions and rewrites, we are almost ready to enter an alpha state. While there is still a long way to go from here and I’m sure there will be more than a few bugs to work out, I think we are at the point where we need to reach out to the community to try to get some input and support to continue this project. As a result of that, we are asking everyone for any comments, concerns, help, and input in order to help bring this project to fruition.
+After a few revisions and rewrites, we are almost ready to enter an alpha state. While there is still a long way to go from here and I'm sure there will be more than a few bugs to work out, I think we are at the point where we need to reach out to the community to try to get some input and support to continue this project. As a result of that, we are asking everyone for any comments, concerns, help, and input in order to help bring this project to fruition.
 
 **Client Status:**
 The bukget client is in a run-able state as it sits for Linux and Mac OSX. Currently it will not attach to any plugin repositories so it only has the capability to update bukkit and start and stop it. In order to be able to background the server, we are interacting with screen to handle these actions.
 
 **Server Status:**
-The server version 0.0.1a was written and is already being used as a basis for 0.0.2. Because of the change in direction from a centralized repository (ala apt-get) to something more akin to python’s setuptools or perl’s CPAN, a complete rewrite is needed. As a result of that, we currently do not have any code in place to generate the repository, however we DO need developers to start using the format laid out in the help section in order to get a base set to work with. The goal is to have a working repository system up and running before June.
+The server version 0.0.1a was written and is already being used as a basis for 0.0.2. Because of the change in direction from a centralized repository (ala apt-get) to something more akin to python's setuptools or perl's CPAN, a complete rewrite is needed. As a result of that, we currently do not have any code in place to generate the repository, however we DO need developers to start using the format laid out in the help section in order to get a base set to work with. The goal is to have a working repository system up and running before June.
 
 **Website Status:**
 I know some people have commended on the bare site currently. Most of my focus has been on coding the client and server and not on getting this site up and running. As a result of that many of the pages are either only half-complete or not functioning all-together. My plan is to have all of this rectified however somewhat shortly.
