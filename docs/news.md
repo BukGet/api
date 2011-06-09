@@ -8,7 +8,7 @@ Dev2, a complete recode of the backend systems, is now the primary site for BukG
 As this is a new site, and since there have been some significant changes to the plugin.json format, we are asking all current plugin devs to re-submit their plugins through the new site.
 </div>
 <div id="post">
-<h2>BukGet Backend Redesign Underway
+<h2>BukGet Backend Redesign Underway</h2>
 
 *May 31, 2011*
 
