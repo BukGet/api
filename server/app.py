@@ -224,8 +224,12 @@ class Repository(Base):
             if plugin['author'].lower() == self.maintainer.lower():
               log.info('Found entry')
               check_ok = True
-    log.info('check_ok is %s' % check_ok)
-    if check_ok:
+              log.info('Matched %s to %s on Bukkit.org' %\
+                       (self.maintainer, self.plugin))
+    if not check_ok:
+      log.info('Unable to match %s to %s on Bukkit.org' %\
+               (self.maintainer, self.plugin))
+    else:
       forum = XenForo(config.get('Forum', 'username'), 
                       config.get('Forum', 'password'),
                       config.get('Forum', 'hostname'))
