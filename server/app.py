@@ -306,7 +306,7 @@ def home_page():
   return template('page_markdown', data=get_from_github('homepage.md'), title='Home')
 
 @route('/news')
-def news_page()::
+def news_page():
   return template('page_markdown', data=get_from_github('news.md'), title='News')
 
 @route('/log')
