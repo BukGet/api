@@ -222,7 +222,6 @@ class Repository(Base):
         if len(name) > 0:
           if name[0].lower() == self.plugin.lower():
             if plugin['author'].lower() == self.maintainer.lower():
-              log.info('Found entry')
               check_ok = True
               log.info('Matched %s to %s on Bukkit.org' %\
                        (self.maintainer, self.plugin))
