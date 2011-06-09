@@ -3,7 +3,7 @@ Packaging
 
 Packaging for BukGet can be as simple or as complex as you need.  The basic premise for getting a package included in BukGet remains the same. This document will walk you through setting up your Bukkit plugin to be distributed through BukGet with minimal mess.  Before we start, lets talk about the requirements:
 
-* Plugin developers host their own packages.  We do not host the packages, only provide a mechanism by which to find and download them.  Please keep this in mind as we handle the repository in this manner to both provide the maximum amount of flexibility to the plugin developer and to try to keep our own colocation costs to a minimum.
+* Plugin developers host their own packages.  We do not host the packages, only provide a mechanism by which to find and download them.  Please keep this in mind as we handle the repository in this manner to provide both the maximum amount of flexibility to the plugin developer and to try to keep our own colocation costs to a minimum.
 * File hosting services that do not provide direct links will not work.  This means that hosting services such as MegaUpload will not work as there is no way for the BukGet backend or the BukGet client to pull any of the data that you upload to these sites.  The hosting service you are using must not change the URL of files if they are updated because BukGet uses a static location to pull your plugin dictionary.  If the URL changes, the backend can no longer track your package and it will be orphaned.  Services that are ok to use include (but aren't limited to) the following:
   * Dropbox
   * CloudShare
@@ -36,9 +36,9 @@ Our first task is to get the md5sum of the plugin.  The steps vary by OS:
     that have been recommended by other plugin developers are 
     [Graphical MD5Sum][md51] and [MD5Summer][md52].
 
-The second step will be to upload the plugin.jar file somewhere and get its URL. we will need this to generate the plugin dictionary.  Depending on how you are hosting your plugin this can be handled any number of ways and is beyond the scope of this document.
+The second step will be to upload the plugin.jar file somewhere and get its URL.  We will need this to generate the plugin dictionary.  Depending on how you are hosting your plugin this can be handled any number of ways and is beyond the scope of this document.
 
-Our next step is to generate the plugin dictionary.  For this example all we really need is a skeleton dictionary that can tell the BukGet what the plugin is and where we can find it.
+Our next step is to generate the plugin dictionary.  For this example all we really need is a skeleton dictionary that can tell BukGet what the plugin is and where we can find it.
 
 ```
   {
@@ -53,7 +53,7 @@ Our next step is to generate the plugin dictionary.  For this example all we rea
       "required_dependencies": [],
       "optional_dependencies": [],
       "conflicts": [],
-      "location": "http://www.website.com/location/to/zipfile.zip",
+      "location": "http://www.website.com/location/to/jarfile.jar",
       "checksum": "MD5-CHECKSUM-GOES-HERE",
       "branch": "stable",
       "engines": [{
@@ -65,7 +65,7 @@ Our next step is to generate the plugin dictionary.  For this example all we rea
   }
 ```
 
-For information about what each of these fields are, please review the definitions at the end of this document.
+For additional information about what each of these fields are, please review the definitions at the end of this document.
 
 Once you have the dictionary filled out, save the file, upload it to your hosting solution, and get the URL.  Once you have the URL, go to the [bukget.org][BukGet] website and fill out the "Add Plugin" page with the URL of the plugin dictionary.  After you submit, the BukGet server will try to validate the information you sent us with what is available on the [Bukkit plugins list][b_plugs] page.  Within a few minutes the server will send a private message to your [bukkit.org][Bukkit] account with an activation link.  Once you click on the link, your new entry will be considered active and will be added to the repository dictionary when it is next generated.
 
@@ -77,7 +77,7 @@ Once you have the dictionary filled out, save the file, upload it to your hostin
 Building Compliant Zip Packages Manually
 ----------------------------------------
 
-Not all plugins can be simple enough to be a singular jar file.  Some plugins rely on other libraries or have configuration files.  Because of this there is also format for generating a plugin package for BukGet using a Zip container.  The Zip folder layout is pretty simple and is described below:
+Not all plugins can be distributed as a single jar file.  Some plugins rely on other libraries or have configuration files.  For these plugins there is a simple format for generating a plugin package for BukGet using a Zip container.  The Zip folder layout is described below:
 
 ```
     /lib
@@ -85,11 +85,11 @@ Not all plugins can be simple enough to be a singular jar file.  Some plugins re
     /plugins/PLUGINNAME
 ```
 
-* **/lib**: This location is where any java libraries that Bukkit is required to load will go.  For example if your plugin relies on the mysql library then you can place it here.
-* **/plugins**: This location is where your plugin jar file goes.  Keep in mind that any files in this location will be overwritten whenever a user updates their package.
-* **/plugins/PLUGINNAME**: This location is where any configuration data or auxiliary data that the plugin needs will go.  Any data in this location that already exists in the bukkit environment will not be overwritten.
+* **/lib**: This folder contains any external libraries Bukkit must load.  SQL libraries go here.
+* **/plugins**: This folder contains your plugin.  Files in this location WILL be overwritten when a package is updated.
+* **/plugins/PLUGINNAME**: This folder contains any configuration files or other files your plugin requires. Files in this location will NOT be overwritten.
 
-There are no dictionaries stored in the package itself, as the package relies on BukGet's canonical plugin listing to know what a package is.
+There are no dictionaries stored in the package itself.  BukGet relies on these to identify packages.  Simply replace the jarfile in the above instructions with your zip package.
 
 Plugin Dictionary Definitions
 -----------------------------
@@ -97,7 +97,7 @@ Plugin Dictionary Definitions
 **name**
 
   * *Type*: Unicode String
-  * *Description*: The package name.  This field must both not have any spaces and must match the name used for packaging and in the Bukkit forums.
+  * *Description*: The package name.  This field must not have any spaces, must match the name used for packaging and in the Bukkit forums.
 
 **authors**
 
@@ -117,12 +117,12 @@ Plugin Dictionary Definitions
 **website**
 
   * *Type*: Unicode String
-  * *Description*: The URL of the plugin homepage.
+  * *Description*: The URL of the plugin homepage or forum thread.
 
 **categories**
 
   * *Type*: List of Unicode Strings
-  * *Description*: List of the categories the plugin falls under.  This should match what is on for Bukkit forum page.  Please note that we are requesting that you submit each catagory as an item in the string.  The means categories should not be formatted like `GEN/ADMN/FUN` but shoudl instead be `['GEN','ADMN','FUN']`.
+  * *Description*: List of the categories the plugin falls under.  This should match what is on for Bukkit forum page.  Please note that we are requesting that you submit each catagory as an item in the string.  The categories should not be formatted like `GEN/ADMN/FUN` but should instead be `['GEN','ADMN','FUN']`.
 
 **versions**
 
@@ -137,7 +137,7 @@ Plugin Dictionary Definitions
 **required_dependencies**
 
   * *Type*: Nested List of Unicode Strings
-  * *Description*: A list of the required plugin dependencies needed to make this plugin work.  Typically this should be a simple list of plugin names that are needed to make the plugin work.  There is one addition however; if you need to specify one plugin OR another, then set them within their own list.  For example: If you need Permissions or GroupManager, then instead of listing them both at the base list, then nest them as their own list. In this example:  `[["Permissions","GroupManager"], "Help"]` would mean that we need Help and either Permissions or GroupManager.
+  * *Description*: A list of the required plugin dependencies needed to make your plugin work.  Typically this should be a simple list of plugin names that are needed to make the plugin work.  There is one addition however; if you need to specify one plugin OR another, then set them within their own list.  For example: If you need Permissions or GroupManager, then instead of listing them both at the base list, nest them as their own list. In this example:  `[["Permissions","GroupManager"], "Help"]` we need Help and either Permissions or GroupManager.
 
 **optional_dependencies**
 
@@ -147,42 +147,42 @@ Plugin Dictionary Definitions
 **conflicts**
 
   * *Type*: List of Unicode Strings
-  * *Destription*: A list of Plugins that conflict with this version of this plugin.
+  * *Destription*: A list of Plugins that conflict with this version of your plugin.
 
 **location**
 
   * *Type*: Unicode String
-  * *Description*: The URL of the location of the plugin version.
+  * *Description*: The URL to this version of your plugin or plugin package.
 
 **checksum**
 
   * *Type*: Unicode String
-  * *Description*: The MD5 checksum of the plugin package.  This is used to validate that the package the client download is the right package and is not corrupt.
+  * *Description*: The MD5 checksum of the plugin or package.  This is used to validate that the package the client download is the right package and is not corrupt.
 
 **branch**
 
   * *Type*: Unicode String
-  * *Description*: Denotes the status of the plugin version.  The allowed values for this field is *stable*, *test*, and *dev*.  Plugin versions with the *dev* tag are to be considered development works-in-progress and no stability should be expected of them.  Plugin versions with *stable* are considered to be stable plugins with relatively few known bugs.  The *test* tag is an intermediate between *dev* and *stable*.
+  * *Description*: Denotes the status of the plugin version.  The allowed values for this field are *stable*, *test*, and *dev*.  Plugin versions with the *dev* tag are to be considered development works-in-progress and no stability should be expected of them.  Plugin versions with *stable* are considered to be stable plugins with relatively few known bugs.  The *test* tag is an intermediate between *dev* and *stable*.
 
 **engines**
 
   * *Type*: List of engine Dictionaries
-  * *Description*: This is a container for all the engine specifications.  This was added late in the spec to account for the possibility of alternative server builds to the craftbukkit server.  Notable works-in-progress here include the glowstone server.
+  * *Description*: This is a container for all the engine specifications.  This was added late in the spec to account for the possibility of alternative server builds to the craftbukkit server.  Notable works-in-progress here include the Glowstone server.
 
 **engine**
 
   * *Type*: Unicode String
-  * *Description*: Denotes what engine the build restrictions pertain to.  currently the only value accepted here is *craftbukkit*.
+  * *Description*: Denotes what engine the build restrictions pertain to.  Currently the only value accepted here is *craftbukkit*.
 
 **build_min**
 
   * *Type*: Integer
-  * *Description*: The minimum build number that this plugin will work with this engine.
+  * *Description*: The minimum build number that this plugin will work with for this engine.
 
 **build_max**
 
   * *Type*: Integer
-  * *Description*: The maximum build number that this plugin will work with this engine.
+  * *Description*: The maximum build number that this plugin will work with for this engine.
 
 Expanded Example JSON Dictionary
 --------------------------------
@@ -196,7 +196,7 @@ Expanded Example JSON Dictionary
     "website": "http://www.website.com",
     "categories": ["GEN", "ADMN"],
     "versions": [{
-      "version": "0.0.1a",
+      "version": "0.0.1b",
       "required_dependencies": [["Permissions","GroupManager"],"Help"],
       "optional_dependencies": [],
       "conflicts": [],
@@ -205,7 +205,7 @@ Expanded Example JSON Dictionary
       "branch": "stable",
       "engines": [{
         "engine": "craftbukkit",
-        "build_min": 800,
+        "build_min": 817,
         "build_max": 900
       }, {
         "engine": "glowstone",
@@ -214,16 +214,17 @@ Expanded Example JSON Dictionary
       }]
     },   {
       "version": "0.0.1a",
-      "required_dependencies": [],
+      "required_dependencies": ["Help"],
       "optional_dependencies": [],
       "conflicts": [],
-      "location": "http://www.website.com/location/to/zipfile.zip",
+      "location": "http://www.website.com/location/to/zipfile-0.0.1a.zip",
       "checksum": "MD5-CHECKSUM-GOES-HERE",
-      "branch": "stable",
+      "branch": "test",
       "engines": [{
         "engine": "craftbukkit",
-        "build_min": 800,
-        "build_max": 900
+        "build_min": 740,
+        "build_max": 806
       }]
+	}]
   }
 ```
