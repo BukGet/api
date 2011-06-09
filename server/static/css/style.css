@@ -9,7 +9,7 @@
 	  
 */
 
-* { padding: 0; margin: 0; }
+/* { padding: 0; margin: 0; } */
 
 body {
     font-family: 'Lucida Grande',Geneva,Arial,Verdana,sans-serif;
@@ -119,6 +119,23 @@ h2 {
  float: left;
 }
 
+/*
+#content ul, #content ol {
+  margin-left: 0; 
+  padding-left: 2em;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#content p {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+*/
+
+#content p code {
+  white-space: pre;
+}
 /* Sidebar Pane */
 #sidebar { 
  float: right;
