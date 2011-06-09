@@ -8,6 +8,8 @@ import hashlib
 import datetime
 import logging
 import re
+import urllib
+import httplib
 from ConfigParser import ConfigParser
 from xenforo import XenForo
 from logging.handlers import SysLogHandler
@@ -47,6 +49,35 @@ Session = sessionmaker(bind=engine)
 # database with SQLAlchemy.
 Base = declarative_base()
 #### END CONFIGURATION AND PRE-PROCESSING
+
+class BukkitDB(object):
+  host = 'plugins.bukkit.org'
+  
+  def _post(self, url, payload):
+    headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Length': len(payload),
+      'X-Requested-With': 'XMLHttpRequest',
+    }
+    
+    http = httplib.HTTPConnection(self.host)
+    http.request('POST', url, body=payload, headers=headers)
+    resp = http.getresponse()
+    return resp.read()
+  
+  def get_data(self):
+    query_data = {
+     'j': 685763,
+     'title': '',
+     'tag': 'all',
+     'author': '',
+     'inc_submissions': 'false',
+     'pageno': 1
+    }
+    form_data = '='
+    db = self._post('/data.php?%s' % urllib.urlencode(query_data), form_data)
+    return json.loads(db)
+    
 
 class NewsArticle(Base):
   '''
@@ -167,19 +198,20 @@ class Repository(Base):
     # First we need to pull the json database from bukkit and parse it into
     # a native dictionary.  If this fails then throw an error and log the
     # problem.
-    try:
-      bukkit = urllib2.urlopen('http://plugins.bukkit.org/data.php').read()
-      bktdata = json.loads(bukkit)
-    except:
-      log.error('Could not contact Bukkit\'s plugin dictionary.')
-      return False
+    #try:
+    api = BukkitDB()
+    bktdata = api.get_data()['realdata']
+    #except:
+    #log.error('Could not contact Bukkit\'s plugin dictionary.')
+    #return False
     for plugin in bktdata:
       name = rname.findall(plugin['title'])
       if isinstance(name, list):
-        if name[0].lower() == self.plugin.lower():
-          if plugin['author'].lower() == self.maintainer.lower():
-            log.info('Found entry')
-            check_ok = True
+        if len(name) > 0:
+          if name[0].lower() == self.plugin.lower():
+            if plugin['author'].lower() == self.maintainer.lower():
+              log.info('Found entry')
+              check_ok = True
     log.info('check_ok is %s' % check_ok)
     if check_ok:
       forum = XenForo(config.get('Forum', 'username'), 
@@ -207,7 +239,7 @@ Repository.metadata.create_all(engine)
 def home_page():
   s = Session()
   news = s.query(NewsArticle).all()
-  return template('home_page', news=news)
+  return template('page_news', news=news)
 
 @route('/add', method='GET')
 @route('/add', method='POST')
@@ -280,14 +312,14 @@ def add_repo():
                       'activation message.  If this issue continues please '+\
                       'notify us of the issue.')
   s.close()
-  return template('add_repository', notes=notes, errors=errors)
+  return template('page_add', notes=notes, errors=errors)
 
 @route('/log')
 def display_logs():
   logfile = open(config.get('Settings', 'log_file'), 'r')
   logdata = logfile.read()
   logfile.close()
-  return template('display_logs', logdata=logdata)
+  return template('page_logs', logdata=logdata)
 
 @route('/code')
 def github_redirect():
@@ -299,11 +331,11 @@ def get_repo_file():
 
 @route('/help')
 def help_page():
-  return template('help_page')
+  return template('page_help')
 
 @route('/search')
 def search_page():
-  return template('search_page')
+  return template('page_search')
 
 @route('/static/:filename#.+#')
 def route_static_files(filename):
