@@ -18,7 +18,7 @@ from BeautifulSoup import BeautifulSoup    as bsoup
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (Table, Column, Integer, String, DateTime, Date, 
                         ForeignKey, Text, Boolean, create_engine, MetaData, 
-                        and_)
+                        and_, desc)
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from bottle import (route, run, debug, template, request, default_app, 
                     redirect, static_file)
@@ -78,6 +78,30 @@ class BukkitDB(object):
     form_data = '='
     db = self._post('/data.php?%s' % urllib.urlencode(query_data), form_data)
     return json.loads(db)
+
+class NewsArticle(Base):
+  '''
+  News article class for the site.
+  '''
+  __tablename__ = 'news'
+  id    = Column(Integer(8), primary_key=True)
+  title = Column(String(128))
+  date  = Column(DateTime)
+  data  = Column(Text)
+  
+  def __init__(self, title, post, date=None):
+    if date is not None:
+      self.date = date
+    else:
+      self.date = datetime.datetime.now()
+    self.title = title
+    self.data = post
+  
+  def get_html(self):
+    markdown = markdown2.Markdown()
+    return markdown.convert(self.data)
+
+NewsArticle.metadata.create_all(engine)
 
 class Repository(Base):
   __tablename__ = 'repository'
@@ -301,13 +325,14 @@ def add_repo():
   return template('page_add', notes=notes, errors=errors)
 
 @route('/')
-@route('/index.html')
 def home_page():
-  return template('page_markdown', data=get_from_github('homepage.md'), title='Home')
+  return template('page_home')
 
 @route('/news')
 def news_page():
-  return template('page_markdown', data=get_from_github('news.md'), title='News')
+  s = Session()
+  news = s.query(NewsArticle).order_by(desc(NewsArticle.date)).all()
+  return template('page_news', news=news)
 
 @route('/log')
 def display_logs():
