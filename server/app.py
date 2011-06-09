@@ -100,7 +100,6 @@ class NewsArticle(Base):
   def get_html(self):
     markdown = markdown2.Markdown()
     return markdown.convert(self.data)
-
 NewsArticle.metadata.create_all(engine)
 
 class Repository(Base):
