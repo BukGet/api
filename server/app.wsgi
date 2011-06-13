@@ -1,13 +1,5 @@
-#### CONFIGURATION AND PRE-PROCESSING
-# The script has to run from the location on disk that it lives.
-script_path = os.path.dirname(__file__)
-
-activate_this = '%s/../bin/activate_this.py' % script_path
-execfile(activate_this, dict(__file__=activate_this))
-
-# Importing all the various modules we will be needing.
-import sys
 import os
+import sys
 import getopt
 import urllib2
 import json
@@ -18,6 +10,15 @@ import logging
 import re
 import urllib
 import httplib
+#### CONFIGURATION AND PRE-PROCESSING
+# The script has to run from the location on disk that it lives.
+script_path = os.path.dirname(__file__)
+os.chdir(script_path)
+
+activate_this = '%s/../bin/activate_this.py' % script_path
+execfile(activate_this, dict(__file__=activate_this))
+
+# Importing all the various modules we will be needing.
 import markdown2
 from ConfigParser import ConfigParser
 from xenforo import XenForo
