@@ -6,7 +6,7 @@
   yourself so that we may activate this entry in our records.
 </p>
 <p>
-  <a href="http://dev2.bukget.org/add?hash={{hash}}&plugin={{plugin}}">
+  <a href="http://bukget.org/add?hash={{hash}}&plugin={{plugin}}">
     ACTIVATION LINK
   </a>
 </p>
