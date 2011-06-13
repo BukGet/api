@@ -12,10 +12,17 @@ import urllib
 import httplib
 #### CONFIGURATION AND PRE-PROCESSING
 # The script has to run from the location on disk that it lives.
-script_path = os.path.dirname(__file__)
-os.chdir(script_path)
+os.chdir(os.path.dirname(__file__))
 
-activate_this = '%s/../bin/activate_this.py' % script_path
+# Next we need to load the configuration file into memory.
+os.chdir(script_path)
+config = ConfigParser()
+config.read('config.ini')
+
+# Next we need to set the environment flag.
+ENV = config.get('Settings', 'environment')
+
+activate_this = '/srv/sites/%s/bin/activate_this.py' % ENV
 execfile(activate_this, dict(__file__=activate_this))
 
 # Importing all the various modules we will be needing.
@@ -31,11 +38,6 @@ from sqlalchemy import (Table, Column, Integer, String, DateTime, Date,
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from bottle import (route, run, debug, template, request, default_app, 
                     redirect, static_file)
-
-# Next we need to load the configuration file into memory.
-os.chdir(script_path)
-config = ConfigParser()
-config.read('config.ini')
 
 # This is a list of the IP addresses allowed to run the repo generation.
 allowed_hosts = config.get('Settings','allowed_hosts').split(',')
