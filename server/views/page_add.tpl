@@ -7,27 +7,20 @@
 %end
 
 <div class="repo_form">
-  <form action="/add" method="post">
-    <table>
-      <tr>
-        <td>Bukkit.org Name</td>
-        <td><input type="text" name="user" class="required_text" /></td>
-      </tr>
-      <tr>
-        <td>Email Address</td>
-        <td><input type="text" name="email" class="required_email" /></td>
-      </tr>
-      <tr>
-        <td>Plugin Name</td>
-        <td><input type="text" name="plugin" class="required_text" /></td>
-      </tr>
-      <tr>
-        <td>Repository URL</td>
-        <td><input type="text" name="url" class="required_url" /></td>
-      </tr>
-      <tr>
-        <td colspan="2"><input type="submit" name="add" value="Submit" /></td>
-    </table>
+  <form action="/add" method="post" cellpadding="10" cellspacing="10">
+      <label for="user">Bukkit.org Name</label>
+      <input type="text" name="user" id="user" class="required_text" size="32" maxlength="32"/>
+      
+      <label for="email">Email Address</label>
+      <input type="text" id="email" name="email" class="required_email" size="46" maxlength="128"/>
+      
+      <label for="plugin">Plugin Name</label>
+      <input type="text" id="plugin" name="plugin" class="required_text" size="32" maxlength="32"/>
+      
+      <label for="url">Repository URL</label>
+      <input type="text" id="url" name="url" class="required_url" size="50"/>
+      
+      <input type="submit" name="add" value="Submit" class="buttons cancel" />
   </form>
 </div>
 %rebase layout title="Add Plugin Repository"
