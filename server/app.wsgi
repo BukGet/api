@@ -10,6 +10,7 @@ import logging
 import re
 import urllib
 import httplib
+from logging.handlers import SysLogHandler
 from ConfigParser import ConfigParser
 
 #### CONFIGURATION AND PRE-PROCESSING
@@ -29,7 +30,6 @@ execfile(activate_this, dict(__file__=activate_this))
 # Importing all the various modules we will be needing.
 import markdown2
 from xenforo import XenForo
-from logging.handlers import SysLogHandler
 from BeautifulSoup import BeautifulSoup    as bsoup
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (Table, Column, Integer, String, DateTime, Date, 
