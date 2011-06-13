@@ -15,7 +15,6 @@ import httplib
 os.chdir(os.path.dirname(__file__))
 
 # Next we need to load the configuration file into memory.
-os.chdir(script_path)
 config = ConfigParser()
 config.read('config.ini')
 
