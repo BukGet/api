@@ -400,5 +400,6 @@ def generate_repository():
 
 # And here we set everything up for Apache to understand what to do with this
 # mess of code ;)
-debug(True)
+if ENV == 'dev':
+  debug(True)
 application = default_app()
