@@ -1,7 +1,6 @@
 #### CONFIGURATION AND PRE-PROCESSING
 # The script has to run from the location on disk that it lives.
 script_path = os.path.dirname(__file__)
-os.chdir(script_path)
 
 activate_this = '%s/../bin/activate_this.py' % script_path
 execfile(activate_this, dict(__file__=activate_this))
@@ -33,6 +32,7 @@ from bottle import (route, run, debug, template, request, default_app,
                     redirect, static_file)
 
 # Next we need to load the configuration file into memory.
+os.chdir(script_path)
 config = ConfigParser()
 config.read('config.ini')
 
