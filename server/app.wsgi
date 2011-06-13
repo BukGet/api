@@ -334,10 +334,11 @@ def add_repo():
   s.close()
   return template('page_add', notes=notes, errors=errors)
 
-@route('/')
-def home_page():
-  return template('page_home')
+#@route('/')
+#def home_page():
+#  return template('page_home')
 
+@route('/')
 @route('/news')
 def news_page():
   s = Session()
