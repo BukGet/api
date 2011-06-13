@@ -1,3 +1,12 @@
+#### CONFIGURATION AND PRE-PROCESSING
+# The script has to run from the location on disk that it lives.
+script_path = os.path.dirname(__file__)
+os.chdir(script_path)
+
+activate_this = '%s/../bin/activate_this.py' % script_path
+execfile(activate_this, dict(__file__=activate_this))
+
+# Importing all the various modules we will be needing.
 import sys
 import os
 import getopt
@@ -22,14 +31,6 @@ from sqlalchemy import (Table, Column, Integer, String, DateTime, Date,
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from bottle import (route, run, debug, template, request, default_app, 
                     redirect, static_file)
-
-#### CONFIGURATION AND PRE-PROCESSING
-# The script has to run from the location on disk that it lives.
-script_path = os.path.dirname(__file__)
-os.chdir(script_path)
-
-activate_this = '%s/../bin/activate_this.py' % script_path
-execfile(activate_this, dict(__file__=activate_this))
 
 # Next we need to load the configuration file into memory.
 config = ConfigParser()
