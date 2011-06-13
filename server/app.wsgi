@@ -10,6 +10,8 @@ import logging
 import re
 import urllib
 import httplib
+from ConfigParser import ConfigParser
+
 #### CONFIGURATION AND PRE-PROCESSING
 # The script has to run from the location on disk that it lives.
 os.chdir(os.path.dirname(__file__))
@@ -26,7 +28,6 @@ execfile(activate_this, dict(__file__=activate_this))
 
 # Importing all the various modules we will be needing.
 import markdown2
-from ConfigParser import ConfigParser
 from xenforo import XenForo
 from logging.handlers import SysLogHandler
 from BeautifulSoup import BeautifulSoup    as bsoup
