@@ -11,6 +11,7 @@
     <li>Handle downloading and installing the bukkit server</li>
   </ul>
 </p>
+<p><img src="/static/images/baskit.png" /></p>
 <p>
   Baskit was originally part of the Bukget package menagement system, however
   with Nijikokun developing the packaging parts as a bukkit plugin, it was
@@ -34,7 +35,7 @@
   same interface that is used for snapshots is used for backups as well.
 </p>
 <p>
-  <strong>Multiple Interface Types:</strong>  Buckit has bot and interactive
+  <strong>Multiple Interface Types:</strong>  Buckit has both an interactive
   shell and command-line options.  
 <br />
 <h3>Building a new bukkit server using baskit</h3>
