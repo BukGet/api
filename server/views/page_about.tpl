@@ -1,7 +1,7 @@
 <div id="about">
   <img src="http://minotar.net/avatar/ManiacM4c/100" />
   <h3>Steven McGrath</h3>
-  <p>Project Lead, Server-side Code</p>
+  <p>Project Lead, Server-side Code, Baskit wrapper</p>
 </div>
 
 <div id="about">
