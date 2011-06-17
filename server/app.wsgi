@@ -376,6 +376,14 @@ def search_page():
 def route_static_files(filename):
   return static_file(filename, root=config.get('Settings', 'static_files'))
 
+@route('/baskit')
+def baskit_page():
+  return template('page_baskit')
+
+@route('/baskit/download')
+def baskit_download():
+  redirect('https://raw.github.com/SteveMcGrath/baskit/master/baskit.py')
+
 @route('/generate')
 def generate_repository():
   '''
