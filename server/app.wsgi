@@ -392,7 +392,7 @@ def generate_repository():
   Generates the master repository file.
   '''
   if request.environ.get('REMOTE_ADDR') in allowed_hosts:
-    log.info('Running Generation Cycle.')
+    #log.info('Running Generation Cycle.')
     s = Session()
     rdict = []
     repos = s.query(Repository).filter_by(activated=True).all()
