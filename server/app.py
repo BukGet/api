@@ -345,6 +345,7 @@ def add_repo():
 def news_page():
   s = Session()
   news = s.query(NewsArticle).order_by(desc(NewsArticle.date)).all()
+  s.close()
   return template('page_news', news=news)
 
 @route('/log')
@@ -410,6 +411,7 @@ def generate_repository():
                  config.get('Settings', 'static_files'),'repo.json'), 'w')
     rfile.write(json.dumps(rdict))
     rfile.close()
+    s.close()
     return '{"plugins": %s}' % len(repos)
   return '{"error": "Not an allowed address"}'
 
