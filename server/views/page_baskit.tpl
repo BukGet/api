@@ -35,7 +35,7 @@
   same interface that is used for snapshots is used for backups as well.
 </p>
 <p>
-  <strong>Multiple Interface Types:</strong>  Buckit has both an interactive
+  <strong>Multiple Interface Types:</strong>  Baskit has both an interactive
   shell and command-line options.  
 <br />
 <h3>Building a new bukkit server using baskit</h3>
