@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import sys
 import getopt
@@ -19,7 +20,7 @@ os.chdir(os.path.dirname(__file__))
 
 # Next we need to load the configuration file into memory.
 config = ConfigParser()
-config.read('config.ini')
+config.read(os.path.join(sys.path[0], 'config.ini'))
 
 # Next we need to set the environment flag.
 ENV = config.get('Settings', 'environment')
@@ -36,6 +37,7 @@ from sqlalchemy import (Table, Column, Integer, String, DateTime, Date,
                         ForeignKey, Text, Boolean, create_engine, MetaData, 
                         and_, desc)
 from sqlalchemy.orm import relationship, backref, sessionmaker
+import bottle
 from bottle import (route, run, debug, template, request, default_app, 
                     redirect, static_file)
 
@@ -409,6 +411,8 @@ def generate_repository():
 
 # And here we set everything up for Apache to understand what to do with this
 # mess of code ;)
-if ENV == 'dev':
+if ENV in ('dev', 'dev2'):
   debug(True)
-application = default_app()
+run(server='twisted', 
+    host=config.get('Settings', 'address'), 
+    port=config.getint('Settings', 'port'))
