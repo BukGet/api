@@ -366,6 +366,10 @@ def about_us():
 def get_repo_file():
   return static_file('repo.json', config.get('Settings','static_files'))
 
+@route('/favicon.ico')
+def get_repo_file():
+  return static_file('images/favicon.ico', config.get('Settings','static_files'))
+
 @route('/help')
 def help_page():
   return template('page_markdown', data=get_from_github('help.md'), title='Help')
