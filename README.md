@@ -11,6 +11,8 @@ Bugs
 Todo
 ----
 * Make the Plugin submission form data persistent while a user is on the page.
+* Change the User-Agent for the Json pull to something that identifies it 
+  as BukGet.
 
 
 Related Projects
