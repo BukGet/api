@@ -187,7 +187,9 @@ class Repository(Base):
     Updates the json dictionary cache stored in the database.
     '''
     try:
-      newd = urllib2.urlopen(self.url).read()
+      request = urllib2.Request(self.url, None, 
+                                headers={'User-Agent': 'BukGet/0.0.1'})
+      newd = urllib2.urlopen(request).read()
       d = json.loads(newd)
     except:
       log.error('Could not read from %s\'s package.json' % self.plugin)
