@@ -305,7 +305,7 @@ def add_repo():
     # the user what failed and allow them to fix their input.
     remail = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$')
     rurl = re.compile(r'^(?:http|https|ftp)\://[a-zA-Z0-9\-\./\?\=\;\%]+')
-    ruser = re.compile(r'^[A-Za-z0-9\_\.]+$')
+    ruser = re.compile(r'^[A-Za-z0-9\_\.\ ]+$')
     rname = re.compile(r'^[A-Za-z0-9\_]+$')
     
     if len(remail.findall(email)) <> 1:
