@@ -21,7 +21,9 @@
       <input type="text" id="url" name="url" class="required_url" size="50"/>
       
       <label for="manual">Manual Activation</label>
+      <small>Please only check this if your plugin is not in the bukkit forums.</small>
       <input type="checkbox" id="manual" name="manual" class="buttons active" />
+      <br />
       
       <input type="submit" name="add" value="Submit" class="buttons cancel" />
   </form>
