@@ -224,7 +224,9 @@ class Repository(Base):
     # First we need to pull the json database from bukkit and parse it into
     # a native dictionary.  If this fails then throw an error and log the
     # problem.
-    if not self.manual:
+    if self.manual:
+      return True
+    else:
       try:
         api = BukkitDB()
         bktdata = api.get_data()['realdata']
@@ -240,29 +242,26 @@ class Repository(Base):
                 check_ok = True
                 log.info('Matched %s to %s on Bukkit.org' %\
                          (self.maintainer, self.plugin))
-    else:
-      check_ok = True
-    
-    if not check_ok:
-      log.info('Unable to match %s to %s on Bukkit.org' %\
-               (self.maintainer, self.plugin))
-    else:
-      forum = XenForo(config.get('Forum', 'username'), 
-                      config.get('Forum', 'password'),
-                      config.get('Forum', 'hostname'))
-      if forum.login():
-        md5 = hashlib.md5()
-        md5.update(self.plugin + datetime.datetime.now().ctime())
-        self.hash = md5.hexdigest()
-        forum.private_message(self.maintainer,
-                              'BukGet Plugin Repo Activation',
-                              template('bukkit_activation', 
-                                       user=self.maintainer,
-                                       plugin=self.plugin, 
-                                       hash=self.hash), 
-                              locked=True)
-      return True
-    return False
+      if not check_ok:
+        log.info('Unable to match %s to %s on Bukkit.org' %\
+                 (self.maintainer, self.plugin))
+      else:
+        forum = XenForo(config.get('Forum', 'username'), 
+                        config.get('Forum', 'password'),
+                        config.get('Forum', 'hostname'))
+        if forum.login():
+          md5 = hashlib.md5()
+          md5.update(self.plugin + datetime.datetime.now().ctime())
+          self.hash = md5.hexdigest()
+          forum.private_message(self.maintainer,
+                                'BukGet Plugin Repo Activation',
+                                template('bukkit_activation', 
+                                         user=self.maintainer,
+                                         plugin=self.plugin, 
+                                         hash=self.hash), 
+                                locked=True)
+        return True
+      return False
 Repository.metadata.create_all(engine)
     
 def get_from_github(filename):
