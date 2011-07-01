@@ -121,15 +121,17 @@ class Repository(Base):
   plugin      = Column(String(32))
   cache       = Column(Text)
   activated   = Column(Boolean)
+  manual      = Column(Boolean)
   hash        = Column(String(32))
   created     = Column(DateTime)
   
-  def __init__(self, plugin, maintainer, email, url):
+  def __init__(self, plugin, maintainer, email, url, manual=False):
     self.plugin     = plugin
     self.maintainer = maintainer
     self.email      = email
     self.url        = url
     self.created    = datetime.datetime.now()
+    self.manual     = manual
   
   def _valid(self, d):
     '''
@@ -222,21 +224,25 @@ class Repository(Base):
     # First we need to pull the json database from bukkit and parse it into
     # a native dictionary.  If this fails then throw an error and log the
     # problem.
-    #try:
-    api = BukkitDB()
-    bktdata = api.get_data()['realdata']
-    #except:
-    #log.error('Could not contact Bukkit\'s plugin dictionary.')
-    #return False
-    for plugin in bktdata:
-      name = rname.findall(plugin['title'])
-      if isinstance(name, list):
-        if len(name) > 0:
-          if name[0].lower() == self.plugin.lower():
-            if plugin['author'].lower() == self.maintainer.lower():
-              check_ok = True
-              log.info('Matched %s to %s on Bukkit.org' %\
-                       (self.maintainer, self.plugin))
+    if not self.manual():
+      try:
+        api = BukkitDB()
+        bktdata = api.get_data()['realdata']
+      except:
+        log.error('Could not contact Bukkit\'s plugin dictionary.')
+        return False
+      for plugin in bktdata:
+        name = rname.findall(plugin['title'])
+        if isinstance(name, list):
+          if len(name) > 0:
+            if name[0].lower() == self.plugin.lower():
+              if plugin['author'].lower() == self.maintainer.lower():
+                check_ok = True
+                log.info('Matched %s to %s on Bukkit.org' %\
+                         (self.maintainer, self.plugin))
+    else:
+      check_ok = True
+    
     if not check_ok:
       log.info('Unable to match %s to %s on Bukkit.org' %\
                (self.maintainer, self.plugin))
@@ -283,9 +289,10 @@ def add_repo():
       errors.append('Activation Failed.  Could not find repository record.')
     else:
       if repo.hash == act:
-        repo.activated = True
-        s.merge(repo)
-        s.commit()
+        if not repo.manual:
+          repo.activated = True
+          s.merge(repo)
+          s.commit()
         notes.append('Activation Successful!')
         log.info('%s is now  active and will be cached next generation cycle.' % name)
       else:
@@ -299,6 +306,7 @@ def add_repo():
     url = request.POST.get('url','').strip()
     email = request.POST.get('email','').strip()
     name = request.POST.get('plugin','').strip()
+    manual = request.POST.get('manual','').strip()
     
     # Now we need to validate all the data we have to make sure it's ok before
     # continue.  First we will define the regexes that we will use to
@@ -324,7 +332,7 @@ def add_repo():
     if len(errors) == 0:
       # If there are no errors, then we will try to activate the repository
       # that was defined.
-      new_repo = Repository(name, user, email, url)
+      new_repo = Repository(name, user, email, url, manual=manual)
       if new_repo.activate():
         notes.append('Please check your Bukkit.org account for ' +\
                      'activation message.  If you havent received one, ' +\
