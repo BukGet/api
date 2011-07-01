@@ -224,7 +224,7 @@ class Repository(Base):
     # First we need to pull the json database from bukkit and parse it into
     # a native dictionary.  If this fails then throw an error and log the
     # problem.
-    if not self.manual():
+    if not self.manual:
       try:
         api = BukkitDB()
         bktdata = api.get_data()['realdata']
