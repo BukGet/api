@@ -305,7 +305,7 @@ def add_repo():
     url = request.POST.get('url','').strip()
     email = request.POST.get('email','').strip()
     name = request.POST.get('plugin','').strip()
-    manual = request.POST.get('manual','').strip()
+    manual = bool(request.POST.get('manual','').strip())
     
     # Now we need to validate all the data we have to make sure it's ok before
     # continue.  First we will define the regexes that we will use to
