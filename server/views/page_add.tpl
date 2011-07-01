@@ -20,6 +20,9 @@
       <label for="url">Repository URL</label>
       <input type="text" id="url" name="url" class="required_url" size="50"/>
       
+      <label for="manual">Manual Activation</label>
+      <input type="checkbox" id="manual" name="manual" class="buttons active" />
+      
       <input type="submit" name="add" value="Submit" class="buttons cancel" />
   </form>
 </div>
