@@ -332,16 +332,21 @@ def add_repo():
       # If there are no errors, then we will try to activate the repository
       # that was defined.
       new_repo = Repository(name, user, email, url, manual=manual)
-      if new_repo.activate():
-        notes.append('Please check your Bukkit.org account for ' +\
-                     'activation message.  If you havent received one, ' +\
-                     'please contact us.')
-        s.add(new_repo)
-        s.commit()
+      if new_repo.manual:
+        notes.append('Your new submission has been flagged for ' +\
+                     'manual activation.  Please work with our staff in ' +\
+                     'the IRC channel to get your plugin activated.')
       else:
-        errors.append('We were unable to send your Bukkit.org account the ' +\
-                      'activation message.  If this issue continues please '+\
-                      'notify us of the issue.')
+        if new_repo.activate():
+          notes.append('Please check your Bukkit.org account for ' +\
+                       'activation message.  If you havent received one, ' +\
+                       'please contact us.')
+          s.add(new_repo)
+          s.commit()
+        else:
+          errors.append('We were unable to send your Bukkit.org account the ' +\
+                        'activation message.  If this issue continues please '+\
+                        'notify us of the issue.')
   s.close()
   return template('page_add', notes=notes, errors=errors)
 
@@ -424,10 +429,9 @@ def generate_repository():
     return '{"plugins": %s}' % len(repos)
   return '{"error": "Not an allowed address"}'
 
-# And here we set everything up for Apache to understand what to do with this
-# mess of code ;)
-if ENV in ('dev', 'dev2'):
-  debug(True)
-run(server='twisted', 
+if __name__ == '__main__':
+  if ENV in ('dev', 'dev2'):
+    debug(True)
+  run(server='twisted', 
     host=config.get('Settings', 'address'), 
     port=config.getint('Settings', 'port'))
