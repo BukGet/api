@@ -336,6 +336,8 @@ def add_repo():
         notes.append('Your new submission has been flagged for ' +\
                      'manual activation.  Please work with our staff in ' +\
                      'the IRC channel to get your plugin activated.')
+        s.add(new_repo)
+        s.commit()
       else:
         if new_repo.activate():
           notes.append('Please check your Bukkit.org account for ' +\
