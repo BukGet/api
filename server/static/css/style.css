@@ -208,6 +208,12 @@ h2 {
  display: inline;
 }
 
+#sidebar > p {
+    width: 90%;
+    margin-bottom: 10px;
+    color: #888;
+}
+
 #sidebar h2 {
     font-size: 1.4em;
     line-height: 0.95;
