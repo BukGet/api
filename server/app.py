@@ -365,6 +365,7 @@ def news_page():
   return template('page_news', news=news)
 
 @route('/repo')
+@route('/repo/#.+#')
 @route('/repo#.+#')
 def repo_page():
   return template('page_repo')
