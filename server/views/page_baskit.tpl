@@ -60,7 +60,7 @@
 <h3>Building a new bukkit server using baskit</h3>
 <p>
   Currently Baskit is a Unix-only tool as it depends on screen to handle
-  backgrounding the java process.  Work is being dont to try to get baskit
+  backgrounding the java process.  Work is being done to try to get baskit
   working for Windows as well, and there have been success stories getting it
   working on Windows via CygWin, however this walkthrough will focus on Linux
   installations.
@@ -89,7 +89,7 @@
 <h3>Migrate an existing bukkit server to use baskit</h3>
 <p>
   Currently Baskit is a Unix-only tool as it depends on screen to handle
-  backgrounding the java process.  Work is being dont to try to get baskit
+  backgrounding the java process.  Work is being done to try to get baskit
   working for Windows as well, and there have been success stories getting it
   working on Windows via CygWin, however this walkthrough will focus on Linux
   installations.
