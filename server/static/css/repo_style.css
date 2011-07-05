@@ -66,7 +66,7 @@ body {
         -[ $_top ]------------------------------ */
 
     .top {
-        background: #E7E6D9 url('/static/images/bg.gif');
+        background: #E7E6D9 url('../images/bg.gif');
         padding-bottom: 5px;
         box-shadow: inset 0px 1px 3px rgba(0,0,0,0.2);
         -moz-box-shadow: inset 0px 1px 3px rgba(0,0,0,0.2);
@@ -106,7 +106,7 @@ body {
                 width: 50px;
                 text-indent: -99999px;
                 color: #fff;
-                background: url('/static/images/logo.png'); }
+                background: url('../images/logo.png'); }
 
             /*
                 [ $navigation ] */
@@ -247,7 +247,10 @@ body {
                     font-size: 11px;
                     margin-left: 8px; }
                     
-                .package .header > .info {
+                .package .header .info {
+                    width: 20%;
+                    text-align: right;
+                    display: inline;
                     float: right; }
         
             .package .meta { 
@@ -273,7 +276,9 @@ body {
                     
                 .package .info > .item {
                     color: #333;
-                    margin-bottom: 10px; }
+                    padding-bottom: 5px;
+                    margin-bottom: 5px;
+                    border-bottom: 1px solid #EEE; }
                 
                     .package .info > .item > span {
                         color: #000;
