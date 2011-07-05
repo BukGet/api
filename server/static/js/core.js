@@ -1,6 +1,6 @@
 var Settings = {
     Core: {
-        templates: 'templates/',
+        templates: '/static/templates/',
         runs: 0,
         poll: 60 // Minutes to refetch repo
     },
