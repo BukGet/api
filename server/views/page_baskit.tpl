@@ -38,6 +38,25 @@
   <strong>Multiple Interface Types:</strong>  Baskit has both an interactive
   shell and command-line options.  
 <br />
+
+<h3>Prerequisites</h3>
+<p>
+  Baskit is written in python and requires Python 2.6 or 2.7.  Most Debian or
+  Ubuntu systems of a recent vintage (within the last 2-3yrs) will have Python
+  2.6 or 2.7 installed by default and will not require any extra work.  For
+  RHEL or CentOS hosts, the following is needed in order to install Python 2.6
+</p>
+<ol>
+  <li><code>wget http://download.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm</code></li>
+  <li><code>rpm -ivh epel-release-5-4.noarch.rpm</code></li>
+  <li><code>yum -y install python26</code></li>
+</ol>
+<p>
+  Baskit also relies on screen to background the bukkit server and java is
+  needed in order to run bukkit.  Baskit will try to check to see if these
+  exist and will prompt you if either of them does not exist.
+</p>
+
 <h3>Building a new bukkit server using baskit</h3>
 <p>
   Currently Baskit is a Unix-only tool as it depends on screen to handle
@@ -46,11 +65,6 @@
   working on Windows via CygWin, however this walkthrough will focus on Linux
   installations.
 </p>
-<ol><p>If on a CentOS5 system, then perform the following extra actions:</p>
-  <li><code>wget http://download.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm</code></li>
-  <li><code>rpm -ivh epel-release-5-4.noarch.rpm</code></li>
-  <li><code>yum -y install python26</code></li>
-</ol>
 
 <ol><p>Perform the following as a priviledged user:</p>
   <li>Make sure screen and a java JRE is installed.  If baskit complains
@@ -80,11 +94,6 @@
   working on Windows via CygWin, however this walkthrough will focus on Linux
   installations.
 </p>
-<ol><p>If on a CentOS5 system, then perform the following extra actions:</p>
-  <li><code>wget http://download.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm</code></li>
-  <li><code>rpm -ivh epel-release-5-4.noarch.rpm</code></li>
-  <li><code>yum -y install python26</code></li>
-</ol>
 
 <ol><p>Perform the following as a priviledged user:</p>
   <li>Download the script: <code>wget -O /usr/local/bin/baskit http://bukget.org/baskit/download</code></li>
