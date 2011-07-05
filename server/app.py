@@ -364,6 +364,7 @@ def news_page():
   s.close()
   return template('page_news', news=news)
 
+@route('/repo')
 @route('/repo#.+#')
 def repo_page():
   return template('page_repo')
