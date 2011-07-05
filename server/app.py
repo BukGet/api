@@ -364,6 +364,10 @@ def news_page():
   s.close()
   return template('page_news', news=news)
 
+@route('/repo')
+def repo_page():
+  return template('page_repo')
+
 @route('/log')
 def display_logs():
   logfile = open(config.get('Settings', 'log_file'), 'r')
