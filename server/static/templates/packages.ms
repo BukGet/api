@@ -4,23 +4,26 @@
                 </div>
                 
                 <div class="pack-list">
-                    {{#packages}}
-                    <div class="pack" onClick="window.location = '#/package/{{name}}';">
+                    {foreach $packages as $i => $pack}
+                    <div class="pack" onClick="window.location = '#/package/{$pack.name}';">
                         <div class="categories">
-                            {{#categories}}<a href="#" class="buttons small">{{.}}</a> {{/categories}}
-                            {{^categories}}...{{/categories}}
+                            {$categories=$pack.categories}
+                            {foreach $categories as $i => $category}
+                                <a href="#" class="buttons small">{$category}</a>
+                            {foreachelse}
+                                ...
+                            {/foreach}
                         </div>
-                        <span class="name">{{name}}</span>
+                        <span class="name">{$pack.name}</span>
                         <div class="description">
-                            <span class="maintainer">Maintained by: {{maintainer}}</span>
-                            <span class="desc">{{description}}</span>
+                            <span class="maintainer">Maintained by: {$pack.maintainer}</span>
+                            <span class="desc">{$pack.description}</span>
                         </div>
                     </div>
-                    {{/packages}}
-                    {{^packages}}
+                    {foreachelse}
                     <div class="error">
                         <span class="description">No Results</span>
                     </div>
-                    {{/packages}}
+                    {/foreach}
                 </div>
             </div>

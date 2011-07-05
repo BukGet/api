@@ -5,7 +5,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link href="/static/css/reset.css" rel="stylesheet" type="text/css"> 
 		<link href="/static/css/grid.css" rel="stylesheet" type="text/css"> 
-		<link href="/static/css/repo_style.css" rel="stylesheet" type="text/css"> 
+		<link href="/static/css/repo.style.css" rel="stylesheet" type="text/css"> 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
 		<script src="https://github.com/Nijikokun/Estro/raw/master/estro.js" type="text/javascript"></script>
 		<script src="/static/js/lib/smart.min.js"></script>
