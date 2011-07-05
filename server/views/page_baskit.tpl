@@ -74,8 +74,8 @@
       it is up to you to make sure that both screen and java is installed.</li>
   <li>Download the script: <code>wget -O /usr/local/bin/baskit http://bukget.org/baskit/download</code></li>
   <li>Make sure it's executable: <code>chmod 755 /usr/local/bin/baskit</code></li>
-  <ul>For CentOS Users
-    <li><code>sed 's/\#\!\/usr\/bin\/env pynv python2.6/g' /usr/local/bin/baskit /tmp/baskit2</code></li>
+  <ul>For CentOS/RHEL Users
+    <li><code>sed 's/\#\!\/usr\/bin\/env python/\#\!\/usr\/bin\/env python2.6/g' /usr/local/bin/baskit /tmp/baskit2</code></li>
     <li><code>mv /tmp/baskit2 /usr/local/bin/baskit</code></li>
   </ul>
   <li>Create the location for the minecraft server environment: <code>mkdir /opt/minecraft</code></li>
@@ -89,7 +89,7 @@
 <h3>Migrate an existing bukkit server to use baskit</h3>
 <p>
   Currently Baskit is a Unix-only tool as it depends on screen to handle
-  backgrounding the java process.  Work is being done to try to get baskit
+  backgrounding the java process.  Work is being don to try to get baskit
   working for Windows as well, and there have been success stories getting it
   working on Windows via CygWin, however this walkthrough will focus on Linux
   installations.
@@ -98,8 +98,8 @@
 <ol><p>Perform the following as a priviledged user:</p>
   <li>Download the script: <code>wget -O /usr/local/bin/baskit http://bukget.org/baskit/download</code></li>
   <li>Make sure it's executable: <code>chmod 755 /usr/local/bin/baskit</code></li>
-  <ul>For CentOS Users
-    <li><code>sed 's/\#\!\/usr\/bin\/env pynv python2.6/g' /usr/local/bin/baskit /tmp/baskit2</code></li>
+  <ul>For CentOS/RHEL Users
+    <li><code>sed 's/\#\!\/usr\/bin\/env python/\#\!\/usr\/bin\/env python2.6/g' /usr/local/bin/baskit /tmp/baskit2</code></li>
     <li><code>mv /tmp/baskit2 /usr/local/bin/baskit</code></li>
   </ul>
   <li>Create the location for the minecraft server environment: <code>mkdir /opt/minecraft</code></li>
