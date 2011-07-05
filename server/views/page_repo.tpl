@@ -8,7 +8,7 @@
 		<link href="/static/css/repo_style.css" rel="stylesheet" type="text/css"> 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
 		<script src="https://github.com/Nijikokun/Estro/raw/master/estro.js" type="text/javascript"></script>
-		<script src="/static/js/lib/moustache.js"></script>
+		<script src="/static/js/lib/smart.min.js"></script>
 		<script src="/static/js/lib/classy.js"></script>
 		<script src="/static/js/lib/extensions.js"></script>
 		<script src="/static/js/lib/router.js"></script>
