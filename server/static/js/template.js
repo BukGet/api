@@ -1,4 +1,5 @@
 var Template = Class.$extend({
+    type: 'jSmart',
     data: '',
     vars: '',
     el: '',
@@ -30,14 +31,28 @@ var Template = Class.$extend({
     append: function() {
         if(!this.url || !this.on || !this.vars) return this;
         this.data = this.$fetch(this.url);
-        if(this.el) $(this.el).append(Mustache.to_html(this.data, this.vars));
+        
+        if(this.type.equals('Moustache')) {
+            if(this.el) $(this.el).append(Mustache.to_html(this.data, this.vars));
+        } else if(this.type.equals('jSmart')) {
+            var tpl = new jSmart(this.data);
+            if(this.el) $(this.el).append(tpl.fetch(this.vars));
+        }
+        
         return this;
     },
     
     parse: function() {
         if(!this.url || !this.on || !this.vars) return this;
         this.data = this.$fetch(this.url);
-        if(this.el) $(this.el).html(Mustache.to_html(this.data, this.vars));
+
+        if(this.type == 'Moustache') {
+            if(this.el) $(this.el).html(Mustache.to_html(this.data, this.vars));
+        } else if(this.type.equals('jSmart')) {
+            var tpl = new jSmart(this.data);
+            if(this.el) $(this.el).html(tpl.fetch(this.vars));
+        }
+        
         return this;
     }
 });
