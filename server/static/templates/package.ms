@@ -32,7 +32,7 @@
                     </div>
                     {foreach $versions as $i => $v}
                     <div class="info v{$v.version_u} grid_10">{$required=$v.required_dependencies}{$optional=$v.optional_dependencies}{$engines=$v.engines}
-                        <a href="{$v.location}" class="buttons cancel download">Download {$v.version}</a>
+                        <a href="{$v.url}" class="buttons cancel download">Download {$v.version}</a>
                         
                         <div class="item"><span>Works With:</span> {foreach $engines as $i => $e}{$e.name} ({$e.min} - {$e.max}){if $e@last}{else}, {/if}{/foreach}</div>
                         <div class="item"><span>Branch:</span> {$v.branch}</div>
