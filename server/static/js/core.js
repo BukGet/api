@@ -14,7 +14,7 @@ var Core = Class.$extend({
     __include__: [ Settings.Core ],
     
     __classvars__: {
-      repo: '/repo.json',
+      repo: '/static/repo.json',
       reply: '',
       json: '',
       polls: 0,
