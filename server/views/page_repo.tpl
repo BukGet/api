@@ -25,7 +25,7 @@
             <header class="grid_12">
                 <div class="logo">Bukget Plugin Repo</div>
                 <nav>
-                    %import navigation
+                    %include navigation
                 </nav>
             </header>
         <div class="clear"></div> 
