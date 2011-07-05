@@ -1,5 +1,5 @@
 var settings = {
-    repo: 'repo.json',
+    repo: '/static/repo.json',
     
     // Used for the load-more
     paging: {
