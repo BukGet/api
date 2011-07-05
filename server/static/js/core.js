@@ -14,7 +14,7 @@ var Core = Class.$extend({
     __include__: [ Settings.Core ],
     
     __classvars__: {
-      repo: '/static/repo.json',
+      repo: '/repo.json',
       reply: '',
       json: '',
       polls: 0,
@@ -239,6 +239,7 @@ var Package = Core.$extend({
         this.$super(this);
         
         if(version) this.version = version.replace(/\./g,'_');
+        
         var packages = this.$class.reply;
         var p = packages.getPackage(pack), i = 0;
         p.versions.sort(function(a,b){ return a.version < b.version; });
@@ -275,6 +276,7 @@ var Package = Core.$extend({
             }
             
             var pack = this.pack['name'];
+            
             $('a#v').click(function() {
                 var v = $(this);
                 var version = v.attr('version');
