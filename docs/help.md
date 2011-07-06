@@ -135,6 +135,18 @@ Plugin Dictionary Definitions
   * *Type*: Unicode String
   * *Description*: Version number of the plugin.
 
+**warn**
+
+  * *Type*: Unicode String
+  * *Note*: This is an optional field.
+  * *Description*: A warning to appear if the user tries to install the plugin.  This will be presented and the installation will be stopped until the user accepts the warning.
+
+**notification**
+
+  * *Type*: Unicode String
+  * *Note*: This is an optional field.
+  * *Description*: A message that will be presented to the user after the installation is complete.
+
 **required_dependencies**
 
   * *Type*: Nested List of Unicode Strings
@@ -204,6 +216,8 @@ Expanded Example JSON Dictionary
       "location": "http://www.website.com/location/to/zipfile.zip",
       "checksum": "MD5-CHECKSUM-GOES-HERE",
       "branch": "stable",
+      "warn": "Configuration File Location changed to X",
+      "notification": "Make sure to move your configuration file to X",
       "engines": [{
         "engine": "craftbukkit",
         "build_min": 817,
