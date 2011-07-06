@@ -192,15 +192,15 @@ var Organize = Core.$extend({
     },
     
     ctag: function (tags, against) {
-        if(tags.length < 1) return false;
-        if(tags.contains(against)) return true;
-        if(tags.contains(against.toLowerCase())) return true;
+        if(tags.length < 1) 
+            return false;
+            
+        if(tags.contains(against) || tags.contains(against.toLowerCase())) 
+            return true;
         
         var items = [], q = [], tag = "";
-
         for(var c = 0; c < tags.length; c++){
-            tag = tags[c];
-            tag.trim();
+            tag = tags[c].trim();
 
             if(tag.equals("ADMIN"))
                 tag = "ADMN";
@@ -214,21 +214,27 @@ var Organize = Core.$extend({
                 items = tag.split("-");
                 
             if(items.length < 1)
-                items[0] = tag;
+                items = [ tag ];
 
             if(against.contains(","))
                 q = against.split(",");
                 
             if(q.length < 1)
-                q = against;
+                q = [ against ];
                 
-            for(var s in q)
+            for(var y = 0; y < q.length; y++){
+                var s = q[y];
+
+                if(tag.equalsIgnoreCase(s) || tag.equals(s)) 
+                    return true;
+                    
                 if(items.contains(s) || items.contains(s.toLowerCase())) 
                     return true;
+            }
         }
         
         return false;
-    },
+    }
 });
 
 var Search = Core.$extend({
@@ -303,7 +309,7 @@ var Search = Core.$extend({
         }
         
         return false;
-    },
+    }
 });
 
 var Home = Core.$extend({
