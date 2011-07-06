@@ -61,6 +61,6 @@
         "py python\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 @shBrushPython.js"));
         
         SyntaxHighlighter.all()
-  </script  
+  </script> 
 </body>
 </html>
