@@ -77,6 +77,22 @@ var Core = Class.$extend({
                 });
             });
             
+            this.$route("/category/:query", function(query){
+                me.setView(new Organize(query));
+                
+                $('.s').keypress(function(e) {
+                    console.log(e);
+                    if(e.which == 13) {
+                        var val = unescape($(this).val());
+                        if(val && !val.isEmpty()) me.$navigate('/search', val, true);
+                        e.preventDefault();
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            });
+            
             this.$route("/package/:pack", function(pack){
                 me.setView(new Package(pack));
              });
@@ -141,6 +157,80 @@ var Finder = Core.$extend({
     }
 });
 
+var Organize = Core.$extend({
+    __include__: [ Settings.Paging ],
+    
+    __init__: function(s) {
+       this.$super(this);
+       
+        if(s) {
+            this.packs = {};
+            this.packs.packages = [];
+            var x = this.packs.packages;
+            var i = 0;
+            
+            for(var p in this.$class.json.packages) {
+                var c = this.$class.json.packages[p];
+                if(p == "contains") 
+                    continue;
+                
+                if(this.ctag(c['categories'], s)) x[i] = c;
+                i++;
+            }
+            
+            this.packs.packages = x;
+        }
+    },
+    
+    open: function() {
+        this.$class.views.path(Settings.Core.templates + 'packages.ms').html('.package-list').args(this.packs).parse();
+        $('.package-list').show();
+    },
+    
+    close: function() {
+        $('.package-list').hide();
+    },
+    
+    ctag: function (tags, against) {
+        if(tags.length < 1) return false;
+        if(tags.contains(against)) return true;
+        if(tags.contains(against.toLowerCase())) return true;
+        
+        var items = [], q = [], tag = "";
+
+        for(var c = 0; c < tags.length; c++){
+            tag = tags[c];
+            tag.trim();
+
+            if(tag.equals("ADMIN"))
+                tag = "ADMN";
+            
+            if(tag.equalsIgnoreCase(against) || tag.equals(against)) 
+                return true;
+            
+            if(tag.contains("/"))
+                items = tag.split("/");
+            else if(tag.contains("-"))
+                items = tag.split("-");
+                
+            if(items.length < 1)
+                items[0] = tag;
+
+            if(against.contains(","))
+                q = against.split(",");
+                
+            if(q.length < 1)
+                q = against;
+                
+            for(var s in q)
+                if(items.contains(s) || items.contains(s.toLowerCase())) 
+                    return true;
+        }
+        
+        return false;
+    },
+});
+
 var Search = Core.$extend({
     __include__: [ Settings.Paging ],
     
@@ -188,20 +278,27 @@ var Search = Core.$extend({
             tag = tags[c];
             tag.trim();
             
-            if(tag.equalsIgnoreCase(against)) return true;
-            if(tag.equals(against)) return true;
+            if(tag.equals("ADMIN"))
+                tag = "ADMN";
+            
+            if(tag.equalsIgnoreCase(against) || tag.equals(against)) 
+                return true;
+                
             if(tag.contains("/")) {
                 items = tag.split("/");
-                if(items.contains(against)) return true;
-                if(items.contains(against.toLowerCase())) return true;
+                
+                if(items.contains(against) || items.contains(against.toLowerCase())) 
+                    return true;
             } else if(tag.contains("-")) {
                 items = tag.split("-");
-                if(items.contains(against)) return true;
-                if(items.contains(against.toLowerCase())) return true;
+                
+                if(items.contains(against) || items.contains(against.toLowerCase())) 
+                    return true;
             } else if(tag.contains(" ")) {
                 items = tag.split(" ");
-                if(items.contains(against)) return true;
-                if(items.contains(against.toLowerCase())) return true;
+                
+                if(items.contains(against) || items.contains(against.toLowerCase())) 
+                    return true;
             }
         }
         
