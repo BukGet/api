@@ -5,7 +5,7 @@
                 
                 <div class="pack-list">
                     {foreach $packages as $i => $pack}
-                    <div class="pack" onClick="window.location = '#/package/{$pack.name}';">
+                    <div class="pack">
                         <div class="categories">
                             {$categories=$pack.categories}
                             {foreach $categories as $i => $category}
@@ -17,8 +17,8 @@
                                 ...
                             {/foreach}
                         </div>
-                        <span class="name">{$pack.name}</span>
-                        <div class="description">
+                        <span class="name" onClick="window.location = '#/package/{$pack.name}';">{$pack.name}</span>
+                        <div class="description" onClick="window.location = '#/package/{$pack.name}';">
                             <span class="maintainer">Maintained by: {$pack.maintainer}</span>
                             <span class="desc">{$pack.description}</span>
                         </div>
