@@ -9,7 +9,10 @@
                         <div class="categories">
                             {$categories=$pack.categories}
                             {foreach $categories as $i => $category}
-                                <a href="#" class="buttons small">{$category}</a>
+                                {if $category eq "ADMIN"}
+                                    {$category="ADMN"}
+                                {/if}
+                                <a href="#/category/{$category}" class="buttons small">{$category}</a>
                             {foreachelse}
                                 ...
                             {/foreach}
