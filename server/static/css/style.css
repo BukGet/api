@@ -76,6 +76,7 @@ h2 {
  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#106FD4', endColorstr='#034C9B');
  background: -webkit-gradient(linear, left top, left bottom, from(#106FD4), to(#034C9B));
  background: -moz-linear-gradient(top,  #106FD4,  #034C9B);
+ background: -o-linear-gradient(top,  #106FD4,  #034C9B);
 }
 
 #logo { 
@@ -458,6 +459,13 @@ input[type="text"]:focus {
         #A1D1F9 50%,
         #D4E9FC 100%
         );
+    background-image: -o-linear-gradient(
+        center bottom,
+        #D3F7FD 0%,
+        #87C5FB 50%,
+        #A1D1F9 50%,
+        #D4E9FC 100%
+        );
     -webkit-animation-name: blinking;
     -webkit-animation-timing-function: ease-in-out;
     -webkit-animation-iteration-count: infinite;
@@ -504,6 +512,13 @@ input[type="text"]:focus {
         #A1D1F9 50%,
         #D4E9FC 100%
         );
+    background-image: -o-linear-gradient(
+        center bottom,
+        #D3F7FD 0%,
+        #87C5FB 50%,
+        #A1D1F9 50%,
+        #D4E9FC 100%
+        );
     border-top-color: #5a5caf;
     border-bottom-color: #52536f;
     border-left-color: #56578f;
@@ -523,6 +538,13 @@ input[type="text"]:focus {
         color-stop(1, #FFFFFF)
     );
     background-image: -moz-linear-gradient(
+        center bottom,
+        #EBEBEB 0%,
+        #ECECEC 50%,
+        #F3F3F3 50%,
+        #FFFFFF 100%
+    );
+    background-image: -o-linear-gradient(
         center bottom,
         #EBEBEB 0%,
         #ECECEC 50%,
