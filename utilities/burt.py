@@ -31,7 +31,7 @@ tool with before running burt.
 def listr(items, delim):
   dset = items.split(delim)
   vals = []
-  if items in ['None', '""', '']:
+  if items in [None, 'None', '""', '']:
     return []
   else:
     for i in dset:
