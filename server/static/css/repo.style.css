@@ -301,19 +301,21 @@ body {
                     color: #C2C2C2; }
             
             .package .info {
-                width: 80%;
-                display: none; }
+                width: 80%; }
                 
-                .package .info > .download {
+                .package .info > .version {
+                    display: none; }
+                
+                .package .info > .version > .download {
                     float: right; }
                     
-                .package .info > .item {
+                .package .info > .version > .item {
                     color: #333;
                     padding-bottom: 5px;
                     margin-bottom: 5px;
                     border-bottom: 1px solid #EEE; }
                 
-                    .package .info > .item > span {
+                    .package .info > .version > .item > span {
                         color: #000;
                         font-weight: bold; }
                     
