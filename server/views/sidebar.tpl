@@ -1,5 +1,5 @@
 <h2>BukGet Plugin</h2>
-<p><a href="http://mirror.nexua.org/BukGet/Beta/2/bukget.jar" class="buttons small">Beta 2</a></p>
+<p><a href="http://bukget.org/repo/#/package/BukGet/" class="buttons small">Download Beta</a></p>
 <br />
 <h2>BuRT</h2>
 <p>Python script to validate, generate, and edit the json definitions.  Requires PyYAML to be installed.</p>
