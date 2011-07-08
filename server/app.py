@@ -171,6 +171,10 @@ class Repository(Base):
       if not isinstance(v['checksum'], unicode): return False
       if 'branch' not in v: return False
       if not isinstance(v['branch'], unicode): return False
+      if 'warn' in v:
+        if not isinstance(v['warn'], unicode): return False
+      if 'notification' in v:
+        if not isinstance(v['notification'], unicode): return False
       if v['branch'] not in ['stable','test','dev']: return False
       for e in v['engines']:
         if 'engine' not in e: return False
