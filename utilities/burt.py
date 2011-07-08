@@ -19,10 +19,6 @@ import hashlib
 __version__ = '0.0.1-poc'
 __author__ = 'Steven McGrath'
 
-help_message = '''
-The help message goes here.
-'''
-
 _motd = '''BuRT (BukGet Repository Tool) Version %s
 Written By: %s
 
