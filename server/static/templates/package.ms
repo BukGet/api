@@ -55,10 +55,19 @@
                                 var disqus_identifier = '{$name}';
                                 var disqus_url = 'http://bukget.org/repo/#!/package/{$name}';
                                 var disqus_title = '{$name} Comments';
+                                
                                 (function() {
                                     var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
                                     dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
                                     (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                                    
+                                    DISQUS.reset({
+                                      reload: true,
+                                      config: function () {  
+                                        this.page.identifier = "{$name}";  
+                                        this.page.url = "http://bukget.org/repo/#!/package/{$name}";
+                                      }
+                                    });
                                 })();
                             </script>
                             <noscript>Please enable JavaScript to view the repository.</noscript>
