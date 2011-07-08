@@ -414,6 +414,10 @@ def route_static_files(filename):
 def baskit_page():
   return template('page_baskit')
 
+@route('/burt')
+def burt_page()::
+  return template('page_burt')
+
 @route('/baskit/download')
 def baskit_download():
   redirect('https://raw.github.com/SteveMcGrath/baskit/master/baskit.py')
