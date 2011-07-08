@@ -334,6 +334,13 @@ body {
                     padding: 3px 8px;
                     border-bottom: 1px solid #eee;
                     border-top: none; }
+                    
+            .package .comments #dsq-global-toolbar {
+                display: none; }
+                
+                
+            .package .comments .dsq-reply {
+                clear: none; }
 
 /*
     -[ $__buttons ]------------------------- */
