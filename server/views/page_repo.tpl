@@ -34,6 +34,7 @@
     
   
     <section class="package-list">
+        <noscript>Enable Javascript to view the Repository. Thank you!</noscript>
     </section>
     
     <section class="package-info">
