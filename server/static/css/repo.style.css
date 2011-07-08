@@ -15,6 +15,7 @@
                |-  $navigation
     -  $__split
      `-|-  $_table
+       |-  $_pagination
        |-  $_viewable
          `-|-  $plugin
     -  $__buttons
@@ -221,6 +222,37 @@ body {
                     margin-right: 10px;
                     color: #ccc; }
             
+    /*
+        -[ $_pagination ]---------------------------- */
+            
+        .pagination {
+            margin-top: 10px;
+            list-style: none;
+            float: left;
+            padding: 3px 0 3px 3px;
+        }
+         
+        .pagination li {
+            float: left;
+        }
+         
+        .pagination li a {
+            float: left;
+            outline: none;
+            width: 6px;
+            height: 6px;
+            line-height: 6px;
+            margin-right: 3px;
+            text-indent: -9999px;
+            background-color: #ccc;
+            -moz-border-radius: 3px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+        }
+         
+        .pagination li.on a {
+            background-color: #106FD4;
+        }
         
     /*
         -[ $_viewable ]------------------------- */
