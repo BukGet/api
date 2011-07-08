@@ -360,10 +360,6 @@ class BuRT(cmd.Cmd):
     # information and pull that.
     if ver == None and 'version' in self.yml_data:
       ver = str(self.yml_data['version'])
-    try:
-      print str(self.yml_data['version'])
-    except:
-      print 'no version :('
     
     # Now we should have a version from something, if not then throw an error,
     # otherwise we need to pull the version information from the json data
@@ -374,6 +370,8 @@ class BuRT(cmd.Cmd):
         if version['version'] == ver:
           vdata = version
           vindex = self.json_data['versions'].index(vdata)
+          if len(engines) == 0 and 'engines' in vdata:
+            engines = vdata['engines']
       if vdata == {}:
         self.json_data['versions'].append(vdata)
         vindex = -1
