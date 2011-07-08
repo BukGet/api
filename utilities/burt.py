@@ -23,8 +23,14 @@ help_message = '''
 The help message goes here.
 '''
 
-_motd = '''
-'''
+_motd = '''BuRT (BukGet Repository Tool) Version %s
+Written By: %s
+
+Please keep in mind that this tool is still in active development and may
+change at any time.  We do not promise that this application will always
+work so we recommend that you backup the files that you plan on using this
+tool with before running burt.
+''' % (__version__, __author__)
 
 def listr(items, delim):
   dset = items.split(delim)
