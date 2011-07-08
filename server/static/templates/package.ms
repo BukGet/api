@@ -53,7 +53,7 @@
                             <script type="text/javascript">
                                 var disqus_shortname = 'bukget';
                                 var disqus_identifier = '{$name}';
-                                var disqus_url = 'http://bukget.org/repo/#/package/{$name}';
+                                var disqus_url = 'http://bukget.org/repo/#!/package/{$name}';
                                 var disqus_title = '{$name} Comments';
                                 (function() {
                                     var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
