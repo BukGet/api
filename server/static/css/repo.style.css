@@ -239,19 +239,22 @@ body {
         .pagination li a {
             float: left;
             outline: none;
-            width: 6px;
-            height: 6px;
+            width: 10px;
+            height: 10px;
             line-height: 6px;
             margin-right: 3px;
             text-indent: -9999px;
-            background-color: #ccc;
-            -moz-border-radius: 3px;
-            -webkit-border-radius: 3px;
-            border-radius: 3px;
+            background: #ccc;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
         }
          
         .pagination li.on a {
-            background-color: #106FD4;
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#106FD4', endColorstr='#034C9B');
+            background: -webkit-gradient(linear, left top, left bottom, from(#106FD4), to(#034C9B));
+            background: -moz-linear-gradient(top,  #106FD4,  #034C9B);
+            background: -o-linear-gradient(top,  #106FD4,  #034C9B);
         }
         
     /*
