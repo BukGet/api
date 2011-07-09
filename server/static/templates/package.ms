@@ -49,13 +49,18 @@
                     {/foreach}
                     
                         <div class="comments">
-                            <span id="idc-container"></span>
-                            <script>
-                            var idcomments_acct = '11dd26e54d76f80c275935242b12a3b9';
-                            var idcomments_post_id = "{$name}";
-                            var idcomments_post_url = "http://bukget.org/repo/?unique={$name}";
+                            <div id="disqus_thread"></div>
+                            <script type="text/javascript">
+                                var disqus_shortname = 'bukget';
+                                var disqus_identifier = '?u={$name}';
+                                var disqus_url = 'http://bukget.org/repo/?u={$name}';
+                                var disqus_developer = 1;
+                                (function() {
+                                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                                    dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                                })();
                             </script>
-                            <script type='text/javascript' src='http://www.intensedebate.com/js/genericCommentWrapperV2.js'></script>
                             <noscript>Please enable JavaScript to view the repository.</noscript>
                         </div>
                     </div>
