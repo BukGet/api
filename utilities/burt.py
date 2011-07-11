@@ -16,20 +16,22 @@ import os
 import cmd
 import hashlib
 
-__version__ = '0.0.1-poc'
-__author__ = 'Steven McGrath'
+__version__ = '0.0.a2'
+__author__ = 'Steven McGrath, and Nijikokun'
 
-help_message = '''
-The help message goes here.
-'''
+_motd = '''BuRT (BukGet Repository Tool) Version %s
+Written By: %s
 
-_motd = '''
-'''
+Please keep in mind that this tool is still in active development and may
+change at any time.  We do not promise that this application will always
+work so we recommend that you backup the files that you plan on using this
+tool with before running burt.
+''' % (__version__, __author__)
 
 def listr(items, delim):
   dset = items.split(delim)
   vals = []
-  if items in ['None', '""']:
+  if items in [None, 'None', '""', '']:
     return []
   else:
     for i in dset:
@@ -38,7 +40,7 @@ def listr(items, delim):
 
 class BuRT(cmd.Cmd):
   prompt = 'BuRT> '
-  json_file = 'plugin.json'
+  json_file = 'package.json'
   plugin_file = None
   yml_data = {}
   json_data = {'versions': []}
@@ -50,7 +52,7 @@ class BuRT(cmd.Cmd):
     if plugin_file is not None:
       self.do_load('plugin %s' % plugin_file)
   
-  def _parse_fields(self, fields, opts, data):
+  def _parse_fields(self, fields, opts, data, accept_defaults=False):
     tmp = {}
     # Here we define the loop and the options that will be iterated through
     for item in fields:
@@ -59,8 +61,16 @@ class BuRT(cmd.Cmd):
       # item and will start with that.
       if item['yaml'] is not None:
         if item['yaml'] in self.yml_data:
-          tmp[item['json']] = self.yml_data[item['yaml']]  
-          flag = True         
+          if item['type'] == 'string':
+            tmp[item['json']] = str(self.yml_data[item['yaml']])
+            flag = True
+          elif item['type'] == 'int':
+            tmp[item['json']] = int(self.yml_data[item['yaml']])
+            flag = True
+          else:
+            tmp[item['json']] = self.yml_data[item['yaml']]
+            flag = True
+          print 'Set %s to %s from YAML' % (item['json'], tmp[item['json']])
       
       # Next we will check to see if there is any existing data in the json
       # data we have.  This will override the yaml data as it's historical
@@ -82,7 +92,8 @@ class BuRT(cmd.Cmd):
           elif item['type'] == 'int':
             tmp[item['json']] = int(val)
           else:
-            tmp[item['json']] = val
+            tmp[item['json']] = str(val)
+          print 'Set %s to %s from option' % (item['json'], tmp[item['json']])
       
       # Lastly, if no flags were set, as the user to input the information
       # manually.  Also show them what we currently have.
@@ -91,17 +102,18 @@ class BuRT(cmd.Cmd):
           hist_val = tmp[item['json']]
         else:
           hist_val = None
-        raw = raw_input('%s [%s]: ' % (item['input'], hist_val))
-        
-        if raw == '' and hist_val is not None:
-          tmp[item['json']] = hist_val
-        elif item['type'] == 'list':
-          tmp[item['json']] = listr(raw, ',')
-        elif item['type'] == 'int':
-          tmp[item['json']] = int(raw)
+        if hist_val is not None and accept_defaults:
+          print 'Using default %s: %s' % (item['json'], tmp[item['json']])
         else:
-          tmp[item['json']] = raw
-    
+          raw = raw_input('%s [%s]: ' % (item['input'], hist_val))       
+          if raw == '' and hist_val is not None:
+            tmp[item['json']] = hist_val
+          elif item['type'] == 'list':
+            tmp[item['json']] = listr(raw, ',')
+          elif item['type'] == 'int':
+            tmp[item['json']] = int(raw)
+          else:
+            tmp[item['json']] = raw
     return tmp
   
   def do_load(self, s):
@@ -213,14 +225,21 @@ class BuRT(cmd.Cmd):
 
     -s (--save)                     Will force save the file after the data
                                     has been parsed.
+    
+    -y (--yes)                      If a value has already been set,
+                                    automatically accept that value and do not
+                                    prompt.
     '''
-    opts, args = getopt.getopt(s.split(), 'a:n:m:w:c:d:s',
-                               ['name=', 'authors=', 'maint=', 
-                                'website=', 'cats=', 'desc='])
+    opts, args = getopt.getopt(s.split(), 'a:n:m:w:c:d:sy',
+                               ['name=', 'authors=', 'maintainer=', 
+                                'website=', 'categories=', 'description=', 'yes'])
     save = False
+    defaults = False
     for opt, val in opts:
       if opt in ('-s', '--save'):
         save = True
+      if opt in ('-y', '--yes'):
+        defaults = True
     
     # Here we define the loop and the options that will be iterated through
     items = [{
@@ -233,7 +252,7 @@ class BuRT(cmd.Cmd):
               'json': 'maintainer',
               'options': ('-m', '--maint'),
               'type': 'string',
-              'yaml': 'author',
+              'yaml': 'maintainer',
               'input': 'Enter Plugin Maintainer',
              },{
               'json': 'authors',
@@ -251,7 +270,7 @@ class BuRT(cmd.Cmd):
               'json': 'categories',
               'options': ('-c', '--cats'),
               'type': 'list',
-              'yaml': None,
+              'yaml': 'categories',
               'input': 'Enter Categories (Comma-Separated)'
              },{
               'json': 'description',
@@ -260,7 +279,7 @@ class BuRT(cmd.Cmd):
               'yaml': 'description',
               'input': 'Enter Description'
              }]
-    tmp = self._parse_fields(items, opts, self.json_data)
+    tmp = self._parse_fields(items, opts, self.json_data, defaults)
     for key in tmp:
       self.json_data[key] = tmp[key]
     
@@ -309,18 +328,26 @@ class BuRT(cmd.Cmd):
                                     
     -s (--save)                     Will force save the file after the data
                                     has been parsed.
+    
+    -y (--yes)                      If a value has already been set,
+                                    automatically accept that value and do not
+                                    prompt.
     '''
-    opts, args = getopt.getopt(s.split(), 'v:l:c:b:W:N:C:R:O:e:s',
+    opts, args = getopt.getopt(s.split(), 'v:l:c:b:W:N:C:R:O:e:sy',
                                ['version=', 'location=', 'checksum=', 
                                 'branch=', 'warn=', 'notify=', 'conflict=',
-                                'required=', 'optional=', 'engine=', 'save'])
+                                'required=', 'optional=', 'engine=', 'save',
+                                'yes'])
     save = False
     tmp = {}
     ver = None
+    defaults = False
     engines = []
     for opt, val in opts:
       if opt in ('-s', '--save'):
         save = True
+      if opt in ('-y', '--yes'):
+        defaults = True
       if opt in ('-v', '--version'):
         ver = val
       if opt in ('-e', '--engine'):
@@ -334,7 +361,7 @@ class BuRT(cmd.Cmd):
     # If there was no version flag set, then check the plugin for the version
     # information and pull that.
     if ver == None and 'version' in self.yml_data:
-      ver = self.yml_data['version']
+      ver = str(self.yml_data['version'])
     
     # Now we should have a version from something, if not then throw an error,
     # otherwise we need to pull the version information from the json data
@@ -345,10 +372,11 @@ class BuRT(cmd.Cmd):
         if version['version'] == ver:
           vdata = version
           vindex = self.json_data['versions'].index(vdata)
-    if vdata == {}:
-      self.json_data['versions'].append(vdata)
-      vindex = -1
-
+          if len(engines) == 0 and 'engines' in vdata:
+            engines = vdata['engines']
+      if vdata == {}:
+        self.json_data['versions'].append(vdata)
+        vindex = -1
     else:
       print 'No version specified.  Please either load a plugin file\n' +\
             ' or set a version via the version flag.'
@@ -365,7 +393,7 @@ class BuRT(cmd.Cmd):
               'json': 'location',
               'options': ('-l', '--location'),
               'type': 'string',
-              'yaml': None,
+              'yaml': 'location',
               'input': 'Enter Plugin File URL',
              },{
               'json': 'checksum',
@@ -377,13 +405,13 @@ class BuRT(cmd.Cmd):
               'json': 'branch',
               'options': ('-b', '--branch'),
               'type': 'string',
-              'yaml': None,
+              'yaml': 'branch',
               'input': 'Enter branch (dev, test, or stable)',
              },{
-              'json': 'conflict',
+              'json': 'conflicts',
               'options': ('-C', '--conflict'),
               'type': 'list',
-              'yaml': None,
+              'yaml': 'conflicts',
               'input': 'Enter Conflictions (Comma-Separated)',
              },{
               'json': 'required_dependencies',
@@ -398,7 +426,7 @@ class BuRT(cmd.Cmd):
               'yaml': 'softdepend',
               'input': 'Enter Soft Dependencies (Comma-Separated)',
              }]
-    tmp = self._parse_fields(items, opts, vdata)
+    tmp = self._parse_fields(items, opts, vdata, defaults)
     
     if len(engines) < 1:
       build_min = None
@@ -443,119 +471,144 @@ class BuRT(cmd.Cmd):
     if 'name' not in d: 
       print 'Missing name'
       flag = True
-    if not isinstance(d['name'], unicode): 
-      print 'Name is not encased in quotes...'
-      flag = True
+    else:
+      if not isinstance(d['name'], unicode): 
+        print 'Name is not encased in quotes...'
+        flag = True
     if 'authors' not in d: 
       print 'missing authors'
       flag = True
-    if not isinstance(d['authors'], list): 
-      print 'Authors is not in list form.'
-      flag = True
+    else:
+      if not isinstance(d['authors'], list): 
+        print 'Authors is not in list form.'
+        flag = True
     if 'maintainer' not in d: 
       print 'Missing maintainer.'
       flag = True
-    if not isinstance(d['maintainer'], unicode): 
-      print 'Maintainer not encased in quotes...'
-      flag = True
+    else:
+      if not isinstance(d['maintainer'], unicode): 
+        print 'Maintainer not encased in quotes...'
+        flag = True
     if 'description' not in d: 
       print 'Missing Description.'
       flag = True
-    if not isinstance(d['description'], unicode): 
-      print 'Description not encased in quotes...'
-      flag = True
+    else:
+      if not isinstance(d['description'], unicode): 
+        print 'Description not encased in quotes...'
+        flag = True
     if 'website' not in d: 
       print 'Missing website.'
       flag = True
-    if not isinstance(d['website'], unicode): 
-      print 'Website not encased in quotes...'
-      flag = True
+    else:
+      if not isinstance(d['website'], unicode): 
+        print 'Website not encased in quotes...'
+        flag = True
     if 'categories' not in d: 
       print 'Missing categories.'
       flag = True
-    if not isinstance(d['categories'], list): 
-      print 'Categories are not in array form.'
-      flag = True
+    else:
+      if not isinstance(d['categories'], list): 
+        print 'Categories are not in array form.'
+        flag = True
     if 'versions' not in d: 
       print 'Missing versions.'
       flag = True
-    if not isinstance(d['versions'], list): 
-      print 'Versions is not in array form.'
-      flag = True
-    for v in d['versions']:
-      if 'version' not in v: 
-        print 'Missing version value on a version object'
-        vstr = 'in unknown version'
+    else:
+      if not isinstance(d['versions'], list): 
+        print 'Versions is not in array form.'
         flag = True
       else:
-        vstr = 'in %s' % v['version']
-      if not isinstance(v['version'], unicode): 
-        print 'Version not unicode...'
-        flag = True
-      if 'required_dependencies' not in v: 
-        print 'Missing required_dependencies value %s' % vstr
-        flag = True
-      if not isinstance(v['required_dependencies'], list): 
-        print 'required_dependencies is not a list on %s' % vstr
-        flag = True
-      if 'optional_dependencies' not in v: 
-        print 'Missing optional_dependencies value in %s' % vstr
-        flag = True
-      if not isinstance(v['optional_dependencies'], list): 
-        print 'optional_dependencies is not a list on %s' % vstr
-        flag = True
-      if 'conflicts' not in v: 
-        print 'Missing conflicts value in %s' % vstr
-        flag = True
-      if not isinstance(v['conflicts'], list): 
-        print 'Conflicts are not in list form %s' % vstr
-        flag = True
-      if 'location' not in v: 
-        print 'Missing location value in %s' % vstr
-        flag = True
-      if not isinstance(v['location'], unicode): 
-        print 'Location not encased in quotes %s' % vstr
-        flag = True
-      if 'checksum' not in v: 
-        print 'Missing checksum value in %s' % vstr
-        flag = True
-      if not isinstance(v['checksum'], unicode): 
-        print 'Checksum not encased in quotes %s' % vstr
-        flag = True
-      if 'branch' not in v: 
-        print 'Missing branch value in %s' % vstr
-        flag = True
-      if not isinstance(v['branch'], unicode): 
-        print 'Branch not encased in quotes %s' % vstr
-        flag = True
-      if v['branch'] not in ['stable','test','dev']: 
-        print 'branch must be [stable, dev, or test] in %s' % vstr
-        flag = True
-      for e in v['engines']:
-        if 'engine' not in e: 
-          print 'Missing engine key'
-          estr = 'on unknown engine %s' % vstr
-          flag = True
-        else:
-          estr = 'on %s %s' % (e['engine'], vstr)
-        if not isinstance(e['engine'], unicode): 
-          print 'Engine not encased in quotes %s' % estr
-          flag = True
-        if 'build_min' not in e: 
-          print 'Missing build_min key %s' % estr
-          flag = True
-        if not isinstance(e['build_min'], int): 
-          print 'build_min not integer %s' % estr
-          flag = True
-        if 'build_max' not in e: 
-          print 'Missing build_max key in %s' % estr
-          flag = True
-        if not isinstance(e['build_max'], int): 
-          print 'build_max not integer %s' % estr
-          flag = True
-        if not e['build_min'] <= e['build_max']: 
-          print 'build_min is not less than build_max on %s' % estr
-          flag = True
+        for v in d['versions']:
+          if 'version' not in v: 
+            print 'Missing version value on a version object'
+            vstr = 'in unknown version'
+            flag = True
+          else:
+            vstr = 'in %s' % v['version']
+          if not isinstance(v['version'], unicode): 
+            print 'Version not unicode %s' % vstr
+            flag = True
+          if 'required_dependencies' not in v: 
+            print 'Missing required_dependencies value %s' % vstr
+            flag = True
+          else:
+            if not isinstance(v['required_dependencies'], list): 
+              print 'required_dependencies is not a list %s' % vstr
+              flag = True
+          if 'optional_dependencies' not in v: 
+            print 'Missing optional_dependencies value %s' % vstr
+            flag = True
+          else:
+            if not isinstance(v['optional_dependencies'], list): 
+              print 'optional_dependencies is not a list %s' % vstr
+              flag = True
+          if 'conflicts' not in v: 
+            print 'Missing conflicts value %s' % vstr
+            flag = True
+          else:
+            if not isinstance(v['conflicts'], list): 
+              print 'Conflicts are not in list form %s' % vstr
+              flag = True
+          if 'location' not in v: 
+            print 'Missing location value %s' % vstr
+            flag = True
+          else:
+            if not isinstance(v['location'], unicode): 
+              print 'Location not encased in quotes %s' % vstr
+              flag = True
+          if 'checksum' not in v: 
+            print 'Missing checksum value %s' % vstr
+            flag = True
+          else:
+            if not isinstance(v['checksum'], unicode): 
+              print 'Checksum not encased in quotes %s' % vstr
+              flag = True
+          if 'branch' not in v: 
+            print 'Missing branch value %s' % vstr
+            flag = True
+          else:
+            if not isinstance(v['branch'], unicode): 
+              print 'Branch not encased in quotes %s' % vstr
+              flag = True
+            if v['branch'] not in ['stable','test','dev']: 
+              print 'branch must be [stable, dev, or test] %s' % vstr
+              flag = True
+          if 'engines' not in v:
+            print 'Missing engine value %s' % vstr
+            flag = True
+          else:
+            if not isinstance(v['engines'], list):
+              print 'engines is not a list %s' % vstr
+              flag = True
+            else:
+              for e in v['engines']:
+                if 'engine' not in e: 
+                  print 'Missing engine key'
+                  estr = 'on unknown engine %s' % vstr
+                  flag = True
+                else:
+                  estr = 'on %s %s' % (e['engine'], vstr)
+                  if not isinstance(e['engine'], unicode): 
+                    print 'Engine not encased in quotes %s' % estr
+                    flag = True
+                if 'build_min' not in e: 
+                  print 'Missing build_min key %s' % estr
+                  flag = True
+                else:
+                  if not isinstance(e['build_min'], int): 
+                    print 'build_min not integer %s' % estr
+                    flag = True
+                if 'build_max' not in e: 
+                  print 'Missing build_max key %s' % estr
+                  flag = True
+                else:
+                  if not isinstance(e['build_max'], int): 
+                    print 'build_max not integer %s' % estr
+                    flag = True
+                  else:
+                    if not e['build_min'] <= e['build_max']: 
+                      print 'build_min is not less than build_max %s' % estr
+                      flag = True
     if flag:
       print 'ERROR: There are errors in your json dictionary.'
     return not flag
