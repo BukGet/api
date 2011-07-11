@@ -30,20 +30,40 @@
                         {/foreach}
                         </ul>
                     </div>
+                    
+                    <div class="info">
                     {foreach $versions as $i => $v}
-                    <div class="info v{$v.version_u} grid_10">{$required=$v.required_dependencies}{$optional=$v.optional_dependencies}{$engines=$v.engines}
-                        <a href="{$v.url}" class="buttons cancel download">Download {$v.version}</a>
-                        
-                        <div class="item"><span>Works With:</span> {foreach $engines as $i => $e}{$e.name} ({$e.min} - {$e.max}){if $e@last}{else}, {/if}{/foreach}</div>
-                        <div class="item"><span>Branch:</span> {$v.branch}</div>
-                        <div class="item"><span>Checksum:</span> {$v.checksum}</div>
-                        <div class="item"><span>Required Dependencies:</span> {foreach $required as $i => $r}{$r}{if $r@last}{else}, {/if}{foreachelse}None{/foreach}</div>
-                        <div class="item"><span>Optional:</span> {foreach $optional as $i => $o}{$o}{if $o@last}{else}, {/if}{foreachelse}None{/foreach}</div>
-                    </div>
+                        <div class="v{$v.version_u} version">{$required=$v.required_dependencies}{$optional=$v.optional_dependencies}{$engines=$v.engines}
+                            <a href="{$v.url}" class="buttons cancel download">Download {$v.version}</a>
+                            
+                            <div class="item"><span>Works With:</span> {foreach $engines as $i => $e}{$e.name} ({$e.min} - {$e.max}){if $e@last}{else}, {/if}{/foreach}</div>
+                            <div class="item"><span>Branch:</span> {$v.branch}</div>
+                            <div class="item"><span>Checksum:</span> {$v.checksum}</div>
+                            <div class="item"><span>Required Dependencies:</span> {foreach $required as $i => $r}{$r}{if $r@last}{else}, {/if}{foreachelse}None{/foreach}</div>
+                            <div class="item"><span>Optional:</span> {foreach $optional as $i => $o}{$o}{if $o@last}{else}, {/if}{foreachelse}None{/foreach}</div>
+                        </div>
                     {foreachelse}
-                    <div class="info show grid_10">
-                        Nothing found.
-                    </div>
+                        <div class="info show grid_10">
+                            Nothing found.
+                        </div>
                     {/foreach}
+                    
+                        <div class="comments">
+                            <div id="disqus_thread"></div>
+                            <script type="text/javascript">
+                                var disqus_shortname = 'bukget';
+                                var disqus_identifier = '?u={$name}';
+                                var disqus_url = 'http://bukget.org/repo/?u={$name}';
+                                var disqus_developer = 1;
+                                (function() {
+                                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                                    dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                                })();
+                            </script>
+                            <noscript>Please enable JavaScript to view the repository.</noscript>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
                 </div>
             </div>

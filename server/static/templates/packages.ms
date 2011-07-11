@@ -29,4 +29,12 @@
                     </div>
                     {/foreach}
                 </div>
+                
+                {if $chunkLength < 0 || $chunkLength eq 0}{else}
+                <ol class="pagination">
+                    {foreach $chunks as $i => $chunk}
+                    <li{if $i eq $page} class="on"{/if}><a href="{if $i eq 0}{$path}{else}{if $path eq "#/"}{$path}{else}{$path}/{/if}page/{$i}{/if}" title="Page {$i}">Page {$i}</a></li>
+                    {/foreach}
+                </ol>
+                {/if}
             </div>

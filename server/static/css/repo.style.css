@@ -67,7 +67,7 @@ body {
         -[ $_top ]------------------------------ */
 
     .top {
-        background: #E7E6D9 url('../images/bg.gif');
+        background: #EEE url('../images/bg.gif');
         padding-bottom: 5px;
         box-shadow: inset 0px 1px 3px rgba(0,0,0,0.2);
         -moz-box-shadow: inset 0px 1px 3px rgba(0,0,0,0.2);
@@ -239,19 +239,28 @@ body {
         .pagination li a {
             float: left;
             outline: none;
-            width: 6px;
-            height: 6px;
+            width: 10px;
+            height: 10px;
             line-height: 6px;
             margin-right: 3px;
             text-indent: -9999px;
-            background-color: #ccc;
-            -moz-border-radius: 3px;
-            -webkit-border-radius: 3px;
-            border-radius: 3px;
+            background: #eee url('../images/bg.gif');
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+            -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+            -moz-box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
         }
          
         .pagination li.on a {
-            background-color: #106FD4;
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#106FD4', endColorstr='#034C9B');
+            background: -webkit-gradient(linear, left top, left bottom, from(#106FD4), to(#034C9B));
+            background: -moz-linear-gradient(top,  #106FD4,  #034C9B);
+            background: -o-linear-gradient(top,  #106FD4,  #034C9B);
+            box-shadow: none;
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
         }
         
     /*
@@ -301,19 +310,21 @@ body {
                     color: #C2C2C2; }
             
             .package .info {
-                width: 80%;
-                display: none; }
+                width: 80%; }
                 
-                .package .info > .download {
+                .package .info > .version {
+                    display: none; }
+                
+                .package .info > .version > .download {
                     float: right; }
                     
-                .package .info > .item {
+                .package .info > .version > .item {
                     color: #333;
                     padding-bottom: 5px;
                     margin-bottom: 5px;
                     border-bottom: 1px solid #EEE; }
                 
-                    .package .info > .item > span {
+                    .package .info > .version > .item > span {
                         color: #000;
                         font-weight: bold; }
                     
@@ -332,6 +343,12 @@ body {
                     padding: 3px 8px;
                     border-bottom: 1px solid #eee;
                     border-top: none; }
+                    
+            .package .comments #dsq-global-toolbar {
+                display: none; }
+
+            .package .comments .dsq-reply {
+                clear: none; }
 
 /*
     -[ $__buttons ]------------------------- */
