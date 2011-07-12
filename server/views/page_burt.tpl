@@ -13,3 +13,7 @@
 <h3>Getting Started</h3>
 
 <h4>Installation</h4>
+
+<h4>Usage</h4>
+
+%rebase layout title='BuRT'
