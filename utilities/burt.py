@@ -16,8 +16,8 @@ import os
 import cmd
 import hashlib
 
-__version__ = '0.0.1-poc'
-__author__ = 'Steven McGrath'
+__version__ = '0.0.a2'
+__author__ = 'Steven McGrath, and Nijikokun'
 
 _motd = '''BuRT (BukGet Repository Tool) Version %s
 Written By: %s
@@ -40,7 +40,7 @@ def listr(items, delim):
 
 class BuRT(cmd.Cmd):
   prompt = 'BuRT> '
-  json_file = 'plugin.json'
+  json_file = 'package.json'
   plugin_file = None
   yml_data = {}
   json_data = {'versions': []}
@@ -231,8 +231,8 @@ class BuRT(cmd.Cmd):
                                     prompt.
     '''
     opts, args = getopt.getopt(s.split(), 'a:n:m:w:c:d:sy',
-                               ['name=', 'authors=', 'maint=', 
-                                'website=', 'cats=', 'desc=', 'yes'])
+                               ['name=', 'authors=', 'maintainer=', 
+                                'website=', 'categories=', 'description=', 'yes'])
     save = False
     defaults = False
     for opt, val in opts:
@@ -252,7 +252,7 @@ class BuRT(cmd.Cmd):
               'json': 'maintainer',
               'options': ('-m', '--maint'),
               'type': 'string',
-              'yaml': 'author',
+              'yaml': 'maintainer',
               'input': 'Enter Plugin Maintainer',
              },{
               'json': 'authors',
@@ -270,7 +270,7 @@ class BuRT(cmd.Cmd):
               'json': 'categories',
               'options': ('-c', '--cats'),
               'type': 'list',
-              'yaml': None,
+              'yaml': 'categories',
               'input': 'Enter Categories (Comma-Separated)'
              },{
               'json': 'description',
@@ -393,7 +393,7 @@ class BuRT(cmd.Cmd):
               'json': 'location',
               'options': ('-l', '--location'),
               'type': 'string',
-              'yaml': None,
+              'yaml': 'location',
               'input': 'Enter Plugin File URL',
              },{
               'json': 'checksum',
@@ -405,13 +405,13 @@ class BuRT(cmd.Cmd):
               'json': 'branch',
               'options': ('-b', '--branch'),
               'type': 'string',
-              'yaml': None,
+              'yaml': 'branch',
               'input': 'Enter branch (dev, test, or stable)',
              },{
               'json': 'conflicts',
               'options': ('-C', '--conflict'),
               'type': 'list',
-              'yaml': None,
+              'yaml': 'conflicts',
               'input': 'Enter Conflictions (Comma-Separated)',
              },{
               'json': 'required_dependencies',
