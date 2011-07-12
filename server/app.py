@@ -415,7 +415,7 @@ def baskit_page():
   return template('page_baskit')
 
 @route('/burt')
-def burt_page()::
+def burt_page():
   return template('page_burt')
 
 @route('/baskit/download')
