@@ -48,7 +48,7 @@ allowed_hosts = config.get('Settings','allowed_hosts').split(',')
 LOG_FORMAT = logging.Formatter('%(name)s: %(levelname)s %(message)s')
 SYSLOG = SysLogHandler(address='/dev/log')
 SYSLOG.setFormatter(LOG_FORMAT)
-log = logging.getLogger('bukget')
+log = logging.getLogger('bukget_%s' % ENV)
 log.setLevel(logging.INFO)
 log.addHandler(SYSLOG)
 
@@ -380,7 +380,7 @@ def display_logs():
   logfile = open(config.get('Settings', 'log_file'), 'r')
   logdata = logfile.read()
   logfile.close()
-  return template('page_logs', logdata=logdata)
+  return template('page_logs', logdata=logdata, ENV=ENV)
 
 @route('/code')
 def github_redirect():
