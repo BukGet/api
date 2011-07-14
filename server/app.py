@@ -68,7 +68,8 @@ class BukkitDB(object):
     headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': len(payload),
-      'X-Requested-With': 'XMLHttpRequest',
+      'X-I-Am-A-Bot': 'bukget.org',
+      'User-Agent': 'bukgetRetriever/woof-woof',
     }
     
     http = httplib.HTTPConnection(self.host)
@@ -78,12 +79,11 @@ class BukkitDB(object):
   
   def get_data(self):
     query_data = {
-     'j': 685763,
      'title': '',
      'tag': 'all',
      'author': '',
      'inc_submissions': 'false',
-     'pageno': 1
+     'pageno': -1 # retrieve all data when lukegb adds pagination
     }
     form_data = '='
     db = self._post('/data.php?%s' % urllib.urlencode(query_data), form_data)
