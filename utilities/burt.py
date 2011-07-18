@@ -136,9 +136,9 @@ class BuRT(cmd.Cmd):
       except:
         print 'Could not read file or file is not properly formatted json.'
       else:
-        if self.do_validate(data=jdata):
-          self.json_data = jdata
-          print 'Json dictionary loaded.'
+        self.do_validate(data=jdata):
+        self.json_data = jdata
+        print 'Json dictionary loaded.'
     if ftype == 'plugin':
       if not os.path.exists(fname):
         print 'Filename does not exist!'
