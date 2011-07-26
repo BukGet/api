@@ -18,8 +18,8 @@ activate_this = '/srv/sites/%s/bin/activate_this.py' % ENV
 import routes
 
 if __name__ == '__main__':
-  if ENV in ('dev', 'dev2'):
-    debug(True)
-  run(server='twisted', 
-    host=config.get('Settings', 'address'), 
-    port=config.getint('Settings', 'port'))
+    if ENV in ('dev', 'dev2'):
+        debug(True)
+    run(server='twisted',
+        host=config.get('Settings', 'address'),
+        port=config.getint('Settings', 'port'))
