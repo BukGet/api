@@ -16,7 +16,9 @@ from ConfigParser import ConfigParser
 
 #### CONFIGURATION AND PRE-PROCESSING
 # The script has to run from the location on disk that it lives.
-os.chdir(os.path.dirname(__file__))
+dirname = os.path.dirname(__file__)
+if dirname:
+    os.chdir(os.path.dirname(__file__))
 
 # Next we need to load the configuration file into memory.
 config = ConfigParser()
