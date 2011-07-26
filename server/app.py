@@ -8,7 +8,9 @@ import datetime
 from bottle import run, debug
 
 # The script has to run from the location on disk that it lives.
-os.chdir(os.path.dirname(__file__))
+dirname = os.path.dirname(__file__)
+if dirname:
+    os.chdir(os.path.dirname(__file__))
 
 from util import config, ENV
 
