@@ -133,7 +133,7 @@ class BuRT(cmd.Cmd):
             except:
                 print 'Could not read file or file is not properly formatted json.'
             else:
-                self.do_validate(data=jdata):
+                self.do_validate(data=jdata)
                 self.json_data = jdata
                 print 'Json dictionary loaded.'
         if ftype == 'plugin':
@@ -381,8 +381,8 @@ class BuRT(cmd.Cmd):
                 self.json_data['versions'].append(vdata)
                 vindex = -1
         else:
-            print 'No version specified.  Please either load a plugin file\n'
-                  ' or set a version via the version flag.'
+            print('No version specified.  Please either load a plugin file\n'
+                  ' or set a version via the version flag.')
             return
 
         # New we need to setup the item dictionary list for the parser.
