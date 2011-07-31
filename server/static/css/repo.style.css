@@ -275,6 +275,17 @@ body {
         }
         
             .package .header {
+                background: rgb(255,255,255);
+                background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(225,225,226,1) 100%);
+                background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(225,225,226,1)));
+                background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(225,225,226,1) 100%);
+                background: -o-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(225,225,226,1) 100%);
+                background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(225,225,226,1) 100%);
+                filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e1e1e2',GradientType=0 );
+                background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(225,225,226,1) 100%);
+                box-shadow: inset 0 -1px rgba(255, 255, 255, 0.8);
+               -moz-box-shadow: inset 0 -1px rgba(255, 255, 255, 0.8);
+               -webkit-box-shadow: inset 0 -1px rgba(255, 255, 255, 0.8);
                 padding: 15px 15px;
                 color: #000;
                 text-shadow: 0 1px 0 white; }
@@ -290,10 +301,14 @@ body {
                     margin-left: 8px; }
                     
                 .package .header .info {
+                    color: #999;
                     width: 20%;
                     text-align: right;
                     display: inline;
                     float: right; }
+                    
+                .package .header strong {
+                    font-weight: bold; }
         
             .package .meta { 
                 width: 922px;
