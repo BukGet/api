@@ -320,11 +320,14 @@ body {
                 padding: 8px;
                 background: #E7E6D9 url('../images/bg.gif');
                 color: #336092;
+                height: 20px;
                 box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
                -moz-box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
                -webkit-box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
                 border: 1px solid #bbb;
                 text-shadow: 0 1px 0 white;
+                font-size: 20px;
+                font-family: Consolas, Monaco, Courier New;
                 font-weight: bold;
                 text-align: center; }
             
