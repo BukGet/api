@@ -290,12 +290,13 @@ body {
                 margin-bottom: 15px;
                 padding: 15px 15px;
                 color: #000;
-                text-shadow: 0 1px 0 white; }
+                text-shadow: 0 1px rgba(255, 255, 255, 0.5); }
                 
                 .package .header h1 {
                     margin: 0px 0px 2px;
-                    color: #000;
-                    font-size: 20pt; }
+                    color: #336092;
+                    font-size: 20pt;
+                    font-weight: bold; }
                     
                 .package .header .desc {
                     color: #777C81;
@@ -303,7 +304,8 @@ body {
                     margin-left: 8px; }
                     
                 .package .header .info {
-                    color: #999;
+                    color: #8A9399;
+                    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
                     width: 20%;
                     text-align: right;
                     display: inline;
@@ -315,11 +317,17 @@ body {
             .package .meta { 
                 width: 922px;
                 margin: 0 auto 20px;
-                padding: 8px;
+                padding: 8px; 
                 background: #E7E6D9 url('../images/bg.gif');
-                color: #333;
-                box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+                color: #336092;
+                height: 20px;
+                box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
+               -moz-box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
+               -webkit-box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid #bbb;
                 text-shadow: 0 1px 0 white;
+                font-size: 20px;
+                font-family: Consolas, Monaco, Courier New;
                 font-weight: bold;
                 text-align: center; }
             
