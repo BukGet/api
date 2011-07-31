@@ -48,7 +48,7 @@ allowed_hosts = config.get('Settings','allowed_hosts').split(',')
 LOG_FORMAT = logging.Formatter('%(name)s: %(levelname)s %(message)s')
 SYSLOG = SysLogHandler(address='/dev/log')
 SYSLOG.setFormatter(LOG_FORMAT)
-log = logging.getLogger('bukget')
+log = logging.getLogger('bukget_%s' % ENV)
 log.setLevel(logging.INFO)
 log.addHandler(SYSLOG)
 
@@ -68,7 +68,8 @@ class BukkitDB(object):
     headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': len(payload),
-      'X-Requested-With': 'XMLHttpRequest',
+      'X-I-Am-A-Bot': 'bukget.org',
+      'User-Agent': 'bukgetRetriever/woof-woof',
     }
     
     http = httplib.HTTPConnection(self.host)
@@ -78,12 +79,11 @@ class BukkitDB(object):
   
   def get_data(self):
     query_data = {
-     'j': 685763,
      'title': '',
      'tag': 'all',
      'author': '',
      'inc_submissions': 'false',
-     'pageno': 1
+     'pageno': -1 # retrieve all data when lukegb adds pagination
     }
     form_data = '='
     db = self._post('/data.php?%s' % urllib.urlencode(query_data), form_data)
@@ -380,7 +380,7 @@ def display_logs():
   logfile = open(config.get('Settings', 'log_file'), 'r')
   logdata = logfile.read()
   logfile.close()
-  return template('page_logs', logdata=logdata)
+  return template('page_logs', logdata=logdata, ENV=ENV)
 
 @route('/code')
 def github_redirect():
@@ -413,6 +413,10 @@ def route_static_files(filename):
 @route('/baskit')
 def baskit_page():
   return template('page_baskit')
+
+@route('/burt')
+def burt_page():
+  return template('page_burt')
 
 @route('/baskit/download')
 def baskit_download():

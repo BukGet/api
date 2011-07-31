@@ -136,9 +136,9 @@ class BuRT(cmd.Cmd):
       except:
         print 'Could not read file or file is not properly formatted json.'
       else:
-        if self.do_validate(data=jdata):
-          self.json_data = jdata
-          print 'Json dictionary loaded.'
+        self.do_validate(data=jdata):
+        self.json_data = jdata
+        print 'Json dictionary loaded.'
     if ftype == 'plugin':
       if not os.path.exists(fname):
         print 'Filename does not exist!'
@@ -207,16 +207,16 @@ class BuRT(cmd.Cmd):
     -a (--authors)  [COMMA,SEP,LST] A Comma-separated list of the names of the
                                     plugin authors.
 
-    -m (--maint)    [MAINTAINER]    The plugin maintainer.  This persion
+    -m (--maintainer) [MAINTAINER]  The plugin maintainer.  This persion
                                     typically matches the originating poster
                                     for the plugin thread on the bukkit
                                     forums.
 
     -w (--website)  [URL]           URL pointing to the plugin's webpage.
     
-    -d (--desc)     [DESCRIPTION]   
+    -d (--description) [DESCRIPTION]   
 
-    -c (--cats)     [LIST,OF,CATS]  Comma-separated list of categories that
+    -c (--categories) [LIST,OF,CATS]Comma-separated list of categories that
                                     the plugin is a member of.  Please do not
                                     use complex categories (i.e. ADMN/FUN) but
                                     instead seperate each category into the
@@ -232,7 +232,8 @@ class BuRT(cmd.Cmd):
     '''
     opts, args = getopt.getopt(s.split(), 'a:n:m:w:c:d:sy',
                                ['name=', 'authors=', 'maintainer=', 
-                                'website=', 'categories=', 'description=', 'yes'])
+                                'website=', 'categories=', 'description=', 
+                                'yes'])
     save = False
     defaults = False
     for opt, val in opts:
@@ -250,7 +251,7 @@ class BuRT(cmd.Cmd):
               'input': 'Enter Plugin Name (no spaces)'
              },{
               'json': 'maintainer',
-              'options': ('-m', '--maint'),
+              'options': ('-m', '--maintainer'),
               'type': 'string',
               'yaml': 'maintainer',
               'input': 'Enter Plugin Maintainer',
@@ -268,13 +269,13 @@ class BuRT(cmd.Cmd):
               'input': 'Enter Website Address',
              },{
               'json': 'categories',
-              'options': ('-c', '--cats'),
+              'options': ('-c', '--categories'),
               'type': 'list',
               'yaml': 'categories',
               'input': 'Enter Categories (Comma-Separated)'
              },{
               'json': 'description',
-              'options': ('-d', '--desc'),
+              'options': ('-d', '--description'),
               'type': 'string',
               'yaml': 'description',
               'input': 'Enter Description'
