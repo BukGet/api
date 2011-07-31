@@ -1,6 +1,6 @@
             <div class="wrapper">
                 <div class="side-bar">
-                    <input type="search" results="5" class="s" placeholder="Search.." class="rounded-three">
+                    <input type="text" results="5" class="search rounded-five" placeholder="Search.." />
                 </div>
                 
                 <div class="pack-list">
