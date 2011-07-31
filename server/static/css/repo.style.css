@@ -317,7 +317,7 @@ body {
             .package .meta { 
                 width: 922px;
                 margin: 0 auto 20px;
-                padding: 8px;
+                padding: 8px; 
                 background: #E7E6D9 url('../images/bg.gif');
                 color: #336092;
                 height: 20px;
