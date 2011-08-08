@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # encoding: utf-8
 """
 burt.py
@@ -16,7 +15,7 @@ import os
 import cmd
 import hashlib
 
-__version__ = '0.0.a2'
+__version__ = '0.0.a3'
 __author__ = 'Steven McGrath, and Nijikokun'
 
 _motd = '''BuRT (BukGet Repository Tool) Version %s
