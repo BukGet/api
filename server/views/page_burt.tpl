@@ -12,8 +12,27 @@
 
 <h3>Getting Started</h3>
 
+<p>
+    First you need to download & install the latest version of BuRT.
+</p>
+
 <h4>Installation</h4>
 
+<h5>Linux</h5>
+<p>
+    Download <a href="https://raw.github.com/SteveMcGrath/bukget/master/utilities/burt.py">burt.py</a> to it's own folder. After downloading, double click to open.
+</p>
+
+<h5>Windows</h5>
+<p>
+    Download and Extract <a href="http://mirror.nexua.org/BuRT/latest/burt.zip">burt.zip</a> to it's own folder. 
+    Double click <code>burt.exe</code> and follow the section below.
+</p>
+
 <h4>Usage</h4>
+
+<p>
+    Coming soon...
+</p>
 
 %rebase layout title='BuRT'
