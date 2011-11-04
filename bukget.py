@@ -22,7 +22,7 @@ from BeautifulSoup import BeautifulSoup as bsoup
 from urllib import urlopen
 from zipfile import ZipFile
 from StringIO import StringIO
-from bottle import (run, debug, template, request, abort, redirect, 
+from bottle import (run, debug, template, request, response, abort, redirect, 
                     static_file, Bottle)
 from ConfigParser import ConfigParser
 import datetime
@@ -339,12 +339,12 @@ def update_json():
 
 @app.route('/repo.json')
 def raw_json():
-    response.set_header('Content-Type', 'application/json')
+    response.headers['Content-Type'] = 'application/json'
     return json.dumps(jdict, sort_keys=True, indent=4)
 
 @app.route('/api/plugins')
 def plugin_list():
-    response.set_header('Content-Type', 'application/json')
+    response.headers['Content-Type'] = 'application/json'
     items = []
     for item in jdict:
         items.append(item['name'])
@@ -352,7 +352,7 @@ def plugin_list():
 
 @app.route('/api/plugin/:name')
 def plugin_info(name):
-    response.set_header('Content-Type', 'application/json')
+    response.headers['Content-Type'] = 'application/json'
     for item in jdict:
         if item['name'] == name:
             return json.dumps(item, sort_keys=True, indent=4)
