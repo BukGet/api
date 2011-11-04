@@ -348,7 +348,7 @@ def plugin_list():
     items = []
     for item in jdict:
         items.append(item['name'])
-    return json.dumps(items, sort_keys=True, indent=4)
+    return json.dumps(sorted(items), sort_keys=True, indent=4)
 
 @app.route('/api/plugin/:name')
 def plugin_info(name):
