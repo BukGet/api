@@ -359,7 +359,7 @@ def plugin_info(name):
             return json.dumps(item, sort_keys=True, indent=4)
     return ''
 
-@app.route('/ai/categories')
+@app.route('/api/categories')
 def cat_list():
     response.headers['Content-Type'] = 'application/json'
     cats = []
@@ -367,19 +367,21 @@ def cat_list():
         for cat in item['categories']:
             if cat not in cats:
                 cats.append(cat)
-    return json.dumps(cats, sort_keys=True, indent=4)
+    return json.dumps(sorted(cats), sort_keys=True, indent=4)
 
 @app.route('/api/category/:name')
 def cat_info(name):
+    response.headers['Content-Type'] = 'application/json'
     cat_name = name.replace('_', ' ')
     items = []
     for item in jdict:
         if cat_name in item['categories']:
             items.append(item['name'])
-    return json.dumps(items, sort_keys=True, indent=4)
+    return json.dumps(sorted(items), sort_keys=True, indent=4)
 
 @app.route('/api/search', method='POST')
 def api_search():
+    response.headers['Content-Type'] = 'application/json'
     field_name = request.forms.get('field_name')
     action = request.forms.get('action')
     value = request.forms.get('action')
