@@ -29,6 +29,7 @@ import datetime
 import yaml
 import json
 import time
+import re
 
 app = Bottle()
 jdict = []
@@ -337,7 +338,7 @@ def update_json():
             speedy=config.getboolean('Settings', 'speed_load'))
         update()
 
-@app.route('/repo.json')
+@app.route('/api/json')
 def raw_json():
     response.headers['Content-Type'] = 'application/json'
     return json.dumps(jdict, sort_keys=True, indent=4)
@@ -357,6 +358,77 @@ def plugin_info(name):
         if item['name'] == name:
             return json.dumps(item, sort_keys=True, indent=4)
     return ''
+
+@app.route('/ai/categories')
+def cat_list():
+    response.headers['Content-Type'] = 'application/json'
+    cats = []
+    for item in jdict:
+        for cat in item['categories']:
+            if cat not in cats:
+                cats.append(cat)
+    return json.dumps(cats, sort_keys=True, indent=4)
+
+@app.route('/api/category/:name')
+def cat_info(name):
+    cat_name = name.replace('_', ' ')
+    items = []
+    for item in jdict:
+        if cat_name in item['categories']:
+            items.append(item['name'])
+    return json.dumps(items, sort_keys=True, indent=4)
+
+@app.route('/api/search', method='POST')
+def api_search():
+    field_name = request.forms.get('field_name')
+    action = request.forms.get('action')
+    value = request.forms.get('action')
+    
+    if field_name[:1] == 'v_':
+        in_versions = True
+        field_name = field_name[2:]
+    else:
+        in_versions = False
+    
+    items = []
+    for item in jdict:
+        match = False
+        if in_versions:
+            for version in item['versions']:
+                match = seval(version, field_name, action, value)
+        else:
+            match = seval(item, field_name, action, value)
+        if match:
+            items.append(item)
+    return json.dumps(items, sort_keys=True, indent=4)
+
+def seval(item, name, action, value):
+    if name in item:
+        try:
+            if action == '=':
+                if value == item[name]:
+                    return True
+            if action == '<':
+                if value < item[name]:
+                    return True
+            if action == '<=':
+                if value <= item[name]:
+                    return True
+            if action == '>':
+                if value > item[name]:
+                    return True
+            if action == '>=':
+                if value >= item[name]:
+                    return True
+            if action == 'in':
+                if value in item[name]:
+                    return True
+            if action == 'like':
+                if len(re.findall(value, item[name])) > 0:
+                    return True
+        except:
+            return False
+    return False
 
 if __name__ == '__main__':
     reload_config()
