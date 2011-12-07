@@ -1,16 +1,24 @@
 #!/usr/bin/env python
 import os
+from ConfigParser import ConfigParser
 
 #### CONFIGURATION AND PRE-PROCESSING
 # The script has to run from the location on disk that it lives.
-#os.chdir(os.path.dirname(__file__))
+os.chdir(os.path.dirname(__file__))
+
+config = ConfigParser()
+
+def reload_config():
+    config.read('bukget.ini')
+
+reload_config()
 
 # Activate the virtualenv
-#activate_this = '../bin/activate_this.py' % ENV
-#execfile(activate_this, dict(__file__=activate_this))
+if config.getboolean('Settings', 'virtual_env'):
+    activate_this = '../bin/activate_this.py'
+    execfile(activate_this, dict(__file__=activate_this))
 
-# Now we can load in whatever libaries we need as we are not inside the
-# virtualenv.
+
 from sqlalchemy import (Table, Column, Integer, String, DateTime, Date, 
                         ForeignKey, Text, Boolean, MetaData, 
                         and_, desc)
@@ -33,9 +41,9 @@ import re
 
 app = Bottle()
 jdict = []
-config = ConfigParser()
+meta = {}
 
-sql_string = 'sqlite:///database.db'
+sql_string = config.get('Settings', 'db_string')
 engine = create_engine(sql_string)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
@@ -56,7 +64,7 @@ class Plugin(Base):
         self.update(authors=authors, categories=categories, status=status)
     
     def _list_parser(self, slist):
-        if isinstance(slist, unicode):
+        if isinstance(slist, unicode) or isinstance(slist, str):
             data = slist.split(',')
         else:
             data = slist
@@ -107,7 +115,7 @@ class Version(Base):
         self.plugin_id = plugin_id
     
     def _list_parser(self, slist):
-        if isinstance(slist, unicode):
+        if isinstance(slist, unicode) or isinstance(slist, str):
             data = slist.split(',')
         else:
             data = slist
@@ -126,8 +134,47 @@ class Version(Base):
             return self._list_parser(self.hard_dependencies)
 Version.metadata.create_all(engine)
 
+class Meta(Base):
+    __tablename__ = 'metadata'
+    id = Column(Integer(8), primary_key=True)
+    date = Column(DateTime)
+    time = Column(Integer(8))
+    start_time = None
+    
+    def __init__(self):
+        self.start_time = datetime.datetime.now()
+    
+    def finish(self):
+        self.date = datetime.datetime.now()
+        self.time = (self.date - self.start_time).seconds
+        
+Meta.metadata.create_all(engine)
+
+class History(Base):
+    __tablename__ = 'history'
+    id = Column(Integer(8), primary_key=True)
+    meta_id = Column(Integer(8), ForeignKey('metadata.id'))
+    plugin_name = Column(Text)
+    version_name = Column(Text)
+    meta = relationship('Meta', backref='history')
+    
+    def __init__(self, meta_id, plugin, version):
+        self.meta_id = meta_id
+        self.plugin_name = plugin
+        self.version_name = version
+History.metadata.create_all(engine)
+
 def get(delay=2, host='http://dev.bukkit.org', debug=False, speedy=False):
+    start = datetime.datetime.now()
     s = Session()
+    
+    # Here we instantiate and add the metadata row to the database.  We will
+    # be using this for historical reasons and will need the id for the
+    # history rows.
+    meta = Meta()
+    s.add(meta)
+    s.commit()
+    
     url = '%s/server-mods' % host
     plugins = []
     
@@ -277,7 +324,13 @@ def get(delay=2, host='http://dev.bukkit.org', debug=False, speedy=False):
                     version = Version(version_name, version_date,
                                       dl_link, vlist, fname, md5sum,
                                       soft_deps, hard_deps, plugin.id)
+                    
+                    # Next we create the history object so that we can track
+                    # the changes...
+                    history = History(meta.id, plugin.name, version_name)
+                    
                     s.add(version)
+                    s.add(history)
                     s.commit()
         next = page.findAll(attrs={'class': 'listing-pagination-pages-next'})
         if count == 0 and speedy:
@@ -288,9 +341,15 @@ def get(delay=2, host='http://dev.bukkit.org', debug=False, speedy=False):
             time.sleep(delay)
         else:
             phase1 = False
+            
+    # Lastly, we will update the meta object to get the time it took to run
+    # the generation and then merge the update.
+    meta.finish()
+    s.merge(meta)
+    s.commit()
     s.close()
 
-def dump(debug=False):
+def jdata_dump(debug=False):
     s = Session()
     plugins = s.query(Plugin).all()
     jdata = []
@@ -303,7 +362,7 @@ def dump(debug=False):
                 'date': int(time.mktime(version.date.timetuple())),
                 'filename': version.filename,
                 'md5': version.md5,
-                'game_builds': [int(i) for i in version.get('cb_versions')],
+                'game_builds': version.get('cb_versions'),
                 'soft_dependencies': version.get('soft_dependencies'),
                 'hard_dependencies': version.get('hard_dependencies')
             })
@@ -315,11 +374,38 @@ def dump(debug=False):
             'categories': plugin.get('categories'),
             'versions': versions
         })
+    s.close()
     return json.dumps(jdata, sort_keys=True, indent=4)
 
+def meta_dump(meta_id=None):
+    s = Session()
+    if meta_id == None:
+        metadata = s.query(Meta).order_by(desc(Meta.id)).limit(1).one()
+    else:
+        try:
+            metadata = s.query(Meta).filter_by(id=meta_id).one()
+        except:
+            s.close()
+            return {'error': 'id doesnt exist'}
+    meta = {
+        'id': metadata.id,
+        'date': int(time.mktime(metadata.date.timetuple())),
+        'duration': metadata.time,
+        'changes': []
+    }
+    for item in metadata.history:
+        meta['changes'].append({
+            'plugin': item.plugin_name,
+            'version': item.version_name
+        })
+    s.close()
+    return json.dumps(meta, sort_keys=True, indent=4)
+    
 def update():
     global jdict
-    jdict = json.loads(dump())
+    global meta
+    jdict = json.loads(jdata_dump())
+    meta = json.loads(meta_dump())
 
 def reload_config():
     config.read('bukget.ini')
@@ -327,7 +413,34 @@ def reload_config():
 @app.route('/')
 @app.route('/index.html')
 def home_page():
-    return template('home_page')
+    data = open('content.md')
+    content = data.read()
+    data.close()
+    return template('home_page', content=content, 
+                    api=meta)
+
+@app.route('/static/:filename#.+#')
+def route_static_files(filename):
+    return static_file(filename, root='static')
+
+@app.route('/favicon.ico')
+def get_repo_file():
+    return static_file('images/favicon.ico', 'static')
+
+@app.route('/api')
+def version_info():
+    response.headers['Content-Type'] = 'application/json'
+    return json.dumps(meta, sort_keys=True, indent=4)
+
+@app.route('/api/history/:meta_raw')
+def version_history(meta_raw):
+    response.headers['Content-Type'] = 'application/json'
+    try:
+        meta_id = int(meta_raw)
+    except:
+        return json.dumps({'error': 'not a valid numerical number'})
+    else:
+        return meta_dump(meta_id)
 
 @app.route('/api/update')
 def update_json():
@@ -337,6 +450,9 @@ def update_json():
             debug=config.getboolean('Settings', 'debug'), 
             speedy=config.getboolean('Settings', 'speed_load'))
         update()
+        return json.dumps(meta, sort_keys=True, indent=4)
+    else:
+        return json.dumps({'error': 'not authorized to run command'})
 
 @app.route('/api/json')
 def raw_json():
@@ -382,27 +498,30 @@ def cat_info(name):
 @app.route('/api/search', method='POST')
 def api_search():
     response.headers['Content-Type'] = 'application/json'
-    field_name = request.forms.get('field_name')
-    action = request.forms.get('action')
-    value = request.forms.get('action')
+    try:
+        field_name = request.forms.get('field_name')
+        action = request.forms.get('action')
+        value = request.forms.get('value')
     
-    if field_name[:1] == 'v_':
-        in_versions = True
-        field_name = field_name[2:]
-    else:
-        in_versions = False
-    
-    items = []
-    for item in jdict:
-        match = False
-        if in_versions:
-            for version in item['versions']:
-                match = seval(version, field_name, action, value)
+        if field_name[:1] == 'v_':
+            in_versions = True
+            field_name = field_name[2:]
         else:
-            match = seval(item, field_name, action, value)
-        if match:
-            items.append(item)
-    return json.dumps(items, sort_keys=True, indent=4)
+            in_versions = False
+    
+        items = []
+        for item in jdict:
+            match = False
+            if in_versions:
+                for version in item['versions']:
+                    match = seval(version, field_name, action, value)
+            else:
+                match = seval(item, field_name, action, value)
+            if match:
+                items.append(item)
+        return json.dumps(items, sort_keys=True, indent=4)
+    except:
+        return json.dumps({'error': 'Could not perform search'})
 
 def seval(item, name, action, value):
     if name in item:
@@ -438,4 +557,6 @@ if __name__ == '__main__':
     debug(config.getboolean('Settings', 'debug'))
     run(app=app, 
         port=config.getint('Settings','port'), 
-        host=config.get('Settings', 'host'))
+        host=config.get('Settings', 'host'),
+        server=config.get('Settings', 'server'),
+        reloader=config.getboolean('Settings', 'debug'))
