@@ -499,18 +499,19 @@ def cat_info(name):
 def api_search():
     response.headers['Content-Type'] = 'application/json'
     try:
-        field_name = request.forms.get('field_name')
-        action = request.forms.get('action')
-        value = request.forms.get('value')
+        field_name = str(request.forms.get('fieldname'))
+        action = str(request.forms.get('action'))
+        value = str(request.forms.get('value'))
     
-        if field_name[:1] == 'v_':
+        if field_name[:2] == 'v_':
             in_versions = True
             field_name = field_name[2:]
         else:
             in_versions = False
-    
+
         items = []
         for item in jdict:
+            version = {}
             match = False
             if in_versions:
                 for version in item['versions']:
@@ -518,7 +519,7 @@ def api_search():
             else:
                 match = seval(item, field_name, action, value)
             if match:
-                items.append(item)
+                items.append(item['name'])
         return json.dumps(items, sort_keys=True, indent=4)
     except:
         return json.dumps({'error': 'Could not perform search'})
@@ -530,16 +531,16 @@ def seval(item, name, action, value):
                 if value == item[name]:
                     return True
             if action == '<':
-                if value < item[name]:
+                if int(value) < int(item[name]):
                     return True
             if action == '<=':
-                if value <= item[name]:
+                if int(value) <= int(item[name]):
                     return True
             if action == '>':
-                if value > item[name]:
+                if int(value) > int(item[name]):
                     return True
             if action == '>=':
-                if value >= item[name]:
+                if int(value) >= int(item[name]):
                     return True
             if action == 'in':
                 if value in item[name]:
