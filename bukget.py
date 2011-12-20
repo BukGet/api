@@ -52,16 +52,18 @@ class Plugin(Base):
     __tablename__ = 'plugin'
     id = Column(Integer(8), primary_key=True)
     name = Column(String(128), unique=True)
+    full_name = Column(String(128))
     categories = Column(Text)
     authors = Column(Text)
     status = Column(String(32))
     link = Column(Text)
     versions = relationship('Version', backref='plugin')
     
-    def __init__(self, name, authors, categories, link, status):
+    def __init__(self, name, authors, categories, link, status, fname):
         self.name = name
         self.link = link
-        self.update(authors=authors, categories=categories, status=status)
+        self.update(authors=authors, categories=categories, status=status,
+                    fname=fname)
     
     def _list_parser(self, slist):
         if isinstance(slist, unicode) or isinstance(slist, str):
@@ -73,13 +75,15 @@ class Plugin(Base):
             vals.append(item.strip())
         return vals
     
-    def update(self, authors=None, categories=None, status=None):
+    def update(self, authors=None, categories=None, status=None, fname=None):
         if authors is not None:
             self.authors = ', '.join(self._list_parser(authors))
         if categories is not None:
             self.categories = ', '.join(self._list_parser(categories))
         if status is not None:
             self.status = status
+        if fname is not None:
+            self.full_name = fname
     
     def get(self, item):
         if item == 'authors':
@@ -201,6 +205,7 @@ def get(delay=2, host='http://dev.bukkit.org', debug=False, speedy=False):
             user_raw = project.findAll(attrs={'class': 'user user-author'})
             status = project.findNext(attrs={'class': 'col-status'}).text
             link = '%s%s' % (host, proj_raw.get('href'))
+            fname = str(proj_raw.text)
             
             # Now to parse through the category list and parse out the items.
             categories = []
@@ -221,10 +226,11 @@ def get(delay=2, host='http://dev.bukkit.org', debug=False, speedy=False):
             try:
                 plugin = s.query(Plugin).filter_by(name=name).one()
             except:
-                plugin = Plugin(name, authors, categories, link, status)
+                plugin = Plugin(name, authors, categories, link, status, 
+                                fname)
                 s.add(plugin)
             plugin.update(authors=authors, categories=categories, 
-                          status=status)
+                          status=status, fname=fname)
             s.merge(plugin)
             s.commit()
             
@@ -368,6 +374,7 @@ def jdata_dump(debug=False):
             })
         jdata.append({
             'name': plugin.name,
+            'plugin_name': plugin.full_name,
             'bukkitdev_link': plugin.link,
             'status': plugin.status,
             'authors': plugin.get('authors'),
@@ -443,12 +450,19 @@ def version_history(meta_raw):
         return meta_dump(meta_id)
 
 @app.route('/api/update')
-def update_json():
+@app.route('/api/update/:speed_load')
+def update_json(speed_load=None):
     if request['REMOTE_ADDR'] == '127.0.0.1':
         reload_config()
+        if speed_load == 'full':
+            speedy = False
+        elif speed_load == 'speedy':
+            speedy = True
+        else:
+            speedy = config.getboolean('Settings', 'speed_load')
         get(delay=config.getint('Settings', 'delay'),
             debug=config.getboolean('Settings', 'debug'), 
-            speedy=config.getboolean('Settings', 'speed_load'))
+            speedy=speedy)
         update()
         return json.dumps(meta, sort_keys=True, indent=4)
     else:
