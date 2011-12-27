@@ -24,7 +24,7 @@ from sqlalchemy import (Table, Column, Integer, String, DateTime, Date,
                         and_, desc)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker, joinedload, subqueryload
 from BeautifulSoup import BeautifulSoup as bsoup
 from urllib import urlopen
@@ -57,7 +57,8 @@ class Plugin(Base):
     authors = Column(Text)
     status = Column(String(32))
     link = Column(Text)
-    versions = relationship('Version', backref='plugin')
+    versions = relationship('Version', order_by='desc(Version.date)', 
+                            backref='plugin')
     
     def __init__(self, name, authors, categories, link, status, fname):
         self.name = name
@@ -205,7 +206,14 @@ def get(delay=2, host='http://dev.bukkit.org', debug=False, speedy=False):
             user_raw = project.findAll(attrs={'class': 'user user-author'})
             status = project.findNext(attrs={'class': 'col-status'}).text
             link = '%s%s' % (host, proj_raw.get('href'))
-            fname = str(proj_raw.text)
+            
+            # Yes this is a bit of a hack.  However this should hopefully
+            # escape the problem data.
+            try:
+                json.dumps(str(proj_raw.text).replace('\\', '\\\\'))
+                fname = str(proj_raw.text).replace('\\', '\\\\')
+            except:
+                fname = ''
             
             # Now to parse through the category list and parse out the items.
             categories = []
@@ -372,9 +380,14 @@ def jdata_dump(debug=False):
                 'soft_dependencies': version.get('soft_dependencies'),
                 'hard_dependencies': version.get('hard_dependencies')
             })
+        try:
+            json.dumps(plugin.full_name)
+            plugin_name = plugin.full_name
+        except:
+            plugin_name = None
         jdata.append({
             'name': plugin.name,
-            'plugin_name': plugin.full_name,
+            'plugin_name': plugin_name,
             'bukkitdev_link': plugin.link,
             'status': plugin.status,
             'authors': plugin.get('authors'),
@@ -407,7 +420,31 @@ def meta_dump(meta_id=None):
         })
     s.close()
     return json.dumps(meta, sort_keys=True, indent=4)
+
+def parent_load(host):
+    try:
+        meta = json.loads(urlopen('http://%s/api').read())
+        jdict = json.loads(urlopen('http://%s/api/json').read())
+    except:
+        return False
+    s = Session()
     
+    # Loading all the data from the API metadata into the database...
+    meta_obj = Meta()
+    meta_obj.id = meta['id']
+    meta_obj.date = datetime.datetime.fromtimestamp(meta['date'])
+    meta_obj.time = meta['duration']
+    s.add(meta_obj)
+    for item in meta['changes']:
+        s.add(History(meta['id'], item['plugin'], item['version']))
+    s.commit()
+    
+    # Now we will start cranking through all of the data in the plugin dump
+    # and make the appropriate additions where necessary.  We will be parsing
+    # everything, not just the changes.  This is to make sure that we realy do
+    # have a full copy.
+    
+
 def update():
     global jdict
     global meta
@@ -417,10 +454,23 @@ def update():
 def reload_config():
     config.read('bukget.ini')
 
+@app.route('/blog')
+@app.route('/repo/') 
+def go_home():
+    redirect('/')
+
 @app.route('/')
 @app.route('/index.html')
 def home_page():
     data = open('content.md')
+    content = data.read()
+    data.close()
+    return template('home_page', content=content, 
+                    api=meta)
+
+@app.route('/baskit')
+def baskit_page():
+    data = open('baskit.md')
     content = data.read()
     data.close()
     return template('home_page', content=content, 
@@ -468,6 +518,7 @@ def update_json(speed_load=None):
     else:
         return json.dumps({'error': 'not authorized to run command'})
 
+@app.route('/repo.json')
 @app.route('/api/json')
 def raw_json():
     response.headers['Content-Type'] = 'application/json'
@@ -573,5 +624,5 @@ if __name__ == '__main__':
     run(app=app, 
         port=config.getint('Settings','port'), 
         host=config.get('Settings', 'host'),
-        server=config.get('Settings', 'server'),
+ #       server=config.get('Settings', 'server'),
         reloader=config.getboolean('Settings', 'debug'))
