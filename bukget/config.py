@@ -1,6 +1,4 @@
 from ConfigParser import ConfigParser
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 
 class Configuration(object):
     '''
@@ -8,6 +6,7 @@ class Configuration(object):
     
     This object houses all of the configuration data for the 
     '''
+    is_parent = False
     parents = ['root.bukget.org',]
     port = 8082
     host = '127.0.0.1'
@@ -27,8 +26,8 @@ class Configuration(object):
         '''
         c = ConfigParser()
         c.read('bukget.ini')
-        self.parents = [for x in c.get('Settings', 'parents').split(','),
-                        x.strip()]
+        self.parents = [x.strip() for x in 
+                        c.get('Settings', 'parents').split(',')]
         self.port = c.getint('Settings', 'port')
         self.host = c.get('Settings', 'host')
         self.debug = c.getboolean('Settings', 'debug')
@@ -37,19 +36,6 @@ class Configuration(object):
         self.virtualenv = c.getboolean('Settings', 'virtual_env')
         self.speedy = c.getboolean('Settings', 'speed_load')
         self.db_string = c.get('Settings', 'db_string')
-        
-
-class Database(object):
-    '''
-    Database Connection Object:
-    
-    This object simply connects to the database and sets up a session factory
-    '''
-    engine = None
-    maker = None
-    
-    def __init__(self):
-        conf = Configuration()
-        self.engine = create_engine(conf.db_string)
-        self.maker = sessionmaker(bind=self.engine)
+        if c.has_option('Settings', 'is_parent'):
+            self.is_parent = c.getboolean('Settings', 'is_parent')
         

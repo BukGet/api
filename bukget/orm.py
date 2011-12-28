@@ -1,22 +1,18 @@
 from sqlalchemy import (Table, Column, Integer, String, DateTime, Date, 
                         ForeignKey, Text, Boolean, MetaData, 
-                        and_, desc)
+                        and_, desc, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import backref, joinedload, subqueryload
+from sqlalchemy.orm import (backref, joinedload, subqueryload, sessionmaker,
+                            relationship)
 import datetime
+import config
 import time
 import yaml
 
+conf = config.Configuration()
 Base = declarative_base()
-
-def init(engine):
-    '''
-    Initializes the Databases
-    '''
-    Plugin.metadata.create_all(engine)
-    Version.metadata.create_all(engine)
-    Meta.metadata.create_all(engine)
-    History.metadata.create_all(engine)
+engine = create_engine(conf.db_string)
+Session = sessionmaker(engine)
 
 def _list_parser(s):
     '''
@@ -24,13 +20,14 @@ def _list_parser(s):
     
     Parses the incoming strint and returns a list.
     '''
-    if isinstance(slist, unicode) or isinstance(slist, str):
-        data = slist.split(',')
+    if isinstance(s, unicode) or isinstance(s, str):
+        data = s.split(',')
     else:
-        data = slist
+        data = s
     vals = []
     for item in data:
-        vals.append(item.strip())
+        if len(item) > 0:
+            vals.append(item.strip())
     return vals
 
 class Plugin(Base):
@@ -40,6 +37,7 @@ class Plugin(Base):
     This is the database object for a plugin.
     '''
     __tablename__ = 'plugin'
+    id = Column(Integer(8), primary_key=True)
     name = Column(String(128), unique=True)
     plugin_name = Column(String(128))
     categories = Column(Text)
@@ -47,9 +45,9 @@ class Plugin(Base):
     status = Column(String(32))
     link = Column(Text)
     versions = relationship('Version', order_by='desc(Version.date)', 
-                            backref='plugin')
+                            backref='plugin', lazy='joined')
     
-    def __init__(self, name, authors, categories, link, status, text):
+    def __init__(self, name, authors, categories, link, status, fname):
         '''
         Initializes a new Plugin.
         
@@ -121,6 +119,7 @@ class Plugin(Base):
         for ver in self.versions:
             data['versions'].append(ver.dict())
         return data
+Plugin.metadata.create_all(engine)
 
 
 class Version(Base):
@@ -140,13 +139,14 @@ class Version(Base):
     soft_dependencies = Column(Text)
     plugin_id = Column(Integer(8), ForeignKey('plugin.id'))
     
-    def __init__(self, name, link, cb_versions, filename, md5, 
+    def __init__(self, name, date, link, cb_versions, filename, md5, 
                  soft_deps, hard_deps, plugin_id):
         '''
         Initialization of the Version object:
         
         Required:
             name            Name of the Version
+            date            Date that the version was updated
             link            Link to the version file
             cb_versions     Bukkit RBs that this plugin is known to work with
             filename        Name of the plugin file
@@ -157,7 +157,7 @@ class Version(Base):
         '''
         self.name = name
         self.link = link
-        self.date = datetime.datetime.now()
+        self.date = date
         self.cb_versions = ', '.join(_list_parser(cb_versions))
         self.filename = filename
         self.md5 = md5
@@ -197,6 +197,7 @@ class Version(Base):
             'soft_dependencies': self.get('soft_dependencies'),
             'hard_dependencies': self.get('hard_dependencies'),
         }
+Version.metadata.create_all(engine)
 
 
 class Meta(Base):
@@ -207,13 +208,14 @@ class Meta(Base):
     id = Column(Integer(8), primary_key=True)
     date = Column(DateTime)
     time = Column(Integer(8))
-    history = relationship('History', backref='meta')
+    history = relationship('History', backref='meta', lazy='joined')
     
     def __init__(self):
         '''
         Initializes the Meta object.
         '''
         self.date = datetime.datetime.now()
+        self.time = 0
     
     def finish(self):
         '''
@@ -221,7 +223,7 @@ class Meta(Base):
         duration times in the database.
         '''
         curtime = datetime.datetime.now()
-        self.time = (curtime - self.start_time).seconds
+        self.time = (curtime - self.date).seconds
     
     def dict(self):
         '''
@@ -233,9 +235,10 @@ class Meta(Base):
             'duration': self.time,
             'changes': []
         }
-        for ver in history:
+        for ver in self.history:
             data['changes'].append(ver.dict())
         return data
+Meta.metadata.create_all(engine)
     
 
 class History(Base):
@@ -266,3 +269,4 @@ class History(Base):
             'plugin': self.plugin_name,
             'version': self.version_name
         }
+History.metadata.create_all(engine)
