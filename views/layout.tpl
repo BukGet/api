@@ -47,6 +47,8 @@
             <ul>
                 <li><a href="/#main">Home</a></li>
                 <li><a href="/#api">API</a></li>
+                <li><a href="https://github.com/SteveMcGrath/bukget/">Code/Development</a></li>
+                <li><a href="https://github.com/SteveMcGrath/bukget/issues/">Tickets</a></li>
                 <li><a href="/baskit">Baskit</a></li>
             </ul>
         </nav>
