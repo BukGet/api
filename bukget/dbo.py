@@ -32,7 +32,7 @@ def category_cache():
     for plugin in plugins:
         for category in plugin.get('categories'):
             if category not in data:
-                data.append('category')
+                data.append(category)
     s.close()
     return data
 
