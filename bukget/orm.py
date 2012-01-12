@@ -103,9 +103,12 @@ class Plugin(Base):
             return _list_parser(self.categories)
         return None
     
-    def dict(self):
+    def dict(self, version=None):
         '''
-        Returns the python dictionary representation of the object.
+        Returns the python dictionary representation of the object.  The
+        versions variable can be optionally specified to denote pulling a
+        specific version of the plugin.  If version is set to latest, it will
+        always pull the most current by date.
         '''
         data = {
             'name': self.name,
@@ -116,8 +119,15 @@ class Plugin(Base):
             'categories': self.get('categories'),
             'versions': []
         }
-        for ver in self.versions:
-            data['versions'].append(ver.dict())
+        if version == 'latest':
+            data['versions'].append(self.versions[0].dict())
+        else:
+            for ver in self.versions:
+                if version is not None:
+                    if ver.name.lower() == version.lower():
+                        data['versions'].append(ver.dict())
+                else:
+                    data['versions'].append(ver.dict())
         return data
 Plugin.metadata.create_all(engine)
 

@@ -1,4 +1,4 @@
-from bottle import template, request, response, Bottle
+from bottle import template, request, response, redirect, Bottle
 import config
 import json
 import dbo
@@ -81,6 +81,28 @@ def plugin_details(name):
             return json.dumps(item.dict(), sort_keys=True, indent=4)
     return ''
 
+@app.route('/plugin/:name/:version')
+def latest_plugins(name, version):
+    response.headers['Content-Type'] = 'application/json'
+    for item in cache['plugins']:
+        if item.name == name:
+            return json.dumps(item.dict(version=version.replace('_', ' ')), 
+                              sort_keys=True, indent=4)
+    return ''
+
+@app.route('/plugin/:name/:version/download')
+def latest_plugin_download(name, version):
+    response.headers['Content-Type'] = 'application/json'
+    for item in cache['plugins']:
+        if item.name == name:
+            if version == 'latest':
+                redirect(item.versions[0].link)
+            else:
+                for ver in item.versions:
+                    if ver.name.lower() == version.replace('_', ' ').lower():
+                        redirect(ver.link)
+    return ''
+
 @app.route('/categories')
 def category_list():
     response.headers['Content-Type'] = 'application/json'
@@ -129,4 +151,12 @@ def json_dump():
     items = []
     for item in cache['plugins']:
         items.append(item.dict())
+    return json.dumps(items, sort_keys=True, indent=4)
+
+@app.route('/json/latest')
+def json_dump():
+    response.headers['Content-Type'] = 'application/json'
+    items = []
+    for item in cache['plugins']:
+        items.append(item.dict(latest=True))
     return json.dumps(items, sort_keys=True, indent=4)

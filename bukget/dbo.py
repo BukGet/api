@@ -80,10 +80,6 @@ def _child_update(parent):
     # and make the appropriate additions where necessary.  We will be parsing
     # everything, not just the changes.  This is to make sure that we realy do
     # have a full copy.
-    debfile = open('help.txt', 'w')
-    debfile.write(json.dumps(jdict, sort_keys=True, indent=4))
-    debfile.close()
-    
     for jplugin in jdict:
         try:
             plugin = s.query(Plugin).finter_by(name=jplugin['name']).one()
