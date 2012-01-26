@@ -65,6 +65,10 @@ def update(load_type='speedy'):
         update_cache()
         return json.dumps(resp, sort_keys=True, indent=4)
 
+@app.route('/cache')
+def sqlite_cache():
+    redirect('/static/cache.db')
+
 @app.route('/plugins')
 def plugin_list():
     response.headers['Content-Type'] = 'application/json'
