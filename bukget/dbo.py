@@ -2,11 +2,12 @@ import yaml
 import config
 import json
 import re
+import os
 from zipfile import ZipFile
 from StringIO import StringIO
 from urllib2 import urlopen
-from sqlalchemy.orm import joinedload
-from sqlalchemy import desc
+from sqlalchemy.orm import joinedload, sessionmaker
+from sqlalchemy import desc, create_engine
 from orm import *
 from BeautifulSoup import BeautifulSoup as bsoup
     
@@ -36,6 +37,29 @@ def category_cache():
     s.close()
     return data
 
+def update_sqlite():
+    sqlite = create_engine('sqlite:///static/cache_gen.db')
+    Maker = sessionmaker(sqlite)
+    Plugin.metadata.create_all(sqlite)
+    Version.metadata.create_all(sqlite)
+    s = Session()
+    db = Maker()
+    plugins = s.query(Plugin).all()
+    for plugin in plugins:
+        pid = plugin.id
+        s.expunge(plugin)
+        plugin = db.merge(plugin)
+        db.commit()
+        versions = s.query(Version).filter_by(plugin_id=pid).all()
+        for version in versions:
+            s.expunge(version)
+            db.merge(version)
+        db.commit()
+    s.close()
+    db.close()
+    os.remove('static/cache.db')
+    os.rename('static/cache_gen.db', 'static/cache.db')
+
 def update(speedy=True):
     conf = config.Configuration()
     updated = False
@@ -47,6 +71,7 @@ def update(speedy=True):
                 updater = parent
     if not updated and conf.is_parent:
         _parent_update(speedy)
+    update_sqlite()
     if updated:
         return {'type': 'child', 'parent': updater, 'status': 'ok'}
     elif conf.is_parent:
