@@ -206,14 +206,14 @@ def _plugin_update(name, meta):
     authors = [a.text for a in page.findAll('a', {'class': 'user user-author'})]
     categories = [a.text for a in page.findAll('a', {'class': 'category'})]
     status = page.find('span', {'class': re.compile(r'project-stage')}).text
-    fullname = page.find('div', {'class': 'global-navigation'}).findNextSibling('h1').text
+    plugin_name = page.find('div', {'class': 'global-navigation'}).findNextSibling('h1').text
     
-    # This is a bit of a hack to see if the fullname will properly export to
+    # This is a bit of a hack to see if the plugin_name will properly export to
     # json, if not, then we will need to simply dump it.
     try:
-        json.dumps(fullname)
+        json.dumps(plugin_name)
     except:
-        fullname = ''
+        plugin_name = ''
     
     # Here we will try to update the plugin in the database.  If that fails
     # for any reason (i.e. it doesn't exist) we will then add a new plugin to
@@ -221,10 +221,10 @@ def _plugin_update(name, meta):
     try:
         plugin = s.query(Plugin).filter_by(name=name).one()
         plugin.update(authors=authors, categories=categories, 
-                      status=status, fname=fullname)
+                      status=status, plugin_name=plugin_name)
         s.merge(plugin)
     except:
-        plugin = Plugin(name, authors, categories, dbo_link, status, fullname)
+        plugin = Plugin(name, authors, categories, dbo_link, status, plugin_name)
         s.add(plugin)
     s.commit()
     
