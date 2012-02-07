@@ -47,7 +47,7 @@ class Plugin(Base):
     versions = relationship('Version', order_by='desc(Version.date)', 
                             backref='plugin', lazy='joined')
     
-    def __init__(self, name, authors, categories, link, status, fname):
+    def __init__(self, name, authors, categories, link, status, plugin_name):
         '''
         Initializes a new Plugin.
         
@@ -57,14 +57,14 @@ class Plugin(Base):
             categories  List of plugin categories
             link        Link to the plugin on DBO
             status      DBO status for the plugin
-            fname        Full name (The displayed text) of the plugin on DBO
+            plugin_name Full name (The displayed text) of the plugin on DBO
         '''
         self.name = name
         self.link = link
         self.update(authors=authors, categories=categories, status=status,
-                    fname=fname)
+                    plugin_name=plugin_name)
 
-    def update(self, authors=None, categories=None, status=None, fname=None):
+    def update(self, authors=None, categories=None, status=None, plugin_name=None):
         '''
         Update plugin information
         
@@ -72,7 +72,7 @@ class Plugin(Base):
             authors         List of plugin authors
             categories      List of plugin categories
             status          Status string
-            text            Full name (The displayed text) of the plugin on DBO
+            plugin_name     Full name (The displayed text) of the plugin on DBO
         '''
         if authors is not None:
             self.authors = ', '.join(_list_parser(authors))
@@ -80,10 +80,10 @@ class Plugin(Base):
             self.categories = ', '.join(_list_parser(categories))
         if status is not None:
             self.status = status
-        if fname is not None:
+        if plugin_name is not None:
             try:
-                json.dumps(fname)
-                self.plugin_name = fname
+                json.dumps(plugin_name)
+                self.plugin_name = plugin_name
             except:
                 self.plugin_name = None
 
