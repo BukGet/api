@@ -171,7 +171,6 @@ def _parent_update(speedy):
         elif len(next) > 0:
             link = next[0].findNext('a')
             curl = 'http://dev.bukkit.org%s' % link.get('href')
-            time.sleep(conf.delay)
         else:
             phase1 = False
             
@@ -203,7 +202,7 @@ def _plugin_update(name, meta):
     dbo_link = 'http://dev.bukkit.org/server-mods/%s/' % name
     page = _get_page(dbo_link, conf.delay)
     
-    authors = [a.text for a in page.findAll('a', {'class': 'user user-author'})]
+    authors = list(set([a.text for a in page.findAll('a', {'class': 'user user-author'})]))
     categories = [a.text for a in page.findAll('a', {'class': 'category'})]
     status = page.find('span', {'class': re.compile(r'project-stage')}).text
     plugin_name = page.find('div', {'class': 'global-navigation'}).findNextSibling('h1').text
