@@ -7,6 +7,7 @@ from sqlalchemy.orm import (backref, joinedload, subqueryload, sessionmaker,
 import datetime
 import config
 import time
+import json
 import yaml
 
 conf = config.Configuration()
@@ -44,10 +45,12 @@ class Plugin(Base):
     authors = Column(Text)
     status = Column(String(32))
     link = Column(Text)
+    desc = Column(Text)
     versions = relationship('Version', order_by='desc(Version.date)', 
                             backref='plugin', lazy='joined')
     
-    def __init__(self, name, authors, categories, link, status, plugin_name):
+    def __init__(self, name, authors, categories, link, status, plugin_name,
+                 plugin_desc):
         '''
         Initializes a new Plugin.
         
@@ -58,13 +61,15 @@ class Plugin(Base):
             link        Link to the plugin on DBO
             status      DBO status for the plugin
             plugin_name Full name (The displayed text) of the plugin on DBO
+            plugin_desc Description of the plugin.
         '''
         self.name = name
         self.link = link
         self.update(authors=authors, categories=categories, status=status,
-                    plugin_name=plugin_name)
+                    plugin_name=plugin_name, desc=plugin_desc)
 
-    def update(self, authors=None, categories=None, status=None, plugin_name=None):
+    def update(self, authors=None, categories=None, status=None, 
+               plugin_name=None, desc=None):
         '''
         Update plugin information
         
@@ -80,6 +85,8 @@ class Plugin(Base):
             self.categories = ', '.join(_list_parser(categories))
         if status is not None:
             self.status = status
+        if desc is not None:
+            self.desc = desc[:200] + '...'
         if plugin_name is not None:
             try:
                 json.dumps(plugin_name)
@@ -117,6 +124,7 @@ class Plugin(Base):
             'status': self.status,
             'authors': self.get('authors'),
             'categories': self.get('categories'),
+            'desc': self.desc,
             'versions': []
         }
         if version == 'latest':
@@ -145,12 +153,14 @@ class Version(Base):
     cb_versions = Column(Text)
     filename = Column(String(32))
     md5 = Column(String(32))
+    status = Column(String(32))
+    type = Column(String(32))
     hard_dependencies = Column(Text)
     soft_dependencies = Column(Text)
     plugin_id = Column(Integer(8), ForeignKey('plugin.id'))
     
     def __init__(self, name, date, link, cb_versions, filename, md5, 
-                 soft_deps, hard_deps, plugin_id):
+                 soft_deps, hard_deps, plugin_id, status, plugin_type):
         '''
         Initialization of the Version object:
         
@@ -164,6 +174,7 @@ class Version(Base):
             soft_deps       Soft dependencies needed for the plugin
             hard_deps       Hard (required) dependencies needed for the plugin
             plugin_id       Id of the plugin this version is associated with
+            status          Current Status of the version
         '''
         self.name = name
         self.link = link
@@ -174,6 +185,8 @@ class Version(Base):
         self.hard_dependencies = ', '.join(_list_parser(hard_deps))
         self.soft_dependencies = ', '.join(_list_parser(soft_deps))
         self.plugin_id = plugin_id
+        self.status = status
+        self.type = plugin_type
     
     def get(self, item):
         '''
@@ -203,6 +216,8 @@ class Version(Base):
             'date': int(time.mktime(self.date.timetuple())),
             'filename': self.filename,
             'md5': self.md5,
+            'status': self.status,
+            'type': self.type,
             'game_builds': self.get('cb_versions'),
             'soft_dependencies': self.get('soft_dependencies'),
             'hard_dependencies': self.get('hard_dependencies'),
