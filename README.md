@@ -38,7 +38,7 @@ The following instructions are assuming that CentOS 6 is installed:
 1. The first thing we need to do is update the system as needed and install 
    the needed OS packages.
     * `yum -y update`
-    * `yum -y groupinstall 'Development Tools`
+    * `yum -y groupinstall 'Development Tools'`
     * `yum -y install python-devel python-setuptools git`
 
 2. Next we need to install virtualenv and build the environment to support
