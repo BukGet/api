@@ -30,16 +30,21 @@ interested in running a public child server, please contact me.
 * Clone the repository
 * Copy the bukget_example.ini file to bukget.ini and configure as needed.
 * Run the server.py script to start the server up.
+* Copy the contab and upstart scripts into the appropriate locations.
 
 **Expanded**
 
-The following instructions are assuming that CentOS 6 is installed:
 
 1. The first thing we need to do is update the system as needed and install 
    the needed OS packages.
-    * `yum -y update`
-    * `yum -y groupinstall 'Development Tools'`
-    * `yum -y install python-devel python-setuptools git`
+    * For CentOS/RHEL
+        * `yum -y update`
+        * `yum -y groupinstall 'Development Tools'`
+        * `yum -y install python-devel python-setuptools git`
+    * For Ubuntu/Debian
+        * `apt-get update`
+        * `apt-get -y upgrade`
+        * `apt-get -y install python-dev git-core python-setuptools build-essential`
 
 2. Next we need to install virtualenv and build the environment to support
    bukget.
@@ -53,8 +58,11 @@ The following instructions are assuming that CentOS 6 is installed:
     * `git clone git://github.com/SteveMcGrath/bukget.git /opt/bukget/code`
     * `cp /opt/bukget/code/bukget_example.ini /opt/bukget/code/bukget.ini`
     * `vi /opt/bukget/code/bukget.ini`
+    * `cp /opt/bukget/code/support/bukget_upstart.conf /etc/init/bukget.conf`
+    * `cp /opt/bukget/code/support/bukget_cron /etc/cron.d/bukget`
     * `/opt/bukget/code/server.py`
 
+4. After the code is running, 
 ## API Calls ##
 The API was specifically written to handle just about everything as GET 
 requests.  This makes is easier to interface with in many languages as you 
