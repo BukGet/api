@@ -1,0 +1,7 @@
+# This is the schedule that bukget should be updating on.  These times are
+# based on US Central time, so feel free to adjust as needed.  Generations
+# on the grandparent bukget.org are performed every 6 hours at half past the
+# hour.  For children, you will want to wait approx 10min to allow the
+# generation to happen before pulling it down to get the latest build.
+
+45 */6  * * *   steve   /usr/bin/curl http://localhost:8082/api/update/speedy
