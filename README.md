@@ -58,6 +58,7 @@ interested in running a public child server, please contact me.
     * `git clone git://github.com/SteveMcGrath/bukget.git /opt/bukget/code`
     * `cp /opt/bukget/code/bukget_example.ini /opt/bukget/code/bukget.ini`
     * `vi /opt/bukget/code/bukget.ini`
+    * `touch /opt/bukget/code/static/cache.db`
     * `cp /opt/bukget/code/support/bukget_upstart.conf /etc/init/bukget.conf`
     * `cp /opt/bukget/code/support/bukget_cron /etc/cron.d/bukget`
     * `/opt/bukget/code/server.py`
