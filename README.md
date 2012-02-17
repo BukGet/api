@@ -52,7 +52,7 @@ interested in running a public child server, please contact me.
     * `mkdir -p /opt/bukget/code`
     * `virtualenv --no-site-packages /opt/bukget`
     * `source /opt/bukget/bin/activate`
-    * `pip install sqlalchemy bottle pyyaml markdown2 twisted`
+    * `pip install sqlalchemy bottle pyyaml markdown2 beautifulsoup twisted`
 
 3. Lastly we need to download the BukGet code, configure it, and run it.
     * `git clone git://github.com/SteveMcGrath/bukget.git /opt/bukget/code`
