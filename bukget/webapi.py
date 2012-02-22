@@ -154,7 +154,7 @@ def search(field=None, action=None, value=None):
         version = {}
         match = False
         if in_versions:
-            for version in item['versions']:
+            for version in item.versions:
                 match = seval(version, field, action, value)
         else:
             match = seval(data, field_name, action, value)
