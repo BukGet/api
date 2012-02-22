@@ -2,6 +2,7 @@ from bottle import template, request, response, redirect, Bottle
 import config
 import json
 import dbo
+import re
 
 cache = None
 app = Bottle()
@@ -22,7 +23,7 @@ def seval(item, name, action, value):
     if name in item:
         try:
             if action == '=':
-                if value == item[name]:
+                if str(value) == str(item[name]):
                     return True
             if action == '<':
                 if int(value) < int(item[name]):
@@ -37,10 +38,10 @@ def seval(item, name, action, value):
                 if int(value) >= int(item[name]):
                     return True
             if action == 'in':
-                if value in item[name]:
+                if str(value) in str(item[name]):
                     return True
             if action == 'like':
-                if len(re.findall(value, item[name])) > 0:
+                if len(re.findall(str(value), str(item[name]))) > 0:
                     return True
         except:
             return False
@@ -150,14 +151,14 @@ def search(field=None, action=None, value=None):
     else:
         in_versions = False
     for item in cache['plugins']:
-        dset = item.dict()
+        data = item.dict()
         version = {}
         match = False
         if in_versions:
-            for version in item.versions:
+            for version in data['versions']:
                 match = seval(version, field, action, value)
         else:
-            match = seval(data, field_name, action, value)
+            match = seval(data, field, action, value)
         if match:
             items.append(data['name'])
     return json.dumps(items, sort_keys=True, indent=4)
