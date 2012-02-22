@@ -107,6 +107,19 @@ def latest_plugin_download(name, version):
                         redirect(ver.link)
     return ''
 
+@app.route('/plugin/:name/:version/version')
+def latest_plugin_download(name, version):
+    response.headers['Content-Type'] = 'application/json'
+    for item in cache['plugins']:
+        if item.name == name:
+            if version == 'latest':
+               return json.dumps(item.versions[0].name)
+            else:
+                for ver in item.versions:
+                    if ver.name.lower() == version.replace('_', ' ').lower():
+                        return json.dumps(ver.name)
+    return ''
+
 @app.route('/categories')
 def category_list():
     response.headers['Content-Type'] = 'application/json'
@@ -131,9 +144,9 @@ def search(field=None, action=None, value=None):
         field = str(request.forms.get('fieldname'))
         action = str(request.forms.get('action'))
         value = str(request.forms.get('value'))    
-    if field_name[:2] == 'v_':
+    if field[:2] == 'v_':
         in_versions = True
-        field_name = field_name[2:]
+        field = field[2:]
     else:
         in_versions = False
     for item in cache['plugins']:
@@ -142,7 +155,7 @@ def search(field=None, action=None, value=None):
         match = False
         if in_versions:
             for version in item['versions']:
-                match = seval(version, field_name, action, value)
+                match = seval(version, field, action, value)
         else:
             match = seval(data, field_name, action, value)
         if match:
@@ -162,5 +175,5 @@ def json_dump():
     response.headers['Content-Type'] = 'application/json'
     items = []
     for item in cache['plugins']:
-        items.append(item.dict(latest=True))
+        items.append(item.dict(version='latest'))
     return json.dumps(items, sort_keys=True, indent=4)
