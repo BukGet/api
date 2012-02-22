@@ -128,7 +128,8 @@ class Plugin(Base):
             'versions': []
         }
         if version == 'latest':
-            data['versions'].append(self.versions[0].dict())
+            if len(self.versions) > 0:
+                data['versions'].append(self.versions[0].dict())
         else:
             for ver in self.versions:
                 if version is not None:
