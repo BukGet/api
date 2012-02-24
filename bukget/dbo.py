@@ -69,9 +69,10 @@ def update(speedy=True):
             updated = _child_update(parent)
             if updated:
                 updater = parent
+                update_sqlite()
     if not updated and conf.is_parent:
         _parent_update(speedy)
-    update_sqlite()
+        update_sqlite()
     if updated:
         return {'type': 'child', 'parent': updater, 'status': 'ok'}
     elif conf.is_parent:
@@ -239,6 +240,7 @@ def _plugin_update(name, meta):
     vurl = '%sfiles/' % dbo_link
     more_versions = True
     while more_versions:
+        vcount = 0
         vpage = _get_page(vurl, conf.delay)
     
         try:
@@ -261,7 +263,9 @@ def _plugin_update(name, meta):
                                         .findChildren('li')]
             v_file = row.findNext('td', {'class': 'col-filename'}).text.strip()
             
-            # This has to be disabled as its no longer on the page.
+            # This has to be disabled as its no longer on the page.  Instead
+            # we are now forced to parse every single download page.  Thanks
+            # Curse for 
             #v_md5 = row.findNext('td', {'class': 'col-md5'}).text
             v_link = 'http://dev.bukkit.org%s' % v_flnk.get('href')
             v_name = v_flnk.text
@@ -273,15 +277,21 @@ def _plugin_update(name, meta):
                 if v_file.split('.')[-1].lower() not in ['zip','jar']:
                     continue
         
+            #try:
+            #    version = s.query(Version).filter_by(plugin_id=plugin.id, 
+            #                                         name=name).one()
+            #except:
+            #    new = True
+            dlpage = _get_page(v_link)
+            v_md5 = dlpage.find('dt', text='MD5').findNext('dd').text
+            dl_link = dlpage.findChild(attrs={
+                                'class': 'user-action user-action-download'})\
+                            .findNext('a').get('href')
             try:
-                version = s.query(Version).filter_by(name=name).one()
+                version = s.query(Version).filter_by(md5=v_md5).one()
             except:
-                new = True
-                dlpage = _get_page(v_link)
-                v_md5 = dlpage.find('dt', text='MD5').findNext('dd').text
-                dl_link = dlpage.findChild(attrs={
-                                    'class': 'user-action user-action-download'})\
-                                .findNext('a').get('href')
+                vcount += 1
+            
                 s_deps = []
                 h_deps = []
             
@@ -315,10 +325,14 @@ def _plugin_update(name, meta):
         
         # Now we need to fetch the next page url if it is available.  If there
         # is no next page to goto, then we will set more_versions to false.
-        try:
-            link = vpage.find('li', {'class': 'listing-pagination-pages-next'})
-            vurl = 'http://dev.bukkit.org%s' % link.findChild('a').get('href')
-        except:
+        if vcount > 0:
+            new = True
+            try:
+                link = vpage.find('li', {'class': 'listing-pagination-pages-next'})
+                vurl = 'http://dev.bukkit.org%s' % link.findChild('a').get('href')
+            except:
+                more_versions = False
+        else:
             more_versions = False
         
         
