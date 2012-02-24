@@ -260,7 +260,9 @@ def _plugin_update(name, meta):
             v_gbvs = [a.text for a in row.findNext('td', {'class': 'col-game-version'})\
                                         .findChildren('li')]
             v_file = row.findNext('td', {'class': 'col-filename'}).text.strip()
-            v_md5 = row.findNext('td', {'class': 'col-md5'}).text
+            
+            # This has to be disabled as its no longer on the page.
+            #v_md5 = row.findNext('td', {'class': 'col-md5'}).text
             v_link = 'http://dev.bukkit.org%s' % v_flnk.get('href')
             v_name = v_flnk.text
             v_date = datetime.datetime.fromtimestamp(float(v_rdate))
@@ -272,10 +274,11 @@ def _plugin_update(name, meta):
                     continue
         
             try:
-                version = s.query(Version).filter_by(md5=v_md5).one()
+                version = s.query(Version).filter_by(name=name).one()
             except:
                 new = True
                 dlpage = _get_page(v_link)
+                v_md5 = dlpage.find('dt', text='MD5').findNext('dd').text
                 dl_link = dlpage.findChild(attrs={
                                     'class': 'user-action user-action-download'})\
                                 .findNext('a').get('href')
