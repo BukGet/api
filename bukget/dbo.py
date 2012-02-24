@@ -69,10 +69,8 @@ def update(speedy=True):
             updated = _child_update(parent)
             if updated:
                 updater = parent
-                update_sqlite()
     if not updated and conf.is_parent:
         _parent_update(speedy)
-        update_sqlite()
     if updated:
         return {'type': 'child', 'parent': updater, 'status': 'ok'}
     elif conf.is_parent:
@@ -135,6 +133,7 @@ def _child_update(parent):
                               jversion['type'])
                 s.add(ver)
                 s.commit()
+    update_sqlite()
     return True
 
 def _parent_update(speedy):
@@ -184,6 +183,7 @@ def _parent_update(speedy):
     s.merge(meta)
     s.commit()
     s.close()
+    update_sqlite()
 
 def _get_page(url, delay=2):
     conf = config.Configuration()
