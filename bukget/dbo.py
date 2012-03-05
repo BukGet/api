@@ -206,7 +206,8 @@ def _plugin_update(name, meta):
     dbo_link = 'http://dev.bukkit.org/server-mods/%s/' % name
     page = _get_page(dbo_link, conf.delay)
     
-    authors = list(set([a.text for a in page.findAll('a', {'class': 'user user-author'})]))
+    authors = list(set([a.text for a in page.find('li', {'class': 'user-list-item'})\
+                                            .findChildren('a', {'class': 'user user-author'})]))
     categories = [a.text for a in page.findAll('a', {'class': 'category'})]
     status = page.find('span', {'class': re.compile(r'project-stage')}).text
     plugin_name = page.find('div', {'class': 'global-navigation'}).findNextSibling('h1').text
