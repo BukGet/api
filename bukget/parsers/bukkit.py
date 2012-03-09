@@ -47,6 +47,7 @@ class Parser(BaseParser):
     
     
     def _plugin_update(self, name):
+        rever = re.compile(r'\d{1,3}\.{0,1}\d{0,3}\.{0,1}\d{0,3}')
         new = False
         s = Session()
         
@@ -79,16 +80,18 @@ class Parser(BaseParser):
                           status=status, plugin_name=plugin_name,
                           desc=plugin_desc)
             s.merge(plugin)
+            self._log.info('PARENT: Updating Global: %s' % name)
         except:
             plugin = Plugin(name, authors, categories, dbo_link, status, 
                             plugin_name, plugin_desc)
             s.add(plugin)
+            self._log.info('PARENT: Adding Global: %s' % name)
         s.commit()
 
         # Now we will drill into the specific versions.  For that we will need to
         # parse the files table on the files page.  Here we will be generating the
         # link and pulling the page down.
-        vurl = '%sfiles/' % dbo_link
+        vurl = '%s/files/' % dbo_link
         more_versions = True
         while more_versions:
             vcount = 0
@@ -119,7 +122,11 @@ class Parser(BaseParser):
                 # Curse for 
                 #v_md5 = row.findNext('td', {'class': 'col-md5'}).text
                 v_link = 'http://dev.bukkit.org%s' % v_flnk.get('href')
-                v_name = v_flnk.text
+                try:
+                    print rever.findall(v_flnk.text)
+                    v_name = rever.findall(v_flnk.text)[0]
+                except:
+                    v_name = v_flnk.text
                 v_date = datetime.datetime.fromtimestamp(float(v_rdate))
 
                 # If the file that we are parsing is not a zip or a jar file, then
@@ -171,7 +178,9 @@ class Parser(BaseParser):
                     # the associated history element.
                     s.add(Version(v_name, v_date, dl_link, v_gbvs, v_file, v_md5,
                                   s_deps, h_deps, plugin.id, v_stat, v_type))
-                    s.add(History(meta.id, plugin.name, v_name))
+                    s.add(History(self.gen_id, plugin.name, v_name))
+                    self._log.info('PARENT: Adding Version: %s/%s' % (name,
+                                                                      v_name))
                     s.commit()
 
             # Now we need to fetch the next page url if it is available.  If there

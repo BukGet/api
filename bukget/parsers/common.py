@@ -19,7 +19,7 @@ class BaseParser(threading.Thread):
         while (time.time() - self._timer) < self._delay:
             time.sleep(0.1)
         self._timer = time.time()
-        return BeautifulSoup(self.get_url(url))
+        return BeautifulSoup(self._get_url(url))
     
     
     def _get_url(self, url):
@@ -27,7 +27,7 @@ class BaseParser(threading.Thread):
         
         Return the contents of the URL specified.
         '''
-        log.debug('Fetching: %s' % url)
+        self._log.debug('Fetching: %s' % url)
         return urlopen(url).read()
     
     
