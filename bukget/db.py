@@ -6,12 +6,19 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 
+
 DBase = declarative_base()
-engine = create_engine(bukget.conf.get('Settings', 'db_string'))
-Session = sessionmaker(engine)
+
+# This is the on-disk database
+disk = create_engine(bukget.conf.get('Settings', 'db_string'))
+Session = sessionmaker(disk)
+
+# This is the in-memory database
+memory = create_engine('sqlite://:memory:')
+Reactor = sessionmaker(memory)
 
 
-def initialize():
+def initialize(engine):
 	Plugin.metadata.create_all(engine)
 	Version.metadata.create_all(engine)
 	Repo.metadata.create_all(engine)
@@ -19,6 +26,74 @@ def initialize():
 	Author.metadata.create_all(engine)
 	catassc.create(engine)
 	authassc.create(engine)
+
+
+def clear(engine):
+    '''clear enigine
+    This function will drop all of the dables in a database, effectively
+    clearing out the database for re-initialization.
+    '''
+    meta = MetaData(engine)
+    meta.reflect()
+    meta.drop_all()
+
+
+def _migrate(s, d, table):
+    rows = s.query(table).all()
+
+    for row in rows:
+        s.expunge(row)
+        d.merge(row)
+    d.commit()
+
+
+def clone(source, dest):
+	'''clone source dest
+	This function will completely clone the Database from the source engine to
+	the destination engine.  This is very useful for replicating information
+	in and out of memory as we will be primarially using an in-memory sqlite
+	database for BukGet for performance purposes.
+	'''
+    # First we need to scrub and initialize the destination to make sure that it
+    # is primed for us to work our magic ;)
+    clear(dest)
+    init(dest)
+
+    # Next we need to setup the session reactors and build the sessions that we
+    # will be working with.
+    smaker = sessionmaker(source)
+    dmaker = sessionmaker(dest)
+
+    s = smaker()
+    d = dmaker()
+
+    # Now for the actual work, We will run migrate on each table we want to
+    # replicate.
+    _migrate(s, d, Plugin)
+    _migrate(s, d, Version)
+    _migrate(s, d, Repo)
+    _migrate(s, d, Category)
+    _migrate(s, d, Author)
+    _migrate(s, d, Meta)
+    _migrate(s, d, catassc)
+    _migrate(s, d, authassc)
+
+    # Lastly we need to close out the sessions.
+    s.close()
+    d.close()
+
+
+def replace(engine):
+    '''replace engine
+    This function is designed to very simply clone the database engine given to
+    us, and return with the sqlite in-memory engine.  This is especially useful
+    for startup and for the updates, as all of the changes can be done to an
+    in-memory copy and then once everything is complete a new, pristine database
+    is returned to the application.
+    '''
+    mem2 = create_engine('sqlite://:memory:')
+    clone(engine, mem2)
+    return mem2, sessionmaker(mem2)
 
 
 class Base(DBase):
