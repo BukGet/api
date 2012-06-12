@@ -1,7 +1,0 @@
-# This is the schedule that bukget should be updating on.  These times are
-# based on US Central time, so feel free to adjust as needed.  Generations
-# on the grandparent bukget.org are performed every 6 hours at half past the
-# hour.  Children can run the update as often as they like as nothing will
-# happen unless the generation id on the parent is different than the child.
-
-*/5 *  * * *   root /usr/bin/curl -s http://localhost:8082/api/update/speedy
