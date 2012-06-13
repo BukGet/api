@@ -39,18 +39,18 @@ class Parser(BaseParser):
     refilety = re.compile(r'file-type')
 
 
-    def run(self, speedy=True):
+    def run(self, speedy=True, page_num=1):
         '''run speedy=True
         This function is the main function to launch the parser.  The speedy
         flag denoted whether the parser will run through the entire DBO database
         or will only check for those items it does not have in the database.
         '''
         self.complete = False
-        self._server_mods(speedy)
+        self._server_mods(speedy, page_num)
         self.complete = True
 
 
-    def _server_mods(self, speedy=True):
+    def _server_mods(self, speedy, page_num):
         '''_server_mods speedy=True
         This function is what will be parsing the plugin listing pages, looking
         for new plugins.
@@ -66,7 +66,7 @@ class Parser(BaseParser):
         # Here we will be pre-loading the current url (curl) variable and
         # setting running to True so that the while loop will just keep doing
         # it's thing.
-        curl = self.base_uri
+        curl = '%s?page=%s' % (self.base_uri, page_num)
         running = True
 
         while running:
@@ -336,12 +336,12 @@ class Parser(BaseParser):
                 # download it and instantiate the data as a ZipFile object.
                 # From there we can pull out the needed data and parse it as
                 # needed.
+                data = StringIO()
                 try:
-                    data = StringIO()
                     data.write(self._get_url(version.download))
                     jar = ZipFile(data)
                 except:
-                    pass
+                    jar = ZipFile(StringIO(), 'w')
 
                 # Now we will look for the plugin.yml file inside the jarfile
                 # and will also add in the hard & soft dependencies, commands,
