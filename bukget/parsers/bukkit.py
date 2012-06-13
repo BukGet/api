@@ -2,6 +2,7 @@ import time
 import yaml
 import json
 import re
+import datetime
 import bukget.db as db
 from bukget.log import log
 from bukget.parsers.base import BaseParser
@@ -26,10 +27,16 @@ class Parser(BaseParser):
 
     # This is the regex that we will be using for parsing out the version
     # numbers.
-    revex = re.compile(r'\d{1,3}\.{0,1}\d{0,3}\.{0,1}\d{0,3}')
+    revex = re.compile(r'b{0,1}\d{1,3}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}')
 
     # This regex is used to parse out the plugin status.
     restage = re.compile(r'project-stage')
+
+    # This regex is used to pull the file status for versions.
+    refilest = re.compile(r'file-status')
+
+    # This regex is used to pull the file type for versions.
+    refilety = re.compile(r'file-type')
 
 
     def run(self, speedy=True):
@@ -53,7 +60,7 @@ class Parser(BaseParser):
         # session, and lastly create a Meta object that we will be using.
         start = time.time()
         s = db.Session()
-        self.meta = db.Meta()
+        #self.meta = db.Meta()
 
         # Here we are querying the database for the repository row that we will
         # need throughout this process.  If one doesn't exist, then we will 
@@ -97,7 +104,7 @@ class Parser(BaseParser):
                 else:
                     # Now we marge in any changes from the _plugin function into
                     # the database
-                    count += self._plugin(plugin)
+                    count += self._plugin(name)
 
             # Next we need to find the link to the next page, then set the curl
             # variable to the next page we will need to parse.
@@ -135,9 +142,9 @@ class Parser(BaseParser):
             plugin = s.query(db.Plugin).filter_by(name=name).one()
             log.debug('PARENT: Updating plugin %s in bukkit repository' % name)
         except:
-            plugin = db.Plugin()
+            plugin = db.Plugin(name, self.repo.id)
             s.add(plugin)
-            log.debug('PARENT: Adding plugin %s in bukkit repository' % name)
+            log.info('PARENT: Adding plugin %s in bukkit repository' % name)
             count += 1
 
         # Next thing we need to do is build the dbo link.  This is the uri that
@@ -161,7 +168,7 @@ class Parser(BaseParser):
                 s.commit()
 
             if author not in plugin.authors:
-                plugin.authors.add(author)
+                plugin.authors.append(author)
 
         # and for the next fun item, categories!  We will be performing the 
         categories = [a.text for a in page.findAll('a', {'class': 'category'})]
@@ -174,11 +181,11 @@ class Parser(BaseParser):
                 s.commit()
 
             if category not in plugin.categories:
-                plugin.categories.add(category)
+                plugin.categories.append(category)
 
         # Now for some easier stuff, we will be parsing through the status,
         # the plugin's full name, and the plugin description.
-        plugin.status = page.find('span', {'class': self.restage}).text
+        plugin.stage = page.find('span', {'class': self.restage}).text
         plugin.description = page.find('div', {'class': 'content-box-inner'}).text
         plugname = page.find('div', {'class': 'global-navigation'}).findNextSibling('h1').text
 
@@ -198,7 +205,6 @@ class Parser(BaseParser):
         # plugin object at this point.
         plugin = s.merge(plugin)
         s.commit()
-        s.close()
 
         # Next we need to start working our way through the various versions.
         # This will be handled very much in the same way as how we were handling
@@ -209,7 +215,7 @@ class Parser(BaseParser):
         # Here we start out (just like before) by pre-loading the vurl variable
         # and setting the running flag to true.  We will also keep track of the
         # number of changes in order to speed things up a bit.
-        vurl = '%s/files/' % dbo_link
+        vurl = '%s/files/' % plugin.link
         running = True
 
         while running:
@@ -228,10 +234,18 @@ class Parser(BaseParser):
             except:
                 rows = []
 
+
+            self.ymlname = False
+            self.ymldesc = False
             for row in rows:
+                #try:
                 vlink = row.findNext('td', {'class': 'col-file'}).findNext('a').get('href')
-                slug = self.vrex.findall(vlink)
-                changes += self._version(plugin.id, slug)
+                vtxt = row.findNext('td', {'class': 'col-file'}).findNext('a').text
+                slug = self.vrex.findall(vlink)[0]
+                vname = self.revex.findall(vtxt)[0]
+                changes += self._version(plugin, slug, vname)
+                #except:
+                #    pass
 
             # Now we will add the changes count into the count counter.  This
             # allows us to keep better track of the number of changes that had
@@ -250,6 +264,124 @@ class Parser(BaseParser):
             else:
                 running = False
 
-        # Lastly, we will return the number of changes that we made.
+
+        # Now we will check to see if we got any plugin names or descriptions
+        # from the plugin.yml parsing in the version and apply those changes
+        # if we did.
+        if self.ymlname:
+            log.debug('Overloading %s plugname to %s' % (plugin.name, self.ymlname))
+            plugin.plugname = self.ymlname
+        if self.ymldesc:
+            log.debug('Overloading %s description to %s' % (plugin.name, self.ymldesc))
+            plugin.description = self.ymldesc
+        s.merge(plugin)
+
+        # Lastly, we will return the number of changes that we made and close
+        # the database session.
+        s.commit()
+        s.close()
         return count
 
+
+    def _version(self, plugin, slug, name):
+        '''_version plugin_id slug
+        The version vunction is designed to take the URL slug and plugin id and
+        will update the database if necessary with new version information for
+        that plugin.
+        '''
+        # We start off with the usual setup stuff, instantiating a counter for
+        # tracking any changes, instantiating a new database session, the normal
+        # boring stuff we always have to do.  We are also computing the version
+        # link.  We will also use this link ourselves to pull the rest of the 
+        # information we need.
+        changes = 0
+        build = False
+        link = '%s/%s/files/%s' % (self.base_uri, plugin.name, slug)
+        s = db.Session()
+
+        # The first thing we need to do is check to see if we even have this
+        # version in the database.  If we do, then we don't need to do anything.
+        try:
+            version = s.query(db.Version).filter_by(link=link).one()
+            s.close()
+            return changes
+        except:
+            # Generally we will end up here, this is ok, because this means that
+            # we have to parse the version and commit it to the database.
+            version = db.Version(name, plugin.id)
+            log.info('VERSION: Adding version %s for plugin %s for bukkit repository' % (name, plugin.name))
+            
+            # as we need this, let go ahead and add the link.
+            version.link = link
+
+            # Yay the page!
+            page = self._get_page(version.link)
+
+            # This is the epoch date that the file was uploaded on.  We will use
+            # this when adding it into the db.
+            epoch = page.find(attrs={'class': 'standard-date'}).get('data-epoch')
+
+            # Now we start parsing!
+            version.download = page.find('dt', text='Filename').findNext('a').get('href')
+            version.filename = page.find('dt', text='Filename').findNext('a').text
+            version.md5 = page.find('dt', text='MD5').findNext('dd').text
+            version.date = datetime.datetime.fromtimestamp(float(epoch))
+            version.status = page.find(attrs={'class': self.refilest}).text
+            version.type = page.find(attrs={'class': self.refilety}).text
+
+            # For the rest of the information, we will need to download the
+            # plugin itself and parse that information.
+            if version.download[-3:].lower() == 'jar':
+                # The first thing we need to do with this jar file is to
+                # download it and instantiate the data as a ZipFile object.
+                # From there we can pull out the needed data and parse it as
+                # needed.
+                data = StringIO()
+                data.write(self._get_url(version.download))
+                jar = ZipFile(data)
+
+                # Now we will look for the plugin.yml file inside the jarfile
+                # and will also add in the hard & soft dependencies, commands,
+                # and permissions.
+                if 'plugin.yml' in jar.namelist():
+                    try:
+                        config = yaml.load(jar.read('plugin.yml'))
+                    except:
+                        config = {}
+                    
+                    # Hard Dependencies
+                    if 'depend' in config and config['depend'] is not None:
+                        version.hard_dependencies = config['depend']
+
+                    # Soft Dependencies
+                    if 'softdepend' in config and config['softdepend'] is not None:
+                        version.soft_dependencies = config['softdepend']
+
+                    # Commands
+                    if 'commands' in config and config['commands'] is not None:
+                        version.commands = config['commands']
+
+                    # Permissions
+                    if 'permissions' in config and config['permissions'] is not None:
+                        version.permissions = config['permissions']
+
+                    # Allow for the ability of the latest update to override the
+                    # plugin name.  We still use the url slug canonically,
+                    # however this may be cleaner ;).
+                    if 'name' in config and config['name'] is not None and not self.ymlname:
+                        self.ymlname = config['name']
+
+                    # Allow for the ability of the latest update to override the
+                    # plugin description.
+                    if 'description' in config and config['description'] is not None and not self.ymldesc:
+                        self.ymldesc = config['description']
+
+                # Now to cleanup...
+                jar.close()
+                data.close()
+
+            # Lastly we will now commit this new version to the database.
+            s.add(version)
+            s.commit()
+            changes = 1
+        return changes
