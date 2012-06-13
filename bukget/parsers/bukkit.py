@@ -60,17 +60,8 @@ class Parser(BaseParser):
         # session, and lastly create a Meta object that we will be using.
         start = time.time()
         s = db.Session()
-        #self.meta = db.Meta()
-
-        # Here we are querying the database for the repository row that we will
-        # need throughout this process.  If one doesn't exist, then we will 
-        # create it here.
-        try:
-            self.repo = s.query(db.Repo).filter_by(name='bukkit').one()
-        except:
-            self.repo = db.Repo('bukkit')
-            s.add(self.repo)
-            s.commit()
+        self.meta = db.Meta('bukkit')
+        s.add(self.meta)
 
         # Here we will be pre-loading the current url (curl) variable and
         # setting running to True so that the while loop will just keep doing
@@ -122,6 +113,7 @@ class Parser(BaseParser):
 
         # Now for a little cleanup, we will commit then close the database
         # session and jump for joy!
+        s.merge(self.meta)
         s.commit()
         s.close()
 
@@ -142,7 +134,7 @@ class Parser(BaseParser):
             plugin = s.query(db.Plugin).filter_by(name=name).one()
             log.debug('PARENT: Updating plugin %s in bukkit repository' % name)
         except:
-            plugin = db.Plugin(name, self.repo.id)
+            plugin = db.Plugin(name, 'bukkit')
             s.add(plugin)
             log.info('PARENT: Adding plugin %s in bukkit repository' % name)
             count += 1
@@ -186,7 +178,8 @@ class Parser(BaseParser):
         # Now for some easier stuff, we will be parsing through the status,
         # the plugin's full name, and the plugin description.
         plugin.stage = page.find('span', {'class': self.restage}).text
-        plugin.description = page.find('div', {'class': 'content-box-inner'}).text
+        #if plugin.description == None:
+        #    plugin.description = page.find('div', {'class': 'content-box-inner'}).text[:150]
         plugname = page.find('div', {'class': 'global-navigation'}).findNextSibling('h1').text
 
         # This is a bit of a hack to get around some issues that have cropped up
@@ -197,7 +190,8 @@ class Parser(BaseParser):
             json.dumps(plugname)
         except: 
             plugname = ''
-        plugin.plugname = plugname
+        #if plugin.plugname == None:
+        #    plugin.plugname = plugname
 
         # Now we need to merge the changes made and commit them into the
         # database before we go much further.  We will also close out the
@@ -242,7 +236,10 @@ class Parser(BaseParser):
                 vlink = row.findNext('td', {'class': 'col-file'}).findNext('a').get('href')
                 vtxt = row.findNext('td', {'class': 'col-file'}).findNext('a').text
                 slug = self.vrex.findall(vlink)[0]
-                vname = self.revex.findall(vtxt)[0]
+                try:
+                    vname = self.revex.findall(vtxt)[0]
+                except:
+                    vname = vtxt
                 changes += self._version(plugin, slug, vname)
                 #except:
                 #    pass
@@ -269,10 +266,10 @@ class Parser(BaseParser):
         # from the plugin.yml parsing in the version and apply those changes
         # if we did.
         if self.ymlname:
-            log.debug('Overloading %s plugname to %s' % (plugin.name, self.ymlname))
+            log.debug('PARENT: Overloading %s plugname to %s' % (plugin.name, self.ymlname))
             plugin.plugname = self.ymlname
         if self.ymldesc:
-            log.debug('Overloading %s description to %s' % (plugin.name, self.ymldesc))
+            log.debug('PARENT: Overloading %s description to %s' % (plugin.name, self.ymldesc))
             plugin.description = self.ymldesc
         s.merge(plugin)
 
@@ -309,7 +306,7 @@ class Parser(BaseParser):
             # Generally we will end up here, this is ok, because this means that
             # we have to parse the version and commit it to the database.
             version = db.Version(name, plugin.id)
-            log.info('VERSION: Adding version %s for plugin %s for bukkit repository' % (name, plugin.name))
+            log.info('PARENT: Adding version %s for plugin %s for bukkit repository' % (name, plugin.name))
             
             # as we need this, let go ahead and add the link.
             version.link = link
@@ -328,6 +325,9 @@ class Parser(BaseParser):
             version.date = datetime.datetime.fromtimestamp(float(epoch))
             version.status = page.find(attrs={'class': self.refilest}).text
             version.type = page.find(attrs={'class': self.refilety}).text
+            version.game_versions = list(set([a.text for a in page.find('dt', text='Game version')\
+                                                                  .findNext('ul')\
+                                                                  .findChildren('li')]))
 
             # For the rest of the information, we will need to download the
             # plugin itself and parse that information.
@@ -336,9 +336,12 @@ class Parser(BaseParser):
                 # download it and instantiate the data as a ZipFile object.
                 # From there we can pull out the needed data and parse it as
                 # needed.
-                data = StringIO()
-                data.write(self._get_url(version.download))
-                jar = ZipFile(data)
+                try:
+                    data = StringIO()
+                    data.write(self._get_url(version.download))
+                    jar = ZipFile(data)
+                except:
+                    pass
 
                 # Now we will look for the plugin.yml file inside the jarfile
                 # and will also add in the hard & soft dependencies, commands,
