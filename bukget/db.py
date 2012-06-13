@@ -37,8 +37,9 @@ disk = create_engine(config.get('Settings', 'db_string'))
 Session = sessionmaker(disk)
 
 # This is the in-memory database
-memory = create_engine('sqlite:///:memory:')
-Reactor = sessionmaker(memory)
+#memory = create_engine('sqlite:///:memory:')
+#Reactor = sessionmaker(memory)
+Reactor = Session
 
 
 # The Category Association Table.  This table houses the relationships
