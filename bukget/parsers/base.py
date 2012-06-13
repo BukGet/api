@@ -2,6 +2,7 @@ import threading
 import time
 from hashlib import md5
 from urllib2 import urlopen
+from bukget.log import log
 from BeautifulSoup import BeautifulSoup
 
 class BaseParser(threading.Thread):
@@ -17,6 +18,7 @@ class BaseParser(threading.Thread):
         while (time.time() - self._timer) < self._delay:
             time.sleep(0.1)
         self._timer = time.time()
+        #log.debug('Parsing Page: %s' % url)    # I dont think we need this ;)
         return BeautifulSoup(self._get_url(url))
     
     
@@ -25,7 +27,7 @@ class BaseParser(threading.Thread):
         
         Return the contents of the URL specified.
         '''
-        self._log.debug('Fetching: %s' % url)
+        log.debug('Fetching: %s' % url)
         return urlopen(url).read()
     
     
