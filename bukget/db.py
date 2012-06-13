@@ -60,7 +60,6 @@ authassc = Table('author_association', Base.metadata,
 def initialize(engine):
     Plugin.metadata.create_all(engine)
     Version.metadata.create_all(engine)
-    Repo.metadata.create_all(engine)
     Category.metadata.create_all(engine)
     Author.metadata.create_all(engine)
     catassc.metadata.create_all(engine)
@@ -150,16 +149,15 @@ class Plugin(Base):
     stage = Column(String)
     link = Column(Text)
     description = Column(Text)
-    repo_id = Column(Integer, ForeignKey('repo.id'))
-    repo = relationship('Repo', backref='plugins')
+    repo = Column(String)
     versions = relationship('Version', order_by='desc(Version.date)',
                             backref='plugin')
     categories = relationship('Category', secondary=catassc, backref='plugins')
     authors = relationship('Author', secondary=authassc, backref='plugins')
 
-    def __init__(self, name, repo_id):
+    def __init__(self, name, repo):
         self.name = name
-        self.repo_id = repo_id
+        self.repo = repo
 
 
 class Version(Base):
@@ -174,6 +172,7 @@ class Version(Base):
     type = Column(String)
     filename = Column(String)
     plugin_id = Column(Integer, ForeignKey('plugin.id'))
+    game_versions = Column(TextPickle(pickler=json))
     permissions = Column(TextPickle(pickler=json))
     commands = Column(TextPickle(pickler=json))
     hard_dependencies = Column(TextPickle(pickler=json))
@@ -182,15 +181,6 @@ class Version(Base):
     def __init__(self, name, plugin_id):
         self.name = name
         self.plugin_id = plugin_id
-
-
-class Repo(Base):
-    __tablename__ = 'repo'
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String)
-
-    def __init__(self, name):
-        self.name = name
 
 
 class Category(Base):
@@ -214,5 +204,8 @@ class Author(Base):
 class Meta(Base):
     __tablename__ = 'meta'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    repo_id = Column(Integer, ForeignKey('repo.id'))
-    generation = Column(Integer)
+    repo = Column(String)
+    changes = Column(TextPickle(pickler=json))
+
+    def __init__(self, repo):
+        self.repo = repo
