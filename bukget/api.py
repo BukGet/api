@@ -2,8 +2,19 @@ from bottle import Bottle, request, response, template, redirect
 from bukget.config import config
 import bukget.db as db
 import bukget.svc as svc
+import json
 
 app = Bottle()
+
+
+def jsonify(dataset):
+    return json.dumps(dataset)
+
+
+@app.hook('before_request')
+def set_json_header():
+    response.set_header('Content-Type', 'application/json')
+
 
 @app.route('/')
 def metadata():
@@ -24,7 +35,7 @@ def plugin_list(repo):
     plugins = s.query(db.Plugin).filter_by(repo=repo).all()
     plist = [a.json('name', 'plugname', 'description') for a in plugins]
     s.close()
-    return plist
+    return jsonify(plist)
 
 
 @app.route('/<repo>/plugin/<name>')
@@ -33,7 +44,7 @@ def plugin_details(repo, name):
     plugin = s.query(db.Plugin).filter_by(name=name, repo=repo).first()
     pdata = plugin.json()
     s.close()
-    return pdata
+    return jsonify(pdata)
 
 
 @app.route('/<repo>/plugin/<name>/<version>')
@@ -49,7 +60,7 @@ def plugin_version(repo, name, version):
     pdata = plugin.json()
     pdata['versions'] = vobj.json()
     s.close()
-    return pdata
+    return jsonify(pdata)
 
 
 @app.route('/<repo>/plugin/<name>/<version>/download')
@@ -71,10 +82,35 @@ def categories(repo):
     categories = s.query(db.Category).all()
     cdata = [c.json('name') for c in categories]
     s.close()
-    return cdata
+    return jsonify(cdata)
 
 
 @app.route('/<repo>/category/<category>')
 def category_plugin_list(repo, category):
     s = db.Reactor()
-    
+    category = category.replace('_', ' ')
+    category = s.query(db.Category).filter_by(name=name).first()
+    pdata = []
+    for plugin in category.plugins:
+        if plugin.repo == repo:
+            pdata.append(plugin.json('name', 'plugname', 'description'))
+    s.close()
+    return jsonify(pdata)
+
+
+@app.route('/authors')
+def author_list():
+    s = db.Reactor()
+    authors = s.query(db.Author).all()
+    adata = [a.json('name') for a in authors]
+    s.close()
+    return jsonify(adata)
+
+
+@app.route('/author/<name>')
+def author_plugins(name):
+    s = db.Reactor()
+    author = s.query(db.Author).filter_by(name=name).first()
+    pdata = [p.json('name', 'plugname', 'description', 'repo') for p in author.plugins]
+    s.close()
+    return jsonify(pdata)
