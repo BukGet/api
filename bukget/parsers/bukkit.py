@@ -27,7 +27,7 @@ class Parser(BaseParser):
 
     # This is the regex that we will be using for parsing out the version
     # numbers.
-    revex = re.compile(r'b{0,1}\d{1,3}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}')
+    revex = re.compile(r'b{0,1}\d{1,3}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}')
 
     # This regex is used to parse out the plugin status.
     restage = re.compile(r'project-stage')
