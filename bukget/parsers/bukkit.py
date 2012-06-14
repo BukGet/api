@@ -153,7 +153,7 @@ class Parser(BaseParser):
                                                 .findChildren('a', {'class': 'user user-author'})]))
         for author_name in authors:
             try:
-                author = s.query(db.Author).filter_by(name=name).one()
+                author = s.query(db.Author).filter_by(name=name).first()
             except:
                 author = db.Author(author_name)
                 s.add(author)
@@ -166,7 +166,7 @@ class Parser(BaseParser):
         categories = [a.text for a in page.findAll('a', {'class': 'category'})]
         for cat_name in categories:
             try:
-                category = s.query(db.Category).filter_by(name=cat_name).one()
+                category = s.query(db.Category).filter_by(name=cat_name).first()
             except:
                 category = db.Category(cat_name)
                 s.add(category)
@@ -346,6 +346,10 @@ class Parser(BaseParser):
                 # Now we will look for the plugin.yml file inside the jarfile
                 # and will also add in the hard & soft dependencies, commands,
                 # and permissions.
+                version.hard_dependencies = []
+                version.soft_dependencies = []
+                version.commands = {}
+                version.permissions = {}
                 if 'plugin.yml' in jar.namelist():
                     try:
                         config = yaml.load(jar.read('plugin.yml'))
