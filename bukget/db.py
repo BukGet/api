@@ -1,4 +1,5 @@
 import json
+import sqlalchemy.orm.collections as collections
 from bukget.config import config
 from sqlalchemy import (Table, Column, Integer, ForeignKey, PickleType, Text,
                         String, DateTime, and_, desc, create_engine)
@@ -18,14 +19,14 @@ class NewBase(object):
         the endire dictionary.
         '''
         jdict = {}
-        if len(fields) == 0:
-            for field in fields:
-                jdict[field] = self.__dict__[field]
-                # Some code will have to be added here to account for
-                # relationship models, however I will have to run some
-                # tests first.
-        else:
-            jdict = self.__dict__
+        for attribute, value in vars(self).items():
+            print attribute
+            if (len(fields) == 0 or attribute in fields) and attribute[0] != '_':
+                print attribute, isinstance(value, collections.InstrumentedList)
+                if isinstance(value, collections.InstrumentedList):
+                    jdict[attribute] = [a.json() for a in value]
+                else:
+                    jdict[attribute] = value
         return jdict
 
 
@@ -40,7 +41,6 @@ Session = sessionmaker(disk)
 #memory = create_engine('sqlite:///:memory:')
 #Reactor = sessionmaker(memory)
 Reactor = Session
-
 
 # The Category Association Table.  This table houses the relationships
 # between plugins and categories.
@@ -180,7 +180,7 @@ class Version(Base):
     soft_dependencies = Column(TextPickle(pickler=json))
 
     def __init__(self, name, plugin_id):
-        self.name = name
+        self.version = name
         self.plugin_id = plugin_id
 
 
