@@ -38,6 +38,9 @@ class Parser(BaseParser):
     # This regex is used to pull the file type for versions.
     refilety = re.compile(r'file-type')
 
+    # This regex is used to let us know what page we are starting to parse.
+    repage = re.compile(r'page=(\d{1,4})')
+
 
     def run(self, speedy=True, page_num=1):
         '''run speedy=True
@@ -62,6 +65,7 @@ class Parser(BaseParser):
         s = db.Session()
         self.meta = db.Meta('bukkit')
         s.add(self.meta)
+        log.info('PARENT: Starting DBO Parsing at page %s' % page_num)
 
         # Here we will be pre-loading the current url (curl) variable and
         # setting running to True so that the while loop will just keep doing
@@ -103,6 +107,7 @@ class Parser(BaseParser):
             if len(nurl) > 0:
                 link = nurl[0].findNext('a')
                 curl = 'http://dev.bukkit.org%s' % link.get('href')
+                log.info('PARENT: Parsing DBO Page %s' % self.repage.findall(curl)[0])
             else:
                 running = False
 
@@ -113,6 +118,8 @@ class Parser(BaseParser):
 
         # Now for a little cleanup, we will commit then close the database
         # session and jump for joy!
+        self.meta.duration = int(time.time() - start)
+        log.info('PARENT: DBO Parsing complete.  took %s seconds' % self.meta.duration)
         s.merge(self.meta)
         s.commit()
         s.close()
@@ -306,6 +313,7 @@ class Parser(BaseParser):
             # Generally we will end up here, this is ok, because this means that
             # we have to parse the version and commit it to the database.
             version = db.Version(name, plugin.id)
+            self.meta.changes.append({'plugin': plugin.name, 'version': name})
             log.info('PARENT: Adding version %s for plugin %s for bukkit repository' % (name, plugin.name))
             
             # as we need this, let go ahead and add the link.
@@ -357,30 +365,30 @@ class Parser(BaseParser):
                         config = {}
                     
                     # Hard Dependencies
-                    if 'depend' in config and config['depend'] is not None:
+                    if 'depend' in config and config['depend'] != None:
                         version.hard_dependencies = config['depend']
 
                     # Soft Dependencies
-                    if 'softdepend' in config and config['softdepend'] is not None:
+                    if 'softdepend' in config and config['softdepend'] != None:
                         version.soft_dependencies = config['softdepend']
 
                     # Commands
-                    if 'commands' in config and config['commands'] is not None:
+                    if 'commands' in config and config['commands'] != None:
                         version.commands = config['commands']
 
                     # Permissions
-                    if 'permissions' in config and config['permissions'] is not None:
+                    if 'permissions' in config and config['permissions'] != None:
                         version.permissions = config['permissions']
 
                     # Allow for the ability of the latest update to override the
                     # plugin name.  We still use the url slug canonically,
                     # however this may be cleaner ;).
-                    if 'name' in config and config['name'] is not None and not self.ymlname:
+                    if 'name' in config and config['name'] != None and not self.ymlname:
                         self.ymlname = config['name']
 
                     # Allow for the ability of the latest update to override the
                     # plugin description.
-                    if 'description' in config and config['description'] is not None and not self.ymldesc:
+                    if 'description' in config and config['description'] != None and not self.ymldesc:
                         self.ymldesc = config['description']
 
                 # Now to cleanup...
