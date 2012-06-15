@@ -206,7 +206,10 @@ class Meta(Base):
     __tablename__ = 'meta'
     id = Column(Integer, autoincrement=True, primary_key=True)
     repo = Column(String)
+    duration = Column(Integer)
     changes = Column(TextPickle(pickler=json))
 
     def __init__(self, repo):
         self.repo = repo
+        self.changes = []
+        self.duration = 0
