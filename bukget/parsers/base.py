@@ -7,7 +7,7 @@ from BeautifulSoup import BeautifulSoup
 
 class BaseParser(threading.Thread):
     _timer = 0
-    _delay = 1
+    _delay = 2
     _verbose = False
     
     def _get_page(self, url):
