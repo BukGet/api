@@ -1,10 +1,11 @@
 import multiprocessing
+import markdown
 import bottle
 from bukget.config import config
 import bukget.api
-import bukget.site
 import bukget.db
 import time
+from urllib2 import urlopen
 from log import log
 from sqlalchemy import desc
 import bukget.parsers
@@ -17,7 +18,13 @@ def website():
 		app.mount('/api', bukget.legacy.app)
 		app.mount('/api2', bukget.api.app)
 	if config.getboolean('Settings', 'enable_site'):
-		app.mount('/', bukget.site.app)
+
+		@app.route('/')
+		def home_page():
+		    url = 'https://raw.github.com/SteveMcGrath/bukget/master/README.md'
+		    page = urlopen(url).read()
+		    return markdown.markdown(page)
+
 	bottle.debug(config.getboolean('Settings', 'debug'))
 	bottle.run(app=app,
 			   port=config.get('Settings', 'port'),
