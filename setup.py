@@ -8,7 +8,7 @@ setup(
     author='Steven McGrath',
     author_email='steve@chigeek.com',
     url='https://github.com/SteveMcGrath/bukget',
-    package_dir=['bukget'],
+    packages=['bukget', 'bukget.parsers'],
     entry_points = {
         'console_scripts': [
             'bukget-web = bukget.svc:website',
@@ -16,14 +16,15 @@ setup(
             ]
     },
     data_files=[
-        ('/etc', ['bukget.config']),
-    ]
+        ('/etc', ['bukget.conf']),
+    ],
     install_requires=[
         'bottle', 
         'markdown >= 2.0',
         'sqlalchemy',
         'bottle-sqlalchemy',
         'beautifulsoup',
+        'pyyaml',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
