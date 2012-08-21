@@ -3,14 +3,14 @@ import yaml
 import json
 import re
 import datetime
+import base
 import bukget.db as db
 from bukget.log import log
-from bukget.parsers.base import BaseParser
 from StringIO import StringIO
 from zipfile import ZipFile
 
 
-class Parser(BaseParser):
+class Parser(base.BaseParser):
     # This is the Bukkit Parser class.  This is the class that will actually
     # parse out the data from DBO and dump it into the database.
     
@@ -65,6 +65,7 @@ class Parser(BaseParser):
         s = db.Session()
         self.meta = db.Meta('bukkit')
         s.add(self.meta)
+        s.commit()
         log.info('PARENT: Starting DBO Parsing at page %s' % page_num)
 
         # Here we will be pre-loading the current url (curl) variable and
@@ -161,10 +162,13 @@ class Parser(BaseParser):
         for author_name in authors:
             try:
                 author = s.query(db.Author).filter_by(name=name).first()
+                if author == None:
+                    author = db.Author(author_name)
+                    s.add(author)
+                    s.commit()
+                    log.debug('Added Author %s' % author_name)
             except:
-                author = db.Author(author_name)
-                s.add(author)
-                s.commit()
+                pass
 
             if author not in plugin.authors:
                 plugin.authors.append(author)
@@ -174,10 +178,13 @@ class Parser(BaseParser):
         for cat_name in categories:
             try:
                 category = s.query(db.Category).filter_by(name=cat_name).first()
+                if category == None:
+                    category = db.Category(cat_name)
+                    s.add(category)
+                    s.commit()
+                    log.debug('Added Category %s' % cat_name)
             except:
-                category = db.Category(cat_name)
-                s.add(category)
-                s.commit()
+                pass
 
             if category not in plugin.categories:
                 plugin.categories.append(category)

@@ -9,6 +9,7 @@ class BaseParser(threading.Thread):
     _timer = 0
     _delay = 2
     _verbose = False
+    complete = True
     
     def _get_page(self, url):
         '''get_page url
@@ -18,7 +19,6 @@ class BaseParser(threading.Thread):
         while (time.time() - self._timer) < self._delay:
             time.sleep(0.1)
         self._timer = time.time()
-        #log.debug('Parsing Page: %s' % url)    # I dont think we need this ;)
         return BeautifulSoup(self._get_url(url))
     
     
