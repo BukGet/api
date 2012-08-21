@@ -9,6 +9,10 @@ _loglevels = {
     'critical': logging.CRITICAL,
 }
 
+# If SQL Gives me issues, I just need to uncomment this ;)
+#logging.basicConfig(filename=config.get('Settings', 'log_file'))
+#logging.getLogger('sqlalchemy.engine').setLevel(_loglevels[config.get('Settings', 'log_level')])
+
 log = logging.getLogger('bukget')
 hdlr = logging.FileHandler(config.get('Settings', 'log_file'))
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
