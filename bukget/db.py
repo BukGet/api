@@ -1,6 +1,9 @@
 import json
+import time
+import datetime
 import sqlalchemy.orm.collections as collections
 from bukget.config import config
+from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy import (Table, Column, Integer, ForeignKey, PickleType, Text,
                         String, DateTime, and_, desc, create_engine)
 from sqlalchemy.orm import relationship, backref, sessionmaker
@@ -20,11 +23,11 @@ class NewBase(object):
         '''
         jdict = {}
         for attribute, value in vars(self).items():
-            print attribute
             if (len(fields) == 0 or attribute in fields) and attribute[0] != '_':
-                print attribute, isinstance(value, collections.InstrumentedList)
                 if isinstance(value, collections.InstrumentedList):
                     jdict[attribute] = [a.json() for a in value]
+                elif isinstance(value, datetime.datetime):
+                    jdict[attribute] = int(time.mktime(value.timetuple()))
                 else:
                     jdict[attribute] = value
         return jdict
@@ -37,10 +40,6 @@ Base = declarative_base(cls=NewBase)
 disk = create_engine(config.get('Settings', 'db_string'))
 Session = sessionmaker(disk)
 
-# This is the in-memory database
-#memory = create_engine('sqlite:///:memory:')
-#Reactor = sessionmaker(memory)
-Reactor = Session
 
 # The Category Association Table.  This table houses the relationships
 # between plugins and categories.
@@ -58,81 +57,14 @@ authassc = Table('author_association', Base.metadata,
 )
 
 
-def initialize(engine):
+def init(engine):
     Plugin.metadata.create_all(engine)
     Version.metadata.create_all(engine)
     Category.metadata.create_all(engine)
+    Meta.metadata.create_all(engine)
     Author.metadata.create_all(engine)
     catassc.metadata.create_all(engine)
     authassc.metadata.create_all(engine)
-
-
-def clear(engine):
-    '''clear enigine
-    This function will drop all of the dables in a database, effectively
-    clearing out the database for re-initialization.
-    '''
-    meta = MetaData(engine)
-    meta.reflect()
-    meta.drop_all()
-
-
-def _migrate(s, d, table):
-    rows = s.query(table).all()
-
-    for row in rows:
-        s.expunge(row)
-        d.merge(row)
-    d.commit()
-
-
-def clone(source, dest):
-    '''clone source dest
-    This function will completely clone the Database from the source engine to
-    the destination engine.  This is very useful for replicating information
-    in and out of memory as we will be primarially using an in-memory sqlite
-    database for BukGet for performance purposes.
-    '''
-    # First we need to scrub and initialize the destination to make sure that it
-    # is primed for us to work our magic ;)
-    clear(dest)
-    init(dest)
-
-    # Next we need to setup the session reactors and build the sessions that we
-    # will be working with.
-    smaker = sessionmaker(source)
-    dmaker = sessionmaker(dest)
-
-    s = smaker()
-    d = dmaker()
-
-    # Now for the actual work, We will run migrate on each table we want to
-    # replicate.
-    _migrate(s, d, Plugin)
-    _migrate(s, d, Version)
-    _migrate(s, d, Repo)
-    _migrate(s, d, Category)
-    _migrate(s, d, Author)
-    _migrate(s, d, Meta)
-    _migrate(s, d, catassc)
-    _migrate(s, d, authassc)
-
-    # Lastly we need to close out the sessions.
-    s.close()
-    d.close()
-
-
-def replace(engine):
-    '''replace engine
-    This function is designed to very simply clone the database engine given to
-    us, and return with the sqlite in-memory engine.  This is especially useful
-    for startup and for the updates, as all of the changes can be done to an
-    in-memory copy and then once everything is complete a new, pristine database
-    is returned to the application.
-    '''
-    mem2 = create_engine('sqlite:///:memory:')
-    clone(engine, mem2)
-    return mem2, sessionmaker(mem2)
 
 
 class TextPickle(PickleType):
@@ -152,9 +84,9 @@ class Plugin(Base):
     description = Column(Text)
     repo = Column(String)
     versions = relationship('Version', order_by='desc(Version.date)',
-                            backref='plugin')
-    categories = relationship('Category', secondary=catassc, backref='plugins')
-    authors = relationship('Author', secondary=authassc, backref='plugins')
+                            backref='plugin', lazy='joined')
+    categories = relationship('Category', secondary=catassc, backref='plugins', lazy='join')
+    authors = relationship('Author', secondary=authassc, backref='plugins', lazy='join')
 
     def __init__(self, name, repo):
         self.name = name
@@ -207,9 +139,11 @@ class Meta(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     repo = Column(String)
     duration = Column(Integer)
+    timestamp = Column(Integer)
     changes = Column(TextPickle(pickler=json))
 
     def __init__(self, repo):
         self.repo = repo
         self.changes = []
         self.duration = 0
+        self.timestamp = int(time.time())
