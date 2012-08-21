@@ -77,12 +77,12 @@ class TextPickle(PickleType):
 class Plugin(Base):
     __tablename__ = 'plugin'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String)
-    plugname = Column(String)
-    stage = Column(String)
+    name = Column(String(128))
+    plugname = Column(Text)
+    stage = Column(String(15))
     link = Column(Text)
     description = Column(Text)
-    repo = Column(String)
+    repo = Column(String(10))
     versions = relationship('Version', order_by='desc(Version.date)',
                             backref='plugin', lazy='joined')
     categories = relationship('Category', secondary=catassc, backref='plugins', lazy='join')
@@ -96,14 +96,14 @@ class Plugin(Base):
 class Version(Base):
     __tablename__ = 'version'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    version = Column(String)
-    link = Column(String)
-    download = Column(String)
+    version = Column(String(20))
+    link = Column(Text)
+    download = Column(Text)
     date = Column(DateTime)
-    md5 = Column(String)
-    status = Column(String)
-    type = Column(String)
-    filename = Column(String)
+    md5 = Column(String(32))
+    status = Column(String(15))
+    type = Column(String(10))
+    filename = Column(String(128))
     plugin_id = Column(Integer, ForeignKey('plugin.id'))
     game_versions = Column(TextPickle(pickler=json))
     permissions = Column(TextPickle(pickler=json))
@@ -119,7 +119,7 @@ class Version(Base):
 class Category(Base):
     __tablename__ = 'category'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String)
+    name = Column(String(128))
 
     def __init__(self, name):
         self.name = name
@@ -128,7 +128,7 @@ class Category(Base):
 class Author(Base):
     __tablename__ = 'author'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String)
+    name = Column(String(128))
 
     def __init__(self, name):
         self.name = name
@@ -137,7 +137,7 @@ class Author(Base):
 class Meta(Base):
     __tablename__ = 'meta'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    repo = Column(String)
+    repo = Column(String(10))
     duration = Column(Integer)
     timestamp = Column(Integer)
     changes = Column(TextPickle(pickler=json))
