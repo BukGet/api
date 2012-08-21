@@ -160,15 +160,12 @@ class Parser(base.BaseParser):
         authors = list(set([a.text for a in page.find('li', {'class': 'user-list-item'})\
                                                 .findChildren('a', {'class': 'user user-author'})]))
         for author_name in authors:
-            try:
-                author = s.query(db.Author).filter_by(name=name).first()
-                if author == None:
-                    author = db.Author(author_name)
-                    s.add(author)
-                    s.commit()
-                    log.debug('Added Author %s' % author_name)
-            except:
-                pass
+            author = s.query(db.Author).filter_by(name=author_name).first()
+            if author is None:
+                author = db.Author(author_name)
+                s.add(author)
+                s.commit()
+                log.debug('Added Author %s' % author_name)
 
             if author not in plugin.authors:
                 plugin.authors.append(author)
@@ -176,15 +173,12 @@ class Parser(base.BaseParser):
         # and for the next fun item, categories!  We will be performing the 
         categories = [a.text for a in page.findAll('a', {'class': 'category'})]
         for cat_name in categories:
-            try:
-                category = s.query(db.Category).filter_by(name=cat_name).first()
-                if category == None:
-                    category = db.Category(cat_name)
-                    s.add(category)
-                    s.commit()
-                    log.debug('Added Category %s' % cat_name)
-            except:
-                pass
+            category = s.query(db.Category).filter_by(name=cat_name).first()
+            if category is None:
+                category = db.Category(cat_name)
+                s.add(category)
+                s.commit()
+                log.debug('Added Category %s' % cat_name)
 
             if category not in plugin.categories:
                 plugin.categories.append(category)
