@@ -1,24 +1,25 @@
-import threading
 import time
+import threading
 from hashlib import md5
 from urllib2 import urlopen
 from bukget.log import log
 from BeautifulSoup import BeautifulSoup
 
 class BaseParser(threading.Thread):
-    _timer = 0
-    _delay = 2
-    _verbose = False
+    timer = 0
+    delay = 2
+    verbose = False
     complete = True
+
     
     def _get_page(self, url):
         '''get_page url
         
         Returns a BeautifulSoup object of the HTML page in the URL specified.
         '''
-        while (time.time() - self._timer) < self._delay:
+        while self.delay_check() < self.delay:
             time.sleep(0.1)
-        self._timer = time.time()
+        self.timer = time.time()
         return BeautifulSoup(self._get_url(url))
     
     
@@ -28,7 +29,14 @@ class BaseParser(threading.Thread):
         Return the contents of the URL specified.
         '''
         log.debug('Fetching: %s' % url)
-        return urlopen(url).read()
+        comp = False
+        while not comp:
+            try:
+                data = urlopen(url, timeout=5).read()
+                comp = True
+            except:
+                log.warn('Connection to %s failed, retrying...')
+        return data
     
     
     def _hash(self, string):
@@ -39,3 +47,10 @@ class BaseParser(threading.Thread):
         h = md5()
         h.update(string)
         return h.hexdigest()
+
+
+    def delay_check(self):
+        '''Returns the number of seconds since the last HTTP request'''
+        return (time.time() - self.timer)
+        
+
