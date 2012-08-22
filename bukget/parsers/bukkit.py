@@ -42,18 +42,24 @@ class Parser(base.BaseParser):
     repage = re.compile(r'page=(\d{1,4})')
 
 
-    def run(self, speedy=True, page_num=1):
-        '''run speedy=True
+    def __init__(self, speedy=True, page_num=1):
+        self.speedy = speedy
+        self.page_num = page_num
+        base.BaseParser.__init__(self)
+
+
+    def run(self):
+        '''run
         This function is the main function to launch the parser.  The speedy
         flag denoted whether the parser will run through the entire DBO database
         or will only check for those items it does not have in the database.
         '''
         self.complete = False
-        self._server_mods(speedy, page_num)
+        self._server_mods()
         self.complete = True
 
 
-    def _server_mods(self, speedy, page_num):
+    def _server_mods(self):
         '''_server_mods speedy=True
         This function is what will be parsing the plugin listing pages, looking
         for new plugins.
@@ -66,12 +72,12 @@ class Parser(base.BaseParser):
         self.meta = db.Meta('bukkit')
         s.add(self.meta)
         s.commit()
-        log.info('PARENT: Starting DBO Parsing at page %s' % page_num)
+        log.info('PARENT: Starting DBO Parsing at page %s' % self.page_num)
 
         # Here we will be pre-loading the current url (curl) variable and
         # setting running to True so that the while loop will just keep doing
         # it's thing.
-        curl = '%s?page=%s' % (self.base_uri, page_num)
+        curl = '%s/?page=%s' % (self.base_uri, self.page_num)
         running = True
 
         while running:
@@ -106,16 +112,17 @@ class Parser(base.BaseParser):
             # variable to the next page we will need to parse.
             nurl = page.findAll(attrs={'class': 'listing-pagination-pages-next'})
             if len(nurl) > 0:
-                link = nurl[0].findNext('a')
-                curl = 'http://dev.bukkit.org%s' % link.get('href')
-                log.info('PARENT: Parsing DBO Page %s' % self.repage.findall(curl)[0])
+                self.page_num += 1
+                curl = '%s/?page=%s' % (self.base_uri, self.page_num)
             else:
                 running = False
 
             # Lastly we will need to check the count and if we are running in
             # speedy mode and act accordingly.
-            if count == 0 and speedy:
+            if count == 0 and self.speedy:
                 running = False
+            else:
+                log.info('PARENT: Parsing DBO Page %s' % self.page_num)
 
         # Now for a little cleanup, we will commit then close the database
         # session and jump for joy!
@@ -189,17 +196,7 @@ class Parser(base.BaseParser):
         #if plugin.description == None:
         #    plugin.description = page.find('div', {'class': 'content-box-inner'}).text[:150]
         plugname = page.find('div', {'class': 'global-navigation'}).findNextSibling('h1').text
-
-        # This is a bit of a hack to get around some issues that have cropped up
-        # thanks to plugins using unicode characters that just arent handled in
-        # json.  Once we have a determination of what we can do, we will
-        # populate that into the plugin.
-        try: 
-            json.dumps(plugname)
-        except: 
-            plugname = ''
-        #if plugin.plugname == None:
-        #    plugin.plugname = plugname
+        plugname = plugname.encode('ascii', 'ignore')
 
         # Now we need to merge the changes made and commit them into the
         # database before we go much further.  We will also close out the
@@ -275,10 +272,10 @@ class Parser(base.BaseParser):
         # if we did.
         if self.ymlname:
             log.debug('PARENT: Overloading %s plugname to %s' % (plugin.name, self.ymlname))
-            plugin.plugname = self.ymlname
+            plugin.plugname = self.ymlname.encode('ascii', 'ignore')
         if self.ymldesc:
             log.debug('PARENT: Overloading %s description to %s' % (plugin.name, self.ymldesc))
-            plugin.description = self.ymldesc
+            plugin.description = self.ymldesc.encode('ascii', 'ignore')
         s.merge(plugin)
 
         # Lastly, we will return the number of changes that we made and close
