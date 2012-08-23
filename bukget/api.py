@@ -25,8 +25,16 @@ def metadata(s):
 
 @app.route('/<repo>/plugins')
 def plugin_list(repo, s):
-    plugins = s.query(db.Plugin).filter_by(repo=repo).all()
-    plist = [a.json('name', 'plugname', 'description') for a in plugins]
+    start = request.query.start or None
+    size = request.query.size or None
+    fields = request.query.fields or 'name,plugname,description'
+    if start is not None and size is not None:
+        plugins = s.query(db.Plugin).filter(db.Plugin.repo==repo)\
+                                    .filter(db.Plugin.id>=int(start))\
+                                    .limit(int(size)).all()
+    else:
+        plugins = s.query(db.Plugin).filter_by(repo=repo).all()
+    plist = [a.json(*fields.split(',')) for a in plugins]
     return jsonify(plist)
 
 
