@@ -1,5 +1,6 @@
 from bottle import Bottle, request, response, template, redirect
 from sqlalchemy import desc, and_, or_
+from sqlalchemy.orm import joinedload
 from bottle.ext import sqlalchemy
 from bukget.config import config
 import bukget.db as db
@@ -40,14 +41,18 @@ def plugin_list(repo, s):
 
 @app.route('/<repo>/plugin/<name>')
 def plugin_details(repo, name, s):
-    plugin = s.query(db.Plugin).filter_by(name=name, repo=repo).first()
+    plugin = s.query(db.Plugin).filter_by(name=name, repo=repo)\
+                               .options(joinedload('categories'),
+                                        joinedload('authors')).first()
     pdata = plugin.json()
     return jsonify(pdata)
 
 
 @app.route('/<repo>/plugin/<name>/<version>')
 def plugin_version(repo, name, version, s):
-    plugin = s.query(db.Plugin).filter_by(name=name, repo=repo).first()
+    plugin = s.query(db.Plugin).filter_by(name=name, repo=repo)\
+                               .options(joinedload('categories'),
+                                        joinedload('authors')).first()
     if version == 'latest':
         vobj = plugin.versions[0]
     else:
