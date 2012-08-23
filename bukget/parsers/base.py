@@ -30,12 +30,17 @@ class BaseParser(threading.Thread):
         '''
         log.debug('Fetching: %s' % url)
         comp = False
-        while not comp:
+        count = 0
+        data = ''
+        while not comp and count <= 5:
             try:
+                count += 1
                 data = urlopen(url, timeout=5).read()
                 comp = True
             except:
                 log.warn('Connection to "%s" failed, retrying...' % url)
+        if count > 5:
+            log.error('Could not get %s.' % url)
         return data
     
     
