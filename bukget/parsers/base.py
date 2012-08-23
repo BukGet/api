@@ -35,7 +35,7 @@ class BaseParser(threading.Thread):
                 data = urlopen(url, timeout=5).read()
                 comp = True
             except:
-                log.warn('Connection to %s failed, retrying...')
+                log.warn('Connection to "%s" failed, retrying...' % url)
         return data
     
     
