@@ -29,7 +29,10 @@ class NewBase(object):
                 elif isinstance(value, datetime.datetime):
                     jdict[attribute] = int(time.mktime(value.timetuple()))
                 else:
-                    jdict[attribute] = value
+                    if value is not None:
+                        jdict[attribute] = value
+                    else:
+                        jdict[attribute] = ''
         return jdict
 
 
