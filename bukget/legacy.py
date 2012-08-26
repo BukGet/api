@@ -3,6 +3,7 @@ from sqlalchemy import desc, and_, or_
 from bottle.ext import sqlalchemy
 from bukget.config import config
 import bukget.db as db
+import bukget.api as api
 import datetime
 import time
 import json
@@ -57,9 +58,8 @@ def metadata(s):
 
 @app.route('/plugins')
 def plugin_list(s):
-    plugins = s.query(db.Plugin).filter_by(repo='bukkit').all()
-    plist = [a.name for a in plugins]
-    return jsonify(plist)
+    plugins = json.loads(api.plugin_list('bukkit', s))
+    return jsonify([a['name'] for a in plugins])
 
 
 @app.route('/plugin/<name>')
@@ -95,13 +95,8 @@ def categories(s):
 
 @app.route('/category/<category>')
 def category_plugin_list(category, s):
-    category = category.replace('_', ' ')
-    category = s.query(db.Category).filter_by(name=category).first()
-    pdata = []
-    for plugin in category.plugins:
-        if plugin.repo == 'bukkit':
-            pdata.append(plugin.name)
-    return jsonify(pdata)
+    plugins = json.loads(api.category_plugin_list('bukkit', category, s))
+    return jsonify([p['name'] for p in plugins])
 
 
 @app.route('/authors')
@@ -121,18 +116,5 @@ def author_plugins(name, s):
 @app.route('/search/<field>/<oper>/<value>')
 @app.route('/search/<obj>/<field>/<oper>/<value>')
 def search(field, oper, value, s, obj='plugin'):
-    if oper in ['=', '>', '>=', '<', '<=']:
-        search = '%s %s \'%s\'' % ('%s.%s' % (obj, field), oper, value)
-    elif oper in ['in', 'like']:
-        search = 'UPPER(%s) LIKE \'%%%s%%\'' % ('%s.%s' % (obj, field), value.upper())
-    else:
-        return jsonify({'ERROR': 'Invalid Search Terms'})
-    if obj == 'plugin':
-        items = s.query(db.Plugin).filter(search).all()
-        pdata = [p.name for p in items]
-    elif obj == 'version':
-        items = s.query(db.Version).filter(search).all()
-        pdata = [p.plugin.name for p in items]
-    else:
-        return jsonify({'ERROR': 'Invalid Object Name'})
-    return jsonify(pdata)
+    plugins = json.loads(api.search(obj, field, oper, value, s))
+    return jsonify([p['name'] for p in plugins])
