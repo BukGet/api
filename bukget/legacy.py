@@ -58,7 +58,7 @@ def metadata(s):
 
 @app.route('/plugins')
 def plugin_list(s):
-    plugins = json.loads(api.plugin_list('bukkit', s))
+    plugins = api.plugin_list('bukkit', s, convert=False)
     return jsonify([a['name'] for a in plugins])
 
 
@@ -89,21 +89,19 @@ def plugin_download(name, version, s):
 @app.route('/categories')
 def categories(s):
     categories = s.query(db.Category).all()
-    cdata = [c.name for c in categories]
-    return jsonify(cdata)
+    return jsonify([c.name for c in categories])
 
 
 @app.route('/category/<category>')
 def category_plugin_list(category, s):
-    plugins = json.loads(api.category_plugin_list('bukkit', category, s))
+    plugins = api.category_plugin_list('bukkit', category, s, convert=False)
     return jsonify([p['name'] for p in plugins])
 
 
 @app.route('/authors')
 def author_list(s):
     authors = s.query(db.Author).all()
-    adata = [a.name for a in authors]
-    return jsonify(adata)
+    return jsonify([a.name for a in authors])
 
 
 @app.route('/author/<name>')
@@ -116,5 +114,5 @@ def author_plugins(name, s):
 @app.route('/search/<field>/<oper>/<value>')
 @app.route('/search/<obj>/<field>/<oper>/<value>')
 def search(field, oper, value, s, obj='plugin'):
-    plugins = json.loads(api.search(obj, field, oper, value, s))
+    plugins = api.search(obj, field, oper, value, s, convert=False)
     return jsonify([p['name'] for p in plugins])

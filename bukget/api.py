@@ -67,7 +67,7 @@ def raw_sql(query, request, session, fields, start=None, size=None):
             # item to plist.
             plist.append(item)
     rows.close()
-    return jsonify(plist)
+    return plist
 
 
 @app.hook('before_request')
@@ -85,7 +85,7 @@ def metadata(s):
 
 
 @app.route('/<repo>/plugins')
-def plugin_list(repo, s):
+def plugin_list(repo, s, convert=True):
     # First we need to initialize everything
     start = request.query.start or None
     size = request.query.size or None
@@ -102,7 +102,11 @@ def plugin_list(repo, s):
             (','.join(fields), repo)
 
     # And now we hand off all of the fun bits to raw_sql ;)
-    return raw_sql(query, request, s, fields, start, size)
+    data = raw_sql(query, request, s, fields, start, size)
+    if convert:
+        return jsonify(data)
+    else:
+        return data
 
 
 @app.route('/<repo>/plugin/<name>')
@@ -167,7 +171,7 @@ def categories(s):
 
 
 @app.route('/<repo>/category/<category>')
-def category_plugin_list(repo, category, s):
+def category_plugin_list(repo, category, s, convert=True):
     # This function will return a list of all of plugins 
     
     # First we need to initialize everything
@@ -194,7 +198,11 @@ def category_plugin_list(repo, category, s):
     ''' % (','.join(fields), repo, category)
 
     # And now we hand off all of the fun bits to raw_sql ;)
-    return raw_sql(query, request, s, fields, start, size)
+    data = raw_sql(query, request, s, fields, start, size)
+    if convert:
+        return jsonify(data)
+    else:
+        return data
 
 
 @app.route('/authors')
@@ -212,7 +220,7 @@ def author_plugins(name, s):
 
 
 @app.route('/search/<obj>/<field>/<oper>/<value>')
-def search(obj, field, oper, value, s):
+def search(obj, field, oper, value, s, convert=True):
     # First we need to initialize everything
     start = request.query.start or None
     size = request.query.size or None
@@ -264,4 +272,8 @@ def search(obj, field, oper, value, s):
     fields.insert(0, 'plugin.name')
     
     # And now we hand off all of the fun bits to raw_sql ;)
-    return raw_sql(query, request, s, fields, start, size)
+    data = raw_sql(query, request, s, fields, start, size)
+    if convert:
+        return jsonify(data)
+    else:
+        return data
