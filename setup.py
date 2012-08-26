@@ -3,7 +3,7 @@ import sys
 
 setup(
     name='BukGet',
-    version='0.2',
+    version='0.2.2',
     description='DBO Parser and web API for Minecraft Plugins',
     author='Steven McGrath',
     author_email='steve@chigeek.com',
@@ -25,6 +25,7 @@ setup(
         'bottle-sqlalchemy',
         'beautifulsoup',
         'pyyaml',
+        'bleach',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
