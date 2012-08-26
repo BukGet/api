@@ -3,6 +3,8 @@ from sqlalchemy import desc, and_, or_
 from sqlalchemy.orm import joinedload
 from bottle.ext import sqlalchemy
 from bukget.config import config
+from bukget.log import log
+import bleach
 import bukget.db as db
 import json
 
@@ -10,37 +12,104 @@ app = Bottle()
 app.install(sqlalchemy.Plugin(db.disk, db.Base.metadata, keyword='s'))
 
 def jsonify(dataset):
+    # This is an abstraction of json.dumps incase we need to augment it
+    # for any reason.
     return json.dumps(dataset)
+
+
+def raw_sql(query, request, session, fields, start=None, size=None):
+    '''raw_sql query request_object, session_object
+    This function is designed to be a central point where we can send queries
+    and get formatted JSON data back.  As we have several functions that will
+    be relying on raw queries for speed purposes, it made sence to centralize
+    this here.
+    '''
+
+    # Here we will be running the query.  You can see that we are
+    # running a raw SQL query here and now going through the ORM.
+    # This is mainly because of the issues with overhead of the
+    # SQLAlchemy ORM and larger datasets.
+    rows = session.execute(query)
+
+    # Now we are gonna parse and jsonify the dataset that we got
+    # back.  There is a little bit of hackery here for pagination as
+    # well.  We are still pulling back the full dataset, and then just
+    # parsing out the subset we need.  This is done this way so that
+    # we can still alphabatize the dataset but still gain pagination.
+    # I'm sure there is a more efficient way to handle this, however I'm
+    # not a competent enough DBA to figure it out.
+    plist = []
+    rcount = 0
+    count = 0
+    fields = [f.split('.')[-1] for f in fields]
+
+    for plugin in rows:
+        # Build the JSON Row.
+        item = {}
+        for field in fields:
+            item[field] = plugin[field]
+
+        # Increment the Row counter.  This is used by the hackery ahead.
+        rcount += 1
+        if start is not None and start is not None:
+            # If we are doing pagination, then we will have to look to
+            # see how many rows we have parsed, if we are within the range
+            # we want, then add the item to plist and increment everything.
+            # Also if we happen to hit the size limiter, then break out of
+            # loop so we can stop parsing data we dont need.
+            if rcount >= int(start):
+                plist.append(item)
+                count += 1
+            if count >= int(size):
+                break
+        else:
+            # If we are simply returning everything, then just append the
+            # item to plist.
+            plist.append(item)
+    rows.close()
+    return jsonify(plist)
 
 
 @app.hook('before_request')
 def set_json_header():
+    # We will need this set for everything in the API ;)
     response.set_header('Content-Type', 'application/json')
 
 
 @app.route('/')
 def metadata(s):
+    # Here we query for the last row in the Meta table, and jsonify it
+    # before returning it to the user.
     meta = s.query(db.Meta).order_by(desc(db.Meta.id)).first()
     return jsonify(meta.json())
 
 
 @app.route('/<repo>/plugins')
 def plugin_list(repo, s):
+    # First we need to initialize everything
     start = request.query.start or None
     size = request.query.size or None
-    fields = request.query.fields or 'name,plugname,description'
-    if start is not None and size is not None:
-        plugins = s.query(db.Plugin).filter(db.Plugin.repo==repo)\
-                                    .filter(db.Plugin.id>=int(start))\
-                                    .limit(int(size)).all()
-    else:
-        plugins = s.query(db.Plugin).filter_by(repo=repo).all()
-    plist = [a.json(*fields.split(',')) for a in plugins]
-    return jsonify(plist)
+    fstring = request.query.fields or 'name,plugname,description'
+    
+    # For the data that were were accepting input, lets go
+    # ahead and sanatize the input of any potential evil ;)
+    fields = bleach.clean(fstring).split(',')
+    repo = bleach.clean(repo)
+
+    # This is the query that we will be sending on to raw_sql
+    # for processing.
+    query = 'SELECT %s FROM plugin WHERE repo = \'%s\' ORDER BY name' %\
+            (','.join(fields), repo)
+
+    # And now we hand off all of the fun bits to raw_sql ;)
+    return raw_sql(query, request, s, fields, start, size)
 
 
 @app.route('/<repo>/plugin/<name>')
 def plugin_details(repo, name, s):
+    # This query will pull all of the information related to this
+    # specific plugin, then jsonify all of the information and
+    # return it as part of the API.
     plugin = s.query(db.Plugin).filter_by(name=name, repo=repo)\
                                .options(joinedload('categories'),
                                         joinedload('authors')).first()
@@ -50,12 +119,21 @@ def plugin_details(repo, name, s):
 
 @app.route('/<repo>/plugin/<name>/<version>')
 def plugin_version(repo, name, version, s):
+    # Here we are only returning the verion information for a specific
+    # version of this plugin.  Again this is a bit hackish and I'm sure there 
+    # is a way to do this within SQLAlchemy.  I should probably have someone 
+    # who knows what they are looking at look through this code ;)
     plugin = s.query(db.Plugin).filter_by(name=name, repo=repo)\
                                .options(joinedload('categories'),
                                         joinedload('authors')).first()
     if version == 'latest':
+        # If the version is latest, then just return the first one we get.  As
+        # the version are sorted by date, this should generally be the latest
+        # plugin anyway.
         vobj = plugin.versions[0]
     else:
+        # Otherwise we will need to parse though each version until we find
+        # a name match, then return that.
         for vitem in plugin.versions:
             if vitem.version == version:
                 vobj = vitem
@@ -66,6 +144,10 @@ def plugin_version(repo, name, version, s):
 
 @app.route('/<repo>/plugin/<name>/<version>/download')
 def plugin_download(repo, name, version, s):
+    # Performs the same lookup as the version query does (and all of the same
+    # hackery) however just simply replies with a redirect to the file's URL.
+    # This makes it possible to very easily download specific versions of
+    # a plugin using the API to handle the dirty work for you.
     plugin = s.query(db.Plugin).filter_by(name=name, repo=repo).first()
     if version == 'latest':
         vobj = plugin.versions[0]
@@ -78,6 +160,7 @@ def plugin_download(repo, name, version, s):
 
 @app.route('/categories')
 def categories(s):
+    # Get all of the categories in the system and return a list of them
     categories = s.query(db.Category).all()
     cdata = [c.name for c in categories]
     return jsonify(cdata)
@@ -85,13 +168,33 @@ def categories(s):
 
 @app.route('/<repo>/category/<category>')
 def category_plugin_list(repo, category, s):
-    category = category.replace('_', ' ')
-    category = s.query(db.Category).filter_by(name=category).first()
-    pdata = []
-    for plugin in category.plugins:
-        if plugin.repo == repo:
-            pdata.append(plugin.json('name', 'plugname', 'description'))
-    return jsonify(pdata)
+    # This function will return a list of all of plugins 
+    
+    # First we need to initialize everything
+    start = request.query.start or None
+    size = request.query.size or None
+    fstring = request.query.fields or 'name,plugname,description'
+    
+    # For the data that were were accepting input, lets go
+    # ahead and sanatize the input of any potential evil ;)
+    fields = ['plugin.%s' % f for f in bleach.clean(fstring).split(',')]
+    repo = bleach.clean(repo)
+
+    # This is the query that we will be sending on to raw_sql
+    # for processing.
+    query = '''
+        SELECT %s 
+          FROM plugin, category, catagory_associations as ca
+         WHERE plugin.repo = '%s'
+           AND category.name = '%s'
+           AND ca.plugin_id = plugin.id
+           AND ca.category_id = category.id
+         ORDER BY name
+
+    ''' % (','.join(fields), repo, category)
+
+    # And now we hand off all of the fun bits to raw_sql ;)
+    return raw_sql(query, request, s, fields, start, size)
 
 
 @app.route('/authors')
@@ -110,18 +213,55 @@ def author_plugins(name, s):
 
 @app.route('/search/<obj>/<field>/<oper>/<value>')
 def search(obj, field, oper, value, s):
+    # First we need to initialize everything
+    start = request.query.start or None
+    size = request.query.size or None
+    fstring = request.query.fields or 'name,plugname,description'
+    
+    # For the data that were were accepting input, lets go
+    # ahead and sanatize the input of any potential evil ;)
+    fields = ['plugin.%s' % f for f in bleach.clean(fstring).split(',')]
+    obj = bleach.clean(obj)
+    field = bleach.clean(field)
+    value = bleach.clean(value)
+
+    # As this is repository indepentent, we need to make sure that the
+    # repo field is listed so we know which repo a plugin is in.  We will also
+    # make sure to remove the plugin.name field as thats already statically in
+    # the query.
+    if 'plugin.name' in fields:
+        del fields[fields.index('plugin.name')]
+    fields.append('plugin.repo')
+
+    # Next we are going to have to determine what kind of filter we are going
+    # to need and build it.
     if oper in ['=', '>', '>=', '<', '<=']:
-        search = '%s %s \'%s\'' % ('%s.%s' % (obj, field), oper, value)
+        search = 'UPPER(%s) %s \'%s\'' % ('%s.%s' % (obj, field), oper, value.upper())
     elif oper in ['in', 'like']:
         search = 'UPPER(%s) LIKE \'%%%s%%\'' % ('%s.%s' % (obj, field), value.upper())
     else:
         return jsonify({'ERROR': 'Invalid Search Terms'})
-    if obj == 'plugin':
-        items = s.query(db.Plugin).filter(search).all()
-        pdata = [p.json('name', 'plugname', 'description', 'repo') for p in items]
-    elif obj == 'version':
-        items = s.query(db.Version).filter(search).all()
-        pdata = [p.plugin.json('name', 'plugname', 'description', 'repo') for p in items]
-    else:
+
+    # Next we need to make sure that we can even perform this search.  We need
+    # to make sure that the only tables that we will search from is version and
+    # plugin.
+    if obj not in ['plugin', 'version']:
         return jsonify({'ERROR': 'Invalid Object Name'})
-    return jsonify(pdata)
+
+    # This is the query that we will be sending on to raw_sql
+    # for processing.
+    query = '''
+        SELECT DISTINCT plugin.name, %s 
+          FROM plugin, version
+         WHERE version.plugin_id = plugin.id
+           AND %s
+         ORDER BY plugin.name
+
+
+    ''' % (','.join(fields), search)
+
+    # And now we add the plugin.name back into fields ;)
+    fields.insert(0, 'plugin.name')
+    
+    # And now we hand off all of the fun bits to raw_sql ;)
+    return raw_sql(query, request, s, fields, start, size)
