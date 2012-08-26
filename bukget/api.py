@@ -1,4 +1,4 @@
-from bottle import Bottle, request, response, template, redirect
+from bottle import Bottle, request, response, template, redirect, error
 from sqlalchemy import desc, and_, or_
 from sqlalchemy.orm import joinedload
 from bottle.ext import sqlalchemy
@@ -57,6 +57,11 @@ def set_json_header():
     response.set_header('Content-Type', 'application/json')
 
 
+@error(404)
+@error(500)
+def error404(error):
+    return jsonify({'ERROR': 'Bad Request'})
+
 @app.route('/')
 def metadata(s):
     # Here we query for the last row in the Meta table, and jsonify it
@@ -85,7 +90,7 @@ def plugin_list(repo, s, convert=True):
             (','.join(fields), repo)
 
     if start > 0 and size > 0:
-        query += ' LIMIT %d, %d' % (start, size + start)
+        query += ' LIMIT %d, %d' % (start, size)
 
     # And now we hand off all of the fun bits to raw_sql ;)
     data = raw_sql(query, request, s, fields, start, size)
@@ -185,7 +190,7 @@ def category_plugin_list(repo, category, s, convert=True):
     ''' % (','.join(fields), repo, category)
 
     if start > 0 and size > 0:
-        query += ' LIMIT %d, %d' % (start, size + start)
+        query += ' LIMIT %d, %d' % (start, size)
 
     # And now we hand off all of the fun bits to raw_sql ;)
     data = raw_sql(query, request, s, fields, start, size)
@@ -259,7 +264,7 @@ def search(obj, field, oper, value, s, convert=True):
     ''' % (','.join(fields), search)
 
     if start > 0 and size > 0:
-        query += ' LIMIT %d, %d' % (start, size + start)
+        query += ' LIMIT %d, %d' % (start, size)
 
     # And now we add the plugin.name back into fields ;)
     fields.insert(0, 'plugin.name')

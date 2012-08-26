@@ -1,4 +1,4 @@
-from bottle import Bottle, request, response, template, redirect
+from bottle import Bottle, request, response, template, redirect, error
 from sqlalchemy import desc, and_, or_
 from bottle.ext import sqlalchemy
 from bukget.config import config
@@ -48,6 +48,13 @@ def getdict(plugin, version_name=None):
 @app.hook('before_request')
 def set_json_header():
     response.set_header('Content-Type', 'application/json')
+
+
+
+@error(404)
+@error(500)
+def error404(error):
+    return jsonify({'ERROR': 'Bad Request'})
 
 
 @app.route('/')
