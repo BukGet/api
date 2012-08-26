@@ -80,12 +80,12 @@ class TextPickle(PickleType):
 class Plugin(Base):
     __tablename__ = 'plugin'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String(128))
-    plugname = Column(Text)
+    name = Column(String(128), index=True)
+    plugname = Column(Text, index=True)
     stage = Column(String(15))
     link = Column(Text)
     description = Column(Text)
-    repo = Column(String(10))
+    repo = Column(String(10), index=True)
     versions = relationship('Version', order_by='desc(Version.date)',
                             backref='plugin', lazy='joined')
     categories = relationship('Category', secondary=catassc, backref='plugins', lazy='join')
@@ -99,7 +99,7 @@ class Plugin(Base):
 class Version(Base):
     __tablename__ = 'version'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    version = Column(String(20))
+    version = Column(String(20), index=True)
     link = Column(Text)
     download = Column(Text)
     date = Column(DateTime)
@@ -122,7 +122,7 @@ class Version(Base):
 class Category(Base):
     __tablename__ = 'category'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String(128))
+    name = Column(String(128), index=True)
 
     def __init__(self, name):
         self.name = name
@@ -131,7 +131,7 @@ class Category(Base):
 class Author(Base):
     __tablename__ = 'author'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String(128))
+    name = Column(String(128), index=True)
 
     def __init__(self, name):
         self.name = name

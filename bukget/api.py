@@ -39,8 +39,6 @@ def raw_sql(query, request, session, fields, start=None, size=None):
     # I'm sure there is a more efficient way to handle this, however I'm
     # not a competent enough DBA to figure it out.
     plist = []
-    rcount = 0
-    count = 0
     fields = [f.split('.')[-1] for f in fields]
 
     for plugin in rows:
@@ -48,24 +46,7 @@ def raw_sql(query, request, session, fields, start=None, size=None):
         item = {}
         for field in fields:
             item[field] = plugin[field]
-
-        # Increment the Row counter.  This is used by the hackery ahead.
-        rcount += 1
-        if start is not None and start is not None:
-            # If we are doing pagination, then we will have to look to
-            # see how many rows we have parsed, if we are within the range
-            # we want, then add the item to plist and increment everything.
-            # Also if we happen to hit the size limiter, then break out of
-            # loop so we can stop parsing data we dont need.
-            if rcount >= int(start):
-                plist.append(item)
-                count += 1
-            if count >= int(size):
-                break
-        else:
-            # If we are simply returning everything, then just append the
-            # item to plist.
-            plist.append(item)
+        plist.append(item)
     rows.close()
     return plist
 
@@ -87,19 +68,24 @@ def metadata(s):
 @app.route('/<repo>/plugins')
 def plugin_list(repo, s, convert=True):
     # First we need to initialize everything
-    start = request.query.start or None
-    size = request.query.size or None
+    start = request.query.start or -1
+    size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     
     # For the data that were were accepting input, lets go
     # ahead and sanatize the input of any potential evil ;)
     fields = bleach.clean(fstring).split(',')
     repo = bleach.clean(repo)
+    start = int(bleach.clean(start))
+    size = int(bleach.clean(size))
 
     # This is the query that we will be sending on to raw_sql
     # for processing.
     query = 'SELECT %s FROM plugin WHERE repo = \'%s\' ORDER BY name' %\
             (','.join(fields), repo)
+
+    if start > 0 and size > 0:
+        query += ' LIMIT %d, %d' % (start, size + start)
 
     # And now we hand off all of the fun bits to raw_sql ;)
     data = raw_sql(query, request, s, fields, start, size)
@@ -175,14 +161,16 @@ def category_plugin_list(repo, category, s, convert=True):
     # This function will return a list of all of plugins 
     
     # First we need to initialize everything
-    start = request.query.start or None
-    size = request.query.size or None
+    start = request.query.start or -1
+    size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     
     # For the data that were were accepting input, lets go
     # ahead and sanatize the input of any potential evil ;)
     fields = ['plugin.%s' % f for f in bleach.clean(fstring).split(',')]
     repo = bleach.clean(repo)
+    start = int(bleach.clean(start))
+    size = int(bleach.clean(size))
 
     # This is the query that we will be sending on to raw_sql
     # for processing.
@@ -194,8 +182,10 @@ def category_plugin_list(repo, category, s, convert=True):
            AND ca.plugin_id = plugin.id
            AND ca.category_id = category.id
          ORDER BY name
-
     ''' % (','.join(fields), repo, category)
+
+    if start > 0 and size > 0:
+        query += ' LIMIT %d, %d' % (start, size + start)
 
     # And now we hand off all of the fun bits to raw_sql ;)
     data = raw_sql(query, request, s, fields, start, size)
@@ -222,8 +212,8 @@ def author_plugins(name, s):
 @app.route('/search/<obj>/<field>/<oper>/<value>')
 def search(obj, field, oper, value, s, convert=True):
     # First we need to initialize everything
-    start = request.query.start or None
-    size = request.query.size or None
+    start = request.query.start or -1
+    size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     
     # For the data that were were accepting input, lets go
@@ -232,6 +222,8 @@ def search(obj, field, oper, value, s, convert=True):
     obj = bleach.clean(obj)
     field = bleach.clean(field)
     value = bleach.clean(value)
+    start = int(bleach.clean(start))
+    size = int(bleach.clean(size))
 
     # As this is repository indepentent, we need to make sure that the
     # repo field is listed so we know which repo a plugin is in.  We will also
@@ -264,9 +256,10 @@ def search(obj, field, oper, value, s, convert=True):
          WHERE version.plugin_id = plugin.id
            AND %s
          ORDER BY plugin.name
-
-
     ''' % (','.join(fields), search)
+
+    if start > 0 and size > 0:
+        query += ' LIMIT %d, %d' % (start, size + start)
 
     # And now we add the plugin.name back into fields ;)
     fields.insert(0, 'plugin.name')
