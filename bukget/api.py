@@ -108,6 +108,8 @@ def plugin_details(repo, name, s):
     plugin = s.query(db.Plugin).filter_by(name=name, repo=repo)\
                                .options(joinedload('categories'),
                                         joinedload('authors')).first()
+    if plugin is None:
+        return jsonify({'error': 'Plugin %s does not exist' % name})
     pdata = plugin.json()
     return jsonify(pdata)
 
@@ -121,6 +123,11 @@ def plugin_version(repo, name, version, s):
     plugin = s.query(db.Plugin).filter_by(name=name, repo=repo)\
                                .options(joinedload('categories'),
                                         joinedload('authors')).first()
+
+    if plugin is None:
+        return jsonify({'error': 'Plugin %s does not exist' % name})
+
+    vobj = None
     if version == 'latest':
         # If the version is latest, then just return the first one we get.  As
         # the version are sorted by date, this should generally be the latest
@@ -132,6 +139,8 @@ def plugin_version(repo, name, version, s):
         for vitem in plugin.versions:
             if vitem.version == version:
                 vobj = vitem
+    if vobj is None:
+        return jsonify({'error': 'Version %s does not exist' % version})
     pdata = plugin.json()
     pdata['versions'] = vobj.json()
     return jsonify(pdata)
@@ -144,12 +153,19 @@ def plugin_download(repo, name, version, s):
     # This makes it possible to very easily download specific versions of
     # a plugin using the API to handle the dirty work for you.
     plugin = s.query(db.Plugin).filter_by(name=name, repo=repo).first()
+
+    if plugin is None:
+        return jsonify({'error': 'Plugin %s does not exist' % name})
+
+    vobj = None
     if version == 'latest':
         vobj = plugin.versions[0]
     else:
         for vitem in plugin.versions:
             if vitem.version == version:
                 vobj = vitem
+    if vobj is None:
+        return jsonify({'error': 'Version %s does not exist' % version})
     redirect(vobj.download)
 
 
@@ -210,6 +226,8 @@ def author_list(s):
 @app.route('/author/<name>')
 def author_plugins(name, s):
     author = s.query(db.Author).filter_by(name=name).first()
+    if author is None:
+        return jsonify({'error': 'Author %s does not exist' % name})
     pdata = [p.json('name', 'plugname', 'description', 'repo') for p in author.plugins]
     return jsonify(pdata)
 

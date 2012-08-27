@@ -16,6 +16,9 @@ def jsonify(dataset):
 
 
 def getdict(plugin, version_name=None):
+    if plugin is None:
+        return {'error': 'Plugin %s does not exist' % name}
+
     out = {
         'name': plugin.name,
         'bukkitdev_link': 'http://dev.bukkit.org/server-mods/%s/' % plugin.plugname,
@@ -115,6 +118,8 @@ def author_list(s):
 @app.route('/author/<name>')
 def author_plugins(name, s):
     author = s.query(db.Author).filter_by(name=name).first()
+    if author is None:
+        return jsonify({'error': 'Author %s does not exist' % name})
     pdata = [p.name for p in author.plugins]
     return jsonify(pdata)
 
