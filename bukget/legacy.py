@@ -32,6 +32,7 @@ def getdict(plugin, version_name=None):
         if version_name is not None and version.name == version_name or\
            not version_name:
             out['versions'].append({
+                    'name': version.version,
                     'date': int(time.mktime(version.date.timetuple())),
                     'dl_link': version.link,
                     'filename': version.filename,
