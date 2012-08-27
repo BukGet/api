@@ -88,12 +88,20 @@ def plugin_version(name, version, s):
 @app.route('/plugin/<name>/<version>/download')
 def plugin_download(name, version, s):
     plugin = s.query(db.Plugin).filter_by(name=name, repo='bukkit').first()
+    
+    if plugin is None:
+        return jsonify({'error': 'Plugin %s does not exist' % name})
+
+    vobj = None
     if version == 'latest':
         vobj = plugin.versions[0]
     else:
         for vitem in plugin.versions:
             if vitem.version == version:
                 vobj = vitem
+    
+    if vobj is None:
+        return jsonify({'error': 'Version %s does not exist' % version})
     redirect(vobj.download)
 
 
