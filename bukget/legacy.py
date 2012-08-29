@@ -29,10 +29,10 @@ def getdict(plugin, version_name=None):
         'versions': []
     }
     if version_name == 'latest':
-        version_name = plugin.versions[0].name
+        version_name = plugin.versions[0].version
 
     for version in plugin.versions:
-        if version_name is not None and version.name == version_name or\
+        if version_name is not None and version.version == version_name or\
            not version_name:
             out['versions'].append({
                     'name': version.version,
