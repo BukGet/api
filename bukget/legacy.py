@@ -40,8 +40,8 @@ def getdict(plugin, version_name=None):
                     'dl_link': version.link,
                     'filename': version.filename,
                     'game_builds': version.game_versions,
-                    'hard_dependencies': version.hard_dependencies,
-                    'soft_dependencies': version.soft_dependencies,
+                    'hard_dependencies': version.hard_dependencies or [],
+                    'soft_dependencies': version.soft_dependencies or [],
                     'status': version.status,
                     'type': version.type,
                 })
