@@ -97,11 +97,10 @@ class Plugin(Base):
 
     def json(self, *fields):
         jdict = Base.json(self, *fields)
-        if fields is not None:
-            if 'categories' in fields:
-                jdict['categories'] = [c.name for c in self.categories]
-            if 'authors' in fields:
-                jdict['authors'] = [a.name for a in self.authors]
+        if 'categories' in fields or len(fields) == 0:
+            jdict['categories'] = [c.name for c in self.categories]
+        if 'authors' in fields or len(fields) == 0:
+            jdict['authors'] = [a.name for a in self.authors]
         return jdict
 
 
