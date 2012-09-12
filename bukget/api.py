@@ -76,6 +76,7 @@ def plugin_list(repo, s, convert=True):
     start = request.query.start or -1
     size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
+    sort = request.query.sort or 'name'
     
     # For the data that were were accepting input, lets go
     # ahead and sanatize the input of any potential evil ;)
@@ -83,11 +84,12 @@ def plugin_list(repo, s, convert=True):
     repo = bleach.clean(repo)
     start = int(bleach.clean(start))
     size = int(bleach.clean(size))
+    sort = int(bleach.clean(sort))
 
     # This is the query that we will be sending on to raw_sql
     # for processing.
-    query = 'SELECT %s FROM plugin WHERE repo = \'%s\' ORDER BY name' %\
-            (','.join(fields), repo)
+    query = 'SELECT %s FROM plugin WHERE repo = \'%s\' ORDER BY %s' %\
+            (','.join(fields), repo, sort)
 
     if start > 0 and size > 0:
         query += ' LIMIT %d, %d' % (start, size)
