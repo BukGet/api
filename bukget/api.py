@@ -84,7 +84,7 @@ def plugin_list(repo, s, convert=True):
     repo = bleach.clean(repo)
     start = int(bleach.clean(start))
     size = int(bleach.clean(size))
-    sort = int(bleach.clean(sort))
+    sort = bleach.clean(sort)
 
     # This is the query that we will be sending on to raw_sql
     # for processing.
