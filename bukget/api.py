@@ -74,7 +74,7 @@ def metadata(s):
 @app.route('/<repo>/plugins')
 def plugin_list(repo, s, convert=True):
     # First we need to initialize everything
-    start = request.query.start or 0
+    start = request.query.start or -1
     size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     sort = request.query.sort or 'name'
@@ -92,7 +92,7 @@ def plugin_list(repo, s, convert=True):
     query = 'SELECT %s FROM plugin WHERE repo = \'%s\' ORDER BY %s' %\
             (','.join(fields), repo, sort)
 
-    if size > 0:
+    if size > 0 and start >= 0:
         query += ' LIMIT %d, %d' % (start, size)
 
     # And now we hand off all of the fun bits to raw_sql ;)
@@ -185,7 +185,7 @@ def category_plugin_list(repo, category, s, convert=True):
     # This function will return a list of all of plugins 
     
     # First we need to initialize everything
-    start = request.query.start or 0
+    start = request.query.start or -1
     size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     
@@ -208,7 +208,7 @@ def category_plugin_list(repo, category, s, convert=True):
          ORDER BY name
     ''' % (','.join(fields), repo, category)
 
-    if size > 0:
+    if size > 0 and start >= 0:
         query += ' LIMIT %d, %d' % (start, size)
 
     # And now we hand off all of the fun bits to raw_sql ;)
@@ -238,7 +238,7 @@ def author_plugins(name, s):
 @app.route('/search/<obj>/<field>/<oper>/<value>')
 def search(obj, field, oper, value, s, convert=True):
     # First we need to initialize everything
-    start = request.query.start or 0
+    start = request.query.start or -1
     size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     
@@ -284,7 +284,7 @@ def search(obj, field, oper, value, s, convert=True):
          ORDER BY plugin.name
     ''' % (','.join(fields), search)
 
-    if size > 0:
+    if size > 0 and start >= 0:
         query += ' LIMIT %d, %d' % (start, size)
 
     # And now we add the plugin.name back into fields ;)
