@@ -91,7 +91,7 @@ def plugin_list(repo, s, convert=True):
     query = 'SELECT %s FROM plugin WHERE repo = \'%s\' ORDER BY %s' %\
             (','.join(fields), repo, sort)
 
-    if start > 0 and size > 0:
+    if size > 0:
         query += ' LIMIT %d, %d' % (start, size)
 
     # And now we hand off all of the fun bits to raw_sql ;)
@@ -207,7 +207,7 @@ def category_plugin_list(repo, category, s, convert=True):
          ORDER BY name
     ''' % (','.join(fields), repo, category)
 
-    if start > 0 and size > 0:
+    if size > 0:
         query += ' LIMIT %d, %d' % (start, size)
 
     # And now we hand off all of the fun bits to raw_sql ;)
@@ -283,7 +283,7 @@ def search(obj, field, oper, value, s, convert=True):
          ORDER BY plugin.name
     ''' % (','.join(fields), search)
 
-    if start > 0 and size > 0:
+    if size > 0:
         query += ' LIMIT %d, %d' % (start, size)
 
     # And now we add the plugin.name back into fields ;)
