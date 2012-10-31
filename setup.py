@@ -21,7 +21,7 @@ setup(
     install_requires=[
         'bottle', 
         'markdown >= 2.0',
-        'sqlalchemy',
+        'sqlalchemy == 0.7.9',
         'bottle-sqlalchemy',
         'beautifulsoup',
         'pyyaml',
