@@ -17,7 +17,7 @@ def jsonify(dataset):
 
 def getdict(plugin, version_name=None):
     if plugin is None:
-        return {'error': 'Plugin %s does not exist' % name}
+        return {'error': 'Plugin does not exist'}
 
     out = {
         'name': plugin.name,
