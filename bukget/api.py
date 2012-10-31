@@ -74,7 +74,7 @@ def metadata(s):
 @app.route('/<repo>/plugins')
 def plugin_list(repo, s, convert=True):
     # First we need to initialize everything
-    start = request.query.start or -1
+    start = request.query.start or 0
     size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     sort = request.query.sort or 'name'
@@ -185,7 +185,7 @@ def category_plugin_list(repo, category, s, convert=True):
     # This function will return a list of all of plugins 
     
     # First we need to initialize everything
-    start = request.query.start or -1
+    start = request.query.start or 0
     size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     
@@ -238,7 +238,7 @@ def author_plugins(name, s):
 @app.route('/search/<obj>/<field>/<oper>/<value>')
 def search(obj, field, oper, value, s, convert=True):
     # First we need to initialize everything
-    start = request.query.start or -1
+    start = request.query.start or 0
     size = request.query.size or -1
     fstring = request.query.fields or 'name,plugname,description'
     
