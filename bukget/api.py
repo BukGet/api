@@ -55,6 +55,7 @@ def raw_sql(query, request, session, fields, start=None, size=None):
 def set_json_header():
     # We will need this set for everything in the API ;)
     response.set_header('Content-Type', 'application/json')
+    response.set_header('Access-Control-Allow-Origin', '*')
 
 
 @error(404)
