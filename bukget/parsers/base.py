@@ -32,7 +32,7 @@ class BaseParser(threading.Thread):
         comp = False
         count = 0
         data = ''
-        while not comp and count <= 5:
+        while not comp and count <= 10:
             try:
                 count += 1
                 data = urlopen(url, timeout=5).read()
