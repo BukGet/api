@@ -260,7 +260,7 @@ class Parser(base.BaseParser):
             # Now we will try to find the next files page if we detected any
             # outstanding changes on this one.  We will keep drilling down until
             # we have hit all of the pages or if no more changes exist.
-            if changes > 0:
+            if changes > 0 or not self.speedy:
                 try:
                     link = vpage.find('li', {'class': 'listing-pagination-pages-next'})
                     vurl = 'http://dev.bukkit.org%s' % link.findChild('a').get('href')
@@ -360,6 +360,8 @@ class Parser(base.BaseParser):
                             if filename[-3:].lower() == 'jar':
                                 data.write(zfile.read(filename))
                                 break
+                    zfile.close()
+                    zdata.close()
                 else:
                     try:
                         data.write(self._get_url(version.download))
