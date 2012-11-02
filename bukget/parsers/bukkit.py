@@ -70,6 +70,8 @@ class Parser(base.BaseParser):
         start = time.time()
         s = db.Session()
         self.meta = db.Meta('bukkit')
+        if not self.speedy:
+            self.meta.speedy = False
         s.add(self.meta)
         s.commit()
         log.info('PARENT: Starting DBO Parsing at page %s' % self.page_num)
@@ -128,6 +130,7 @@ class Parser(base.BaseParser):
         # session and jump for joy!
         self.meta.duration = int(time.time() - start)
         log.info('PARENT: DBO Parsing complete.  took %s seconds' % self.meta.duration)
+        print self.meta.changes
         s.merge(self.meta)
         s.commit()
         s.close()
@@ -337,17 +340,37 @@ class Parser(base.BaseParser):
 
             # For the rest of the information, we will need to download the
             # plugin itself and parse that information.
-            if version.download[-3:].lower() == 'jar':
+
+            ## THIS WHOLE SECTION NEEDS TO BE REFACTORED.  INNEFICIENT.
+            if version.download[-3:].lower() in ['jar', 'zip']:
+                data = StringIO() # Jar file Data
+
+                if version.download[-3:].lower() == 'zip':
+                    # If it's a zip file, we will try to dig into the zip file,
+                    # pull out the proper jar file and and then return the data
+                    # to the data var.
+                    zdata = StringIO()
+                    try:
+                        zdata.write(self._get_url(version.download))
+                        zfile = ZipFile(zdata)
+                    except:
+                        pass
+                    else:
+                        for filename in zfile.namelist():
+                            if version.filename[:3].lower() in filename.lower():
+                                data.write(zfile.read(filename))
+                else:
+                    try:
+                        data.write(self._get_url(version.download))
+                    except:
+                        pass
+
+
                 # The first thing we need to do with this jar file is to
                 # download it and instantiate the data as a ZipFile object.
                 # From there we can pull out the needed data and parse it as
                 # needed.
-                data = StringIO()
-                try:
-                    data.write(self._get_url(version.download))
-                    jar = ZipFile(data)
-                except:
-                    jar = ZipFile(StringIO(), 'w')
+                jar = ZipFile(data)
 
                 # Now we will look for the plugin.yml file inside the jarfile
                 # and will also add in the hard & soft dependencies, commands,
