@@ -5,7 +5,7 @@ import sqlalchemy.orm.collections as collections
 from bukget.config import config
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy import (Table, Column, Integer, ForeignKey, PickleType, Text,
-                        String, DateTime, and_, desc, create_engine)
+                        Boolean, String, DateTime, and_, desc, create_engine)
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -149,6 +149,7 @@ class Meta(Base):
     __tablename__ = 'meta'
     id = Column(Integer, autoincrement=True, primary_key=True)
     repo = Column(String(10))
+    speedy = Column(Boolean)
     duration = Column(Integer)
     timestamp = Column(Integer)
     changes = Column(TextPickle(pickler=json))
@@ -158,3 +159,4 @@ class Meta(Base):
         self.changes = []
         self.duration = 0
         self.timestamp = int(time.time())
+        self.speedy = True
