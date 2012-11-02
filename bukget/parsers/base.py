@@ -39,6 +39,7 @@ class BaseParser(threading.Thread):
                 comp = True
             except:
                 log.warn('Connection to "%s" failed, retrying...' % url)
+                time.sleep(self.delay)
         if count > 5:
             log.error('Could not get %s.' % url)
         return data
