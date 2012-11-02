@@ -357,8 +357,9 @@ class Parser(base.BaseParser):
                         pass
                     else:
                         for filename in zfile.namelist():
-                            if version.filename[:3].lower() in filename.lower():
+                            if filename[-3:].lower() == 'jar':
                                 data.write(zfile.read(filename))
+                                break
                 else:
                     try:
                         data.write(self._get_url(version.download))
