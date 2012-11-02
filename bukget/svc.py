@@ -76,16 +76,16 @@ def updater():
 
             # Lets go ahead and log those times to the debug messages...
             log.debug('%s sDelay=%s/%s fDelay=%s/%s' % (parser, 
-                      delay, config.get(parser, 'speedy_delay'),
-                      fdelay, config.get(parser, 'full_delay')))
+                      delay, config.get(parser, 'speedy_update'),
+                      fdelay, config.get(parser, 'full_update')))
 
             # Now we will check first the full delay, then the speedy delay
             # depending on our needs.
-            if fdelay >= config.getint(parser, 'full_delay'):
+            if fdelay >= config.getint(parser, 'full_update'):
                 p = bukget.parsers.parsers[parser](speedy=False)
                 p.start()
                 parsers.append(p)
-            elif delay >= config.getint(parser, 'speedy_delay'):
+            elif delay >= config.getint(parser, 'speedy_update'):
                 p = bukget.parsers.parsers[parser]()
                 p.start()
                 parsers.append(p)
