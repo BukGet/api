@@ -19,12 +19,12 @@ setup(
         ('/etc', ['bukget.conf']),
     ],
     install_requires=[
-        'bottle', 
-        'markdown >= 2.0',
-        'sqlalchemy == 0.7.9',
+        'bottle == 0.10.11', 
+        'Markdown >= 2.0',
+        'SQLAlchemy == 0.7.9',
         'bottle-sqlalchemy',
         'beautifulsoup',
-        'pyyaml',
+        'PyYAML',
         'bleach',
     ],
     classifiers=[
