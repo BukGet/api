@@ -1,14 +1,11 @@
-import multiprocessing
-import bottle
+from sqlalchemy import desc
 from bukget.config import config
+from bukget.log import log
+import bukget.parsers
 import bukget.api
 import bukget.db
+import bottle
 import time
-from urllib2 import urlopen
-from log import log
-from sqlalchemy import desc
-import bukget.parsers
-
 
 def website():
     '''
@@ -77,8 +74,7 @@ def updater():
             fdelay = int(time.time() - fmeta.timestamp)
             s.close()
 
-
-            # Lets go ahead and log those times to the dubug messages...
+            # Lets go ahead and log those times to the debug messages...
             log.debug('%s sDelay=%s/%s fDelay=%s/%s' % (parser, 
                       delay, config.get(parser, 'speedy_delay'),
                       fdelay, config.get(parser, 'full_delay')))
