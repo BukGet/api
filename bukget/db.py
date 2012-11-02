@@ -81,7 +81,7 @@ class Plugin(Base):
     __tablename__ = 'plugin'
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(128), index=True)
-    plugname = Column(Text, index=True)
+    plugname = Column(String(128), index=True)
     stage = Column(String(15))
     link = Column(Text)
     description = Column(Text)
@@ -148,8 +148,8 @@ class Author(Base):
 class Meta(Base):
     __tablename__ = 'meta'
     id = Column(Integer, autoincrement=True, primary_key=True)
-    repo = Column(String(10))
-    speedy = Column(Boolean)
+    repo = Column(String(10), index=True)
+    speedy = Column(Boolean, index=True)
     duration = Column(Integer)
     timestamp = Column(Integer)
     changes = Column(TextPickle(pickler=json))
