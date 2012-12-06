@@ -320,8 +320,10 @@ class Parser(BaseParser):
                                                 .findChildren('a', {'class': 'user user-author'})]))
         plugin['categories'] = [a.text for a in page.findAll('a', {'class': 'category'})]
         try:
-            plugin['logo'] = page.find('a', attrs={'class': 'project-default-image'}).findChild('img').get('src')
-            plugin['logo_full'] = page.find('a', attrs={'class': 'project-default-image'}).findChild('img').get('data-full-src')
+            plugin['logo'] = page.find('a', attrs={'class': 'project-default-image'})\
+                                 .findChild('img').get('src')
+            plugin['logo_full'] = page.find('a', attrs={'class': 'project-default-image'})\
+                                      .findChild('img').get('data-full-src')
         except:
             plugin['logo'] = ''
             plugin['logo_full'] = ''
@@ -377,8 +379,8 @@ class Parser(BaseParser):
         version['status'] = page.find(attrs={'class': self.r_status}).text
         version['type'] = page.find(attrs={'class': self.r_filetype}).text
         version['game_versions'] = list(set([a.text for a in page.find('dt', text='Game version')\
-                                                                  .findNext('ul')\
-                                                                  .findChildren('li')]))
+                                                                 .findNext('ul')\
+                                                                 .findChildren('li')]))
         try:
             version['changelog'] = base64.encodestring(\
                 page.find('h3',text='Change log').findParent('div').prettify())
