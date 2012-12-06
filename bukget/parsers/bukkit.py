@@ -96,8 +96,7 @@ class Parser(BaseParser):
                     # normalize that madness.
                     if isinstance(child, dict):
                         child, value = child.iteritems().next()
-                    elif isinstance(p['children'], list) or\
-                         isinstance(p['children'], unicode):
+                    elif isinstance(p['children'], list) or isinstance(p['children'], unicode):
                         value = False
                     elif isinstance(child, str):
                         dset = child.split(':')
@@ -270,8 +269,7 @@ class Parser(BaseParser):
         # The first thing we need to do here is query the API and find out if
         # the plugin already exists.  If it doesn't then we will start with a
         # completely clean dictionary.
-        plugin = self._api_get('plugin', {'plugin.server': 'bukkit', 
-                                          'plugin.slug': slug})
+        plugin = self._api_get('plugin', {'plugin.server': 'bukkit', 'plugin.slug': slug})
         if plugin:
             log.info('PARSER: Updating Bukkit Plugin %s' % slug)
         else:
@@ -283,8 +281,7 @@ class Parser(BaseParser):
         filepage = 1        # The current page of versions.
         versions = []       # The versions list.
         while running:
-            page = self._get_page('%s/%s/files/?page=%s' % (
-                self.config_base, slug, filepage))
+            page = self._get_page('%s/%s/files/?page=%s' % (self.config_base, slug, filepage))
             try:
                 rows = page.findChild('tbody').findAll('tr')
             except:
@@ -357,7 +354,7 @@ class Parser(BaseParser):
                                             'plugin.server': 'bukkit',
                                             'plugin.versions.slug': slug})
         if version:
-            if self.config_type == 'speedy':
+            if self.config_type == 'speedy': 
                 return False, version
             log.info('PARSER: Updating Bukkit Plugin %s Version %s' % (plugin, slug))
         else:
