@@ -42,8 +42,7 @@ class Parser(BaseParser):
         We will also need to parse the children and apply the default
         values as needed as well.
         '''
-        inv = {'op': 'not op', 'not op': 'op', 
-               True: False, False: True, None: True}
+        inv = {'op': 'not op', 'not op': 'op', True: False, False: True}
         pdict = {}
 
         # If we run into a string instead of what we expect, then we will
@@ -70,6 +69,7 @@ class Parser(BaseParser):
                 # lets try to parse it out, and return with the default
                 # value if we cant find anything.
                 default = p['default'] if 'default' in p else False
+                default = False if default is None else default
                 pdict[perm]['default'] = default
             else:
                 # As we may use this if we have children, might as well
