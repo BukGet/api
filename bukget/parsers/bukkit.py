@@ -2,425 +2,403 @@ import time
 import yaml
 import json
 import re
-import datetime
-import base
-import bukget.db as db
-from bukget.log import log
+import base64
 from StringIO import StringIO
 from zipfile import ZipFile
+from bukget.log import log
+from bukget.parsers.base import BaseParser
 
 
-class Parser(base.BaseParser):
-    # This is the Bukkit Parser class.  This is the class that will actually
-    # parse out the data from DBO and dump it into the database.
-    
-    # This is the base uri that we will be parsing from.
-    base_uri = 'http://dev.bukkit.org/server-mods'
+class Parser(BaseParser):
+    '''Bukkit Parser Object
+    '''
+    config_type = 'speedy'
+    config_base = 'http://dev.bukkit.org/server-mods'
+    config_start = 1
+    r_version = re.compile(r'\/files\/(.*?)\/')
+    r_plugin = re.compile(r'\/server-mods\/(.*?)\/')
+    r_versionnum = re.compile(\
+        r'b{0,1}\d{1,3}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}')
+    r_stage = re.compile(r'project-stage')
+    r_status = re.compile(r'file-status')
+    r_filetype = re.compile(r'file-type')
+    r_pagenum = re.compile(r'page=(\d{1,4})')
+    changes = []
 
-    # This is the regex that we will be using to parse out the url slug that is
-    # used for bukkit.
-    prex = re.compile(r'\/server-mods\/(.*?)\/')
+    def _permissions(self, perms):
+        '''
+        This is a basic function used to normalize out the permissions
+        contained within the plugin.yml file in a plugin.  As bukkit
+        allows for something thats a bit more free-form, we need to
+        normalize everything down to something thats a little easier
+        to work with and will allow us to search based on the data.
 
-    # This is the regex that is used to parse out the version slug that is used
-    # for bukkit.
-    vrex = re.compile(r'\/files\/(.*?)\/')
+        The end result will use the following format:
+        [{
+            'role': 'role.permission',
+            'default': 'default role value',
+        },]
 
-    # This is the regex that we will be using for parsing out the version
-    # numbers.
-    revex = re.compile(r'b{0,1}\d{1,3}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}')
+        We will also need to parse the children and apply the default
+        values as needed as well.
+        '''
+        inv = {'op': 'not op', 'not op': 'op', True: False, False: True}
+        pdict = {}
 
-    # This regex is used to parse out the plugin status.
-    restage = re.compile(r'project-stage')
+        # If we run into a string instead of what we expect, then we will
+        # convert it into a dict so that the defaults can be applied as
+        # expected.
+        if isinstance(perms, unicode):
+            d = {}
+            for item in perms.split():
+                d[item] = {}
+            perms = d
 
-    # This regex is used to pull the file status for versions.
-    refilest = re.compile(r'file-status')
+        for perm in perms:
+            # The first thing we need to do is get the role into the pdict
+            # dictionary.  Once we have that known we can start working our
+            # way down some of the normalizations. Furthermore, we can
+            # fix the problem where sometimes we get a null value.
+            p = {} if perms[perm] is None else perms[perm]
+            if isinstance(p, str): p = {}
 
-    # This regex is used to pull the file type for versions.
-    refilety = re.compile(r'file-type')
+            pdict[perm] = {'role': perm}
 
-    # This regex is used to let us know what page we are starting to parse.
-    repage = re.compile(r'page=(\d{1,4})')
+            if 'default' not in pdict[perm]:
+                # If there isnt any default permission currently set, then
+                # lets try to parse it out, and return with the default
+                # value if we cant find anything.
+                default = p['default'] if 'default' in p else False
+                pdict[perm]['default'] = default
+            else:
+                # As we may use this if we have children, might as well
+                # load it in if we didnt set it ;)
+                default = pdict[perm]['default']
+
+            # Lastly lets check for any children.  If we find this entry
+            # in the permission, then add in the default option if it
+            # doesnt already exist, or if it's different than the
+            # default permission set for the parent.
+            if 'children' in p and p['children'] is not None:
+
+                # YAIH (Yet Another Interesting Hack) to get around
+                # the ambiguous plugin.yml format.
+                if isinstance(p['children'], unicode):
+                    child_list = p['children'].split()
+                else:
+                    child_list = p['children']
+
+                for child in child_list:
+                    # Nice little hack to get around some ambiguity in
+                    # the format >.<
+                    if isinstance(child, dict):
+                        child, value = child.iteritems().next()
+                    elif isinstance(p['children'], list) or\
+                         isinstance(p['children'], unicode):
+                        value = False
+                    elif isinstance(child, str):
+                        dset = child.split(':')
+                        if len(dset) > 1:
+                            child, value = dset
+                        else:
+                            child = dset[0]
+                            value = False
+                    else:
+                        value = p['children'][child]
+                    if child in pdict:
+                        c = pdict[child]
+                    else:
+                        c = {'default': False, 'role': child}
+                    if 'default' not in c or c['default'] == False:
+                        if value:
+                            c['default'] = default
+                        else:
+                            c['default'] = inv[default]
+                    pdict[child] = c
+        # Lastly, we will convert the dictionary into a list.  As the 
+        # list is what we will be using for the Database as well as 
+        # the JSON, it only makes sense to do it here ;)
+        return [pdict[item] for item in pdict]
 
 
-    def __init__(self, speedy=True, page_num=1):
-        self.speedy = speedy
-        self.page_num = page_num
-        base.BaseParser.__init__(self)
+    def _commands(self, commands):
+        '''
+        Function to normalize out the commands into what we expect for 
+        bukget.  There isn't nearly as much needed to be done here as
+        for the permissions, however it only makes sense to break it
+        out just the same.
+        '''
+        clist = []
+        
+        # If what were given is not a dictionary, don't even bother to
+        # try to parse it, just respond with an empty dictionary.
+        if not isinstance(commands, dict):
+            return []
+
+        for command in commands:
+            c = commands[command]
+
+            # Yet another hack incase there is no data for the command.
+            if c is None:
+                c = {}
+
+            # This is a bit of a hack to normalize out the aliases so
+            # thart it's always a list.  The bukkit plugin.yml format
+            # allows for either string or list. however that doesn't
+            # exactly jive well with trying to keep a strict format.
+            aliases = []
+            if 'aliases' in c:
+                if isinstance(c['aliases'], list):
+                    aliases = c['aliases']
+                else:
+                    aliases = [str(c['aliases']),]
+
+            if 'permission' in c:
+                if isinstance(c['permission'], dict):
+                    permission = ''
+                else:
+                    permission = c['permission']
+            else:
+                permission = ''
+
+            # Now to add the normalized entry to the clist list.  The
+            # clist variable will be whats returned to the calling
+            # function.
+            clist.append({
+                'command': command,
+                'aliases': aliases,
+                'permission': permission,
+                'usage': c['usage'] if 'usage' in c else '',
+                'permission-message': c['permission-message'] if 'permission-message' in c else '',
+                })
+        return clist
+
+
+    def _find_plugin_yaml(self, dataobj):
+        '''
+        '''
+        yml = False
+        try:
+            # The first thing we are going to try to do is create a ZipFile
+            # object with the StringIO data that we have.
+            zfile = ZipFile(dataobj)
+        except:
+            pass
+        else:
+            # Before we start recursively jumping through hoops, lets first
+            # check to see if the plugin.yml exists at this level.  If so, then
+            # just set the yaml variable.  Otherwise we are gonna look for more
+            # zip and jar files and dig into them.
+            if 'plugin.yml' in zfile.namelist():
+                try:
+                    yml = yaml.load(zfile.read('plugin.yml'))
+                except:
+                    return False
+            else:
+                for filename in zfile.namelist():
+                    if not yml and filename[-3:].lower() in ['zip', 'jar']:
+                        data = StringIO()
+                        yml = self._find_plugin_yaml(\
+                            data.write(zfile.read(filename)))
+                        data.close()
+                zfile.close()
+        return yml
 
 
     def run(self):
-        '''run
-        This function is the main function to launch the parser.  The speedy
-        flag denoted whether the parser will run through the entire DBO database
-        or will only check for those items it does not have in the database.
+        '''server_mods
         '''
-        self.complete = False
-        self._server_mods()
-        self.complete = True
-
-
-    def _server_mods(self):
-        '''_server_mods speedy=True
-        This function is what will be parsing the plugin listing pages, looking
-        for new plugins.
-        '''
-        # Here we set a few things up, we will get the current time in order
-        # to set the duration for the meta object, instantiate a database
-        # session, and lastly create a Meta object that we will be using.
         start = time.time()
-        s = db.Session()
-        self.meta = db.Meta('bukkit')
-        if not self.speedy:
-            self.meta.speedy = False
-        s.add(self.meta)
-        s.commit()
-        log.info('PARENT: Starting DBO Parsing at page %s' % self.page_num)
+        log.info('PARSER: Starting DBO Parsing at page %s' % self.config_start)
 
-        # Here we will be pre-loading the current url (curl) variable and
-        # setting running to True so that the while loop will just keep doing
-        # it's thing.
-        curl = '%s/?page=%s' % (self.base_uri, self.page_num)
-        running = True
-
-        while running:
-            # This counter keeps track of the number of plugins that we have
-            # modified.  This is very useful in speedy mode as if we run through
-            # a whole page without any plugin changes, there is generally no
-            # need to keep going.
-            count = 0
-
-            page = self._get_page(curl)
-
-            # Here we are building a list of all of the plugin links on the page
-            # so that we can parse out the plugin slug and hand that off to the
-            # _plugin function.
+        pagenum = self.config_start
+        parsing = True
+        while parsing:
+            count = len(self.changes)
+            page = self._get_page('%s/?page=%s' % (self.config_base, pagenum))
             plugins = [a.findChild('a').get('href') for a in page.findAll('h2')]
-
             for plugin in plugins:
-
-                # Here we will attempt to parse out the plugin name.  If we are
-                # unable to do so for any reason, then we simply log it and
-                # move on.
                 try:
-                    name = self.prex.findall(plugin)[0]
+                    slug = self.r_plugin.findall(plugin)[0]
                 except:
-                    log.debug('Could not Parse: %s' % plugin)
+                    log.debug('PARSER: Could not parse %s' % plugin)
                 else:
-                    # Now we marge in any changes from the _plugin function into
-                    # the database
-                    count += self._plugin(name)
-
-            # Next we need to find the link to the next page, then set the curl
-            # variable to the next page we will need to parse.
-            nurl = page.findAll(attrs={'class': 'listing-pagination-pages-next'})
-            if len(nurl) > 0:
-                self.page_num += 1
-                curl = '%s/?page=%s' % (self.base_uri, self.page_num)
+                    self.plugin(slug)
+            if page.find(attrs={'class': 'listing-pagination-pages-next'}):
+                pagenum += 1
+            if len(self.changes) == count and self.config_type == 'speedy':
+                parsing = False
             else:
-                running = False
-
-            # Lastly we will need to check the count and if we are running in
-            # speedy mode and act accordingly.
-            if count == 0 and self.speedy:
-                running = False
-            else:
-                log.info('PARENT: Parsing DBO Page %s' % self.page_num)
-
-        # Now for a little cleanup, we will commit then close the database
-        # session and jump for joy!
-        self.meta.duration = int(time.time() - start)
-        log.info('PARENT: DBO Parsing complete.  took %s seconds' % self.meta.duration)
-        print self.meta.changes
-        s.merge(self.meta)
-        s.commit()
-        s.close()
+                log.info('PARSER: Parsing DBO Page %s' % pagenum)
+        geninfo = {
+            'duration': int(time.time() - start),
+            'timestamp': int(time.time()),
+            'parser': 'bukkit',
+            'type': self.config_type,
+            'changes': self.changes,
+        }
+        log.info('PARSER: DBO Parsing complete. Time: %s' % geninfo['duration'])
+        self._add_geninfo(geninfo)
 
 
-    def _plugin(self, name):
-        '''_plugin name
-        This function parses the plugin page and subsiquent files pages to pull
-        all of the information from DBO and update the plugin cache we have in
-        the database.  We will then return both the cound of changes and the
-        updated plugin object.
+    def plugin(self, slug):
+        '''plugin slug
         '''
-        count = 0       # This counter keeps track of the number of updates.
-        # First things first, we will need to create a session from the reactor
-        # and then check to see if this is an existing plugin or not.  If not,
-        # then we will need to create a new one.
-        s = db.Session()
-        try:
-            plugin = s.query(db.Plugin).filter_by(name=name).one()
-            log.debug('PARENT: Updating plugin %s in bukkit repository' % name)
-        except:
-            plugin = db.Plugin(name, 'bukkit')
-            s.add(plugin)
-            log.info('PARENT: Adding plugin %s in bukkit repository' % name)
-            count += 1
 
-        # Next thing we need to do is build the dbo link.  This is the uri that
-        # points directly to the plugin.
-        plugin.link = '%s/%s' % (self.base_uri, name)
-
-        # Now to pull the page down.
-        page = self._get_page(plugin.link)
-
-        # Next we will be parsing through the authors.  If we run into an author
-        # that we havent seen before, then we will also add that author to the
-        # database as well.
-        authors = list(set([a.text for a in page.find('li', {'class': 'user-list-item'})\
-                                                .findChildren('a', {'class': 'user user-author'})]))
-        for author_name in authors:
-            author = s.query(db.Author).filter_by(name=author_name).first()
-            if author is None:
-                author = db.Author(author_name)
-                s.add(author)
-                s.commit()
-                log.debug('Added Author %s' % author_name)
-
-            if author not in plugin.authors:
-                plugin.authors.append(author)
-
-        # and for the next fun item, categories!  We will be performing the 
-        categories = [a.text for a in page.findAll('a', {'class': 'category'})]
-        for cat_name in categories:
-            category = s.query(db.Category).filter_by(name=cat_name).first()
-            if category is None:
-                category = db.Category(cat_name)
-                s.add(category)
-                s.commit()
-                log.debug('Added Category %s' % cat_name)
-
-            if category not in plugin.categories:
-                plugin.categories.append(category)
-
-        # Now for some easier stuff, we will be parsing through the status,
-        # the plugin's full name, and the plugin description.
-        plugin.stage = page.find('span', {'class': self.restage}).text
-        #if plugin.description == None:
-        #    plugin.description = page.find('div', {'class': 'content-box-inner'}).text[:150]
-        plugname = page.find('div', {'class': 'global-navigation'}).findNextSibling('h1').text
-        plugname = plugname.encode('ascii', 'ignore')
-
-        # Now we need to merge the changes made and commit them into the
-        # database before we go much further.  We will also close out the
-        # session at this point because there will be no further changes to the
-        # plugin object at this point.
-        plugin = s.merge(plugin)
-        s.commit()
-
-        # Next we need to start working our way through the various versions.
-        # This will be handled very much in the same way as how we were handling
-        # plugins, by simply looking for the version slug and handing this
-        # information off to a seperate function designed to better break down
-        # the data.
-
-        # Here we start out (just like before) by pre-loading the vurl variable
-        # and setting the running flag to true.  We will also keep track of the
-        # number of changes in order to speed things up a bit.
-        vurl = '%s/files/' % plugin.link
-        running = True
-
+        # The first thing we need to do here is query the API and find out if
+        # the plugin already exists.  If it doesn't then we will start with a
+        # completely clean dictionary.
+        plugin = self._api_get('plugin', {'plugin.server': 'bukkit', 
+                                          'plugin.slug': slug})
+        if plugin:
+            log.info('PARSER: Updating Bukkit Plugin %s' % slug)
+        else:
+            plugin = {}
+            log.info('PARSER: Adding Bukkit Plugin %s' % slug)
+        
+        yml = False         # Variable to house the most recent version yaml.
+        running = True      # Will stay true as long as we are parsing versions
+        filepage = 1        # The current page of versions.
+        versions = []       # The versions list.
         while running:
-            changes = 0     # Counter to keep track of changes on this page.
-            # We start off by pulling down the files page and parsing out the 
-            # link to the version page.  Then we will hand off that slug with
-            # the plugin.id so that the _version function knows what to do from
-            # there.
-            vpage = self._get_page(vurl)
-
-            # Lets try to parse out the rows in the table on the page.  If we
-            # can't find anything, then just set the rows variable to an empty
-            # list so we can drop out of the loop gracefully.
+            page = self._get_page('%s/%s/files/?page=%s' % (
+                self.config_base, slug, filepage))
             try:
-                rows = vpage.findChild('tbody').findAll('tr')
+                rows = page.findChild('tbody').findAll('tr')
             except:
                 rows = []
-
-
-            self.ymlname = False
-            self.ymldesc = False
             for row in rows:
-                #try:
                 vlink = row.findNext('td', {'class': 'col-file'}).findNext('a').get('href')
-                vtxt = row.findNext('td', {'class': 'col-file'}).findNext('a').text
-                slug = self.vrex.findall(vlink)[0]
-                try:
-                    vname = self.revex.findall(vtxt)[0]
-                except:
-                    vname = vtxt
-                changes += self._version(plugin, slug, vname)
-                #except:
-                #    pass
-
-            # Now we will add the changes count into the count counter.  This
-            # allows us to keep better track of the number of changes that had
-            # occured.
-            count += changes
-
-            # Now we will try to find the next files page if we detected any
-            # outstanding changes on this one.  We will keep drilling down until
-            # we have hit all of the pages or if no more changes exist.
-            if changes > 0 or not self.speedy:
-                try:
-                    link = vpage.find('li', {'class': 'listing-pagination-pages-next'})
-                    vurl = 'http://dev.bukkit.org%s' % link.findChild('a').get('href')
-                except:
-                    running = False
+                vslug = self.r_version.findall(vlink)[0]
+                tyml, vdata = self.version(slug, vslug)
+                if vdata is not None:
+                    versions.append(vdata)
+                if not yml:
+                    yml = tyml
+            if page.find('li', {'class': 'listing-pagination-pages-next'}):
+                filepage += 1
             else:
                 running = False
+        if not yml:
+            yml = {}
 
 
-        # Now we will check to see if we got any plugin names or descriptions
-        # from the plugin.yml parsing in the version and apply those changes
-        # if we did.
-        if self.ymlname:
-            log.debug('PARENT: Overloading %s plugname to %s' % (plugin.name, self.ymlname))
-            plugin.plugname = self.ymlname.encode('ascii', 'ignore')
-        if self.ymldesc:
-            log.debug('PARENT: Overloading %s description to %s' % (plugin.name, self.ymldesc))
-            plugin.description = self.ymldesc.encode('ascii', 'ignore')
-        s.merge(plugin)
+        # Before we bother to get too much further, lets make sure there are
+        # actually plugin revisions uploaded to DBO.  If there isn't, then there
+        # isn't too much of a new to import this into the API.
 
-        # Lastly, we will return the number of changes that we made and close
-        # the database session.
-        s.commit()
-        s.close()
-        return count
-
-
-    def _version(self, plugin, slug, name):
-        '''_version plugin_id slug
-        The version vunction is designed to take the URL slug and plugin id and
-        will update the database if necessary with new version information for
-        that plugin.
-        '''
-        # We start off with the usual setup stuff, instantiating a counter for
-        # tracking any changes, instantiating a new database session, the normal
-        # boring stuff we always have to do.  We are also computing the version
-        # link.  We will also use this link ourselves to pull the rest of the 
-        # information we need.
-        changes = 0
-        build = False
-        link = '%s/%s/files/%s' % (self.base_uri, plugin.name, slug)
-        s = db.Session()
-
-        # The first thing we need to do is check to see if we even have this
-        # version in the database.  If we do, then we don't need to do anything.
+        # First lets scrape out everything we need from the plugins main page.
+        # Some of these will be overrided by the YAML settings, so it's easier
+        # to pre-load here and then opverload if needed.
+        page = self._get_page('%s/%s' % (self.config_base, slug))
+        
+        # Plugin Stage
+        plugin['stage'] = page.find('span', {'class': self.r_stage}).text
+        plugin['authors'] = list(set([a.text for a in page.find('li', {'class': 'user-list-item'})\
+                                                .findChildren('a', {'class': 'user user-author'})]))
+        plugin['categories'] = [a.text for a in page.findAll('a', {'class': 'category'})]
         try:
-            version = s.query(db.Version).filter_by(link=link).one()
-            s.close()
-            return changes
+            plugin['logo'] = page.find('a', attrs={'class': 'project-default-image'}).findChild('img').get('src')
+            plugin['logo_full'] = page.find('a', attrs={'class': 'project-default-image'}).findChild('img').get('data-full-src')
         except:
-            # Generally we will end up here, this is ok, because this means that
-            # we have to parse the version and commit it to the database.
-            version = db.Version(name, plugin.id)
-            self.meta.changes.append({'plugin': plugin.name, 'version': name})
-            log.info('PARENT: Adding version %s for plugin %s for bukkit repository' % (name, plugin.name))
-            
-            # as we need this, let go ahead and add the link.
-            version.link = link
+            plugin['logo'] = ''
+            plugin['logo_full'] = ''
 
-            # Yay the page!
-            page = self._get_page(version.link)
+        # Now to pull in all of the data from the YAML definitions.
+        if 'name' in yml: plugin['plugin_name'] = yml['name']
+        if 'description' in yml: plugin['description'] = yml['description']
+        if 'author' in yml: plugin['authors'] = [yml['author'],]
+        if 'authors' in yml: plugin['authors'] = yml['authors']
+        if 'website' in yml: 
+            plugin['website'] = yml['website']
+        else:
+            plugin['website'] = '%s/%s' % (self.config_base, slug)
 
-            # This is the epoch date that the file was uploaded on.  We will use
-            # this when adding it into the db.
-            epoch = page.find(attrs={'class': 'standard-date'}).get('data-epoch')
+        # These don't really require any work, as we can determine these without
+        # parsing either the YAML or scraping it out of the page.
+        plugin['slug'] = slug
+        plugin['dbo_page'] = '%s/%s' % (self.config_base, slug)
+        plugin['server'] = 'bukkit'
+        plugin['versions'] = versions
+        self._update_plugin(plugin)
 
-            # Now we start parsing!
-            version.download = page.find('dt', text='Filename').findNext('a').get('href')
-            version.filename = page.find('dt', text='Filename').findNext('a').text
-            version.md5 = page.find('dt', text='MD5').findNext('dd').text
-            version.date = datetime.datetime.fromtimestamp(float(epoch))
-            version.status = page.find(attrs={'class': self.refilest}).text
-            version.type = page.find(attrs={'class': self.refilety}).text
-            version.game_versions = list(set([a.text for a in page.find('dt', text='Game version')\
+
+    def version(self, plugin, slug):
+        '''version plugin slug
+        '''
+
+        # The very first thing we need to do if check to see if this version
+        # already exists in the API.
+        version = self._api_get('version', {'plugin.slug': plugin,
+                                            'plugin.server': 'bukkit',
+                                            'plugin.versions.slug': slug})
+        if version:
+            if self.config_type == 'speedy':
+                return False, version
+            log.info('PARSER: Updating Bukkit Plugin %s Version %s' % (plugin, slug))
+        else:
+            version = {}
+            log.info('PARSER: Adding Bukkit Plugin %s Version %s' % (plugin, slug))
+
+        # Now we need to pull the page.  While we are at it, we might as well
+        # parse as much out of the page as we can.
+        dbo_page = '%s/%s/files/%s/' % (self.config_base, plugin, slug)
+        page = self._get_page(dbo_page)
+        try:
+            version['version'] = self.r_versionnum.findall(\
+                page.find(attrs={'class': 'unit size2of3'}).findNext('h1').text)[0]
+        except:
+            version['version'] = 'UNKNOWN'
+        version['date'] = int(page.find(attrs={'class': 'standard-date'}).get('data-epoch'))
+        version['download'] = page.find('dt', text='Filename').findNext('a').get('href')
+        version['md5'] = page.find('dt', text='MD5').findNext('dd').text
+        version['status'] = page.find(attrs={'class': self.r_status}).text
+        version['type'] = page.find(attrs={'class': self.r_filetype}).text
+        version['game_versions'] = list(set([a.text for a in page.find('dt', text='Game version')\
                                                                   .findNext('ul')\
                                                                   .findChildren('li')]))
+        try:
+            version['changelog'] = base64.encodestring(\
+                page.find('h3',text='Change log').findParent('div').prettify())
+        except:
+            version['changelog'] = ''
 
-            # For the rest of the information, we will need to download the
-            # plugin itself and parse that information.
+        # Lets also pre-populate some information into the version to make sure
+        # that regardless, we will have something in these values.
+        version['hard_dependencies'] = []
+        version['soft_dependencies'] = []
+        version['commands'] = []
+        version['permissions'] = []
 
-            ## THIS WHOLE SECTION NEEDS TO BE REFACTORED.  INNEFICIENT.
-            if version.download[-3:].lower() in ['jar', 'zip']:
-                data = StringIO() # Jar file Data
+        # Now that we have parsed out some of the information, we need to do a
+        # little sanity check and make sure that we only input zip or jar files
+        # into the API.  All the other stuff, while useful, is outside the
+        # scope of what the API is intended for.
+        if version['download'][-3:] not in ['jar', 'zip']:
+            return False, None
 
-                if version.download[-3:].lower() == 'zip':
-                    # If it's a zip file, we will try to dig into the zip file,
-                    # pull out the proper jar file and and then return the data
-                    # to the data var.
-                    zdata = StringIO()
-                    try:
-                        zdata.write(self._get_url(version.download))
-                        zfile = ZipFile(zdata)
-                    except:
-                        pass
-                    else:
-                        for filename in zfile.namelist():
-                            if filename[-3:].lower() == 'jar':
-                                data.write(zfile.read(filename))
-                                break
-                    zfile.close()
-                    zdata.close()
-                else:
-                    try:
-                        data.write(self._get_url(version.download))
-                    except:
-                        pass
+        # Next we need to download the plugin and try to get to the jar file.
+        # we will be using a separate function to handle this that can
+        # recursively drill in until it finds a plugin.yml file.  If no yaml
+        # file was found, then we will just throw a blank dictionary into the
+        # variable in order to get through the if block.
+        download = StringIO()
+        download.write(self._get_url(version['download']))
+        yml = self._find_plugin_yaml(download)
+        download.close()
+        if not yml: yml = {}
 
+        # Now to populate the version dictionary based on the plugin.yml ;)
+        if 'depend' in yml and yml['depend'] is not None: 
+            version['soft_dependencies'] = yml['depend']
+        if 'softdepend' in yml and yml['softdepend'] is not None:
+            version['hard_dependencies'] = yml['softdepend']
+        if 'commands' in yml and yml['commands'] is not None:
+            version['commands'] = self._commands(yml['commands'])
+        if 'permissions' in yml and yml['permissions'] is not None:
+            version['permissions'] = self._permissions(yml['permissions'])
+        if 'version' in yml and yml['version'] is not None:
+            version['version'] = str(yml['version'])
 
-                # The first thing we need to do with this jar file is to
-                # download it and instantiate the data as a ZipFile object.
-                # From there we can pull out the needed data and parse it as
-                # needed.
-                jar = ZipFile(data)
-
-                # Now we will look for the plugin.yml file inside the jarfile
-                # and will also add in the hard & soft dependencies, commands,
-                # and permissions.
-                version.hard_dependencies = []
-                version.soft_dependencies = []
-                version.commands = {}
-                version.permissions = {}
-                if 'plugin.yml' in jar.namelist():
-                    try:
-                        config = yaml.load(jar.read('plugin.yml'))
-                    except:
-                        config = {}
-                    
-                    # Hard Dependencies
-                    if 'depend' in config and config['depend'] != None:
-                        version.hard_dependencies = config['depend']
-
-                    # Soft Dependencies
-                    if 'softdepend' in config and config['softdepend'] != None:
-                        version.soft_dependencies = config['softdepend']
-
-                    # Commands
-                    if 'commands' in config and config['commands'] != None:
-                        version.commands = config['commands']
-
-                    # Permissions
-                    if 'permissions' in config and config['permissions'] != None:
-                        version.permissions = config['permissions']
-
-                    # Allow for the ability of the latest update to override the
-                    # plugin name.  We still use the url slug canonically,
-                    # however this may be cleaner ;).
-                    if 'name' in config and config['name'] != None and not self.ymlname:
-                        self.ymlname = config['name']
-
-                    # Allow for the ability of the latest update to override the
-                    # plugin description.
-                    if 'description' in config and config['description'] != None and not self.ymldesc:
-                        self.ymldesc = config['description']
-
-                # Now to cleanup...
-                jar.close()
-                data.close()
-
-            # Lastly we will now commit this new version to the database.
-            s.add(version)
-            s.commit()
-            changes = 1
-        return changes
+        self.changes.append({'plugin': plugin, 'version': version['version']})
+        return yml, version
