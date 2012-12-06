@@ -42,7 +42,8 @@ class Parser(BaseParser):
         We will also need to parse the children and apply the default
         values as needed as well.
         '''
-        inv = {'op': 'not op', 'not op': 'op', True: False, False: True}
+        inv = {'op': 'not op', 'not op': 'op', 
+               True: False, False: True, None: True}
         pdict = {}
 
         # If we run into a string instead of what we expect, then we will
@@ -90,7 +91,9 @@ class Parser(BaseParser):
 
                 for child in child_list:
                     # Nice little hack to get around some ambiguity in
-                    # the format >.<
+                    # the format.  permissions can be of any number of
+                    # different formats.  This is an attempt to
+                    # normalize that madness.
                     if isinstance(child, dict):
                         child, value = child.iteritems().next()
                     elif isinstance(p['children'], list) or\
@@ -105,10 +108,15 @@ class Parser(BaseParser):
                             value = False
                     else:
                         value = p['children'][child]
+
+                    # Now lets get a basic structure layed out for the child.
                     if child in pdict:
                         c = pdict[child]
                     else:
                         c = {'default': False, 'role': child}
+
+                    # Once we have that basic structure, lets fix the
+                    # permissions if we need to flip it.
                     if 'default' not in c or c['default'] == False:
                         if value:
                             c['default'] = default
@@ -211,14 +219,24 @@ class Parser(BaseParser):
         start = time.time()
         log.info('PARSER: Starting DBO Parsing at page %s' % self.config_start)
 
+        # So here is the meat and potatos of this function.  We will be looping
+        # as long as there is either more changes being added to the changes
+        # variable or until we run out of plugins to parse.
         pagenum = self.config_start
         parsing = True
         while parsing:
-            count = len(self.changes)
+            count = len(self.changes)   # Current Change count.
+
+            # Lets go ahead and grab the page, then pull out all of the plugins
+            # listed on this given page.
             page = self._get_page('%s/?page=%s' % (self.config_base, pagenum))
             plugins = [a.findChild('a').get('href') for a in page.findAll('h2')]
+
+            # Now to iterate through all of the plugins we discovered...
             for plugin in plugins:
                 try:
+                    # Here we are attemping to pull out the plugin slug.  This
+                    # will be used as
                     slug = self.r_plugin.findall(plugin)[0]
                 except:
                     log.debug('PARSER: Could not parse %s' % plugin)
@@ -230,6 +248,8 @@ class Parser(BaseParser):
                 parsing = False
             else:
                 log.info('PARSER: Parsing DBO Page %s' % pagenum)
+
+        # The geninfo for this generation.
         geninfo = {
             'duration': int(time.time() - start),
             'timestamp': int(time.time()),
@@ -237,6 +257,8 @@ class Parser(BaseParser):
             'type': self.config_type,
             'changes': self.changes,
         }
+
+        # Lets send a log and then upload the generation info to the API.
         log.info('PARSER: DBO Parsing complete. Time: %s' % geninfo['duration'])
         self._add_geninfo(geninfo)
 
