@@ -74,7 +74,7 @@ class Parser(BaseParser):
                 else:
                     default = p['default'] if 'default' in p else False
                     default = False if default is None else default
-                    pdict[perm]['default'] = default
+                pdict[perm]['default'] = default
             else:
                 # As we may use this if we have children, might as well
                 # load it in if we didnt set it ;)
