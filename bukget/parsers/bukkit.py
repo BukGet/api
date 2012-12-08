@@ -42,7 +42,8 @@ class Parser(BaseParser):
         We will also need to parse the children and apply the default
         values as needed as well.
         '''
-        inv = {'op': 'not op', 'not op': 'op', True: False, False: True}
+        inv = {'op': 'not op', 'not op': 'op', True: False, False: True,
+               'OP': 'not op', 'NOT OP': 'op', 'not-op': 'op', 'NOT-OP': 'op'}
         pdict = {}
 
         # If we run into a string instead of what we expect, then we will
@@ -68,9 +69,12 @@ class Parser(BaseParser):
                 # If there isnt any default permission currently set, then
                 # lets try to parse it out, and return with the default
                 # value if we cant find anything.
-                default = p['default'] if 'default' in p else False
-                default = False if default is None else default
-                pdict[perm]['default'] = default
+                if isinstance(p, str) or isinstance(p, bool): 
+                    default = p
+                else:
+                    default = p['default'] if 'default' in p else False
+                    default = False if default is None else default
+                    pdict[perm]['default'] = default
             else:
                 # As we may use this if we have children, might as well
                 # load it in if we didnt set it ;)
@@ -347,7 +351,6 @@ class Parser(BaseParser):
     def version(self, plugin, slug):
         '''version plugin slug
         '''
-
         # The very first thing we need to do if check to see if this version
         # already exists in the API.
         version = self._api_get('version', {'plugin.slug': plugin,
@@ -415,9 +418,17 @@ class Parser(BaseParser):
         if 'softdepend' in yml and yml['softdepend'] is not None:
             version['hard_dependencies'] = yml['softdepend']
         if 'commands' in yml and yml['commands'] is not None:
-            version['commands'] = self._commands(yml['commands'])
+            try:
+                version['commands'] = self._commands(yml['commands'])
+            except:
+                log.warn('PARSER: Could not Parse commands for %s:%s' % (plugin, slug))
+                version['commands'] = []
         if 'permissions' in yml and yml['permissions'] is not None:
-            version['permissions'] = self._permissions(yml['permissions'])
+            try:
+                version['permissions'] = self._permissions(yml['permissions'])
+            except:
+                log.warn('PARSER: Could not Parse permissions for %s:%s' % (plugin, slug))
+                version['permissions'] = []
         if 'version' in yml and yml['version'] is not None:
             version['version'] = str(yml['version'])
 
