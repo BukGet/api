@@ -3,7 +3,7 @@ import threading
 import json
 import os
 from hashlib import md5
-from urllib2 import urlopen
+from urllib2 import urlopen, HTTPError, URLError
 from bukget.log import log
 from BeautifulSoup import BeautifulSoup
 
@@ -12,10 +12,10 @@ from BeautifulSoup import BeautifulSoup
 from pymongo import MongoClient
 connection = MongoClient('localhost', 27017)
 db = connection.bukget
-try:
-    db.plugins.drop()
-except:
-    pass
+#try:
+#    db.plugins.drop()
+#except:
+#    pass
 if not os.path.exists('json_dicts'):
     os.mkdir('json_dicts')
 # --HACKERY
@@ -43,18 +43,21 @@ class BaseParser(threading.Thread):
         '''
         log.debug('PARSER: Fetching: %s' % url)
         comp = False
-        count = 0
         data = ''
-        while not comp and count <= 10:
+        while not comp:
             try:
-                count += 1
                 data = urlopen(url, timeout=5).read()
                 comp = True
-            except:
+            except HTTPError, msg:
+                if msg.code == 404:
+                    log.error('PARSER: File not found for %s' % url)
+                    break
+                else:
+                    log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
+                    time.sleep(self.config_delay)
+            except URLError:
                 log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                 time.sleep(self.config_delay)
-        if count > 5:
-            log.error('PARSER: Could not get %s.' % url)
         return data
     
     
@@ -78,7 +81,11 @@ class BaseParser(threading.Thread):
 
     def _update_plugin(self, data):
         # Debugging hackery
-        with open('json_dicts/%s.json' % data['slug'], 'w') as jfile:
-            jfile.write(json.dumps(data, sort_keys=True, indent=4))
-        print db.plugins.insert(data)
+        try:
+            db.plugins.insert(data)
+        except:
+            del(data['_id'])
+            with open('json_dicts/%s.json' % data['slug'], 'w') as jfile:
+                jfile.write(json.dumps(data, sort_keys=True, indent=4))
+            log.error('PARSER: Could not import %s' % data['slug'])
         

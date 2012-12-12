@@ -27,7 +27,7 @@ class Parser(BaseParser):
 
     def _permissions(self, perms):
         '''
-        This is a basic function used to normalize out the permissions
+        This is a basic function used to normalize out the permissionsn
         contained within the plugin.yml file in a plugin.  As bukkit
         allows for something thats a bit more free-form, we need to
         normalize everything down to something thats a little easier
@@ -161,6 +161,11 @@ class Parser(BaseParser):
             if 'aliases' in c:
                 if isinstance(c['aliases'], list):
                     aliases = c['aliases']
+
+                    # This hack here is to find when ? was used and replace it
+                    # with what was expected.
+                    if {None: None} in aliases:
+                        aliases[aliases.index({None: None})] = '?'
                 else:
                     aliases = [str(c['aliases']),]
 
@@ -338,6 +343,7 @@ class Parser(BaseParser):
             plugin['website'] = yml['website']
         else:
             plugin['website'] = '%s/%s' % (self.config_base, slug)
+
 
         # These don't really require any work, as we can determine these without
         # parsing either the YAML or scraping it out of the page.
