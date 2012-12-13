@@ -9,6 +9,17 @@ from bukget.log import log
 from bukget.parsers.base import BaseParser
 
 
+def speedy():
+    p = Parser()
+    p.run()
+
+
+def full():
+    p = Parser()
+    p.config_type = 'full'
+    p.run()
+
+
 class Parser(BaseParser):
     '''Bukkit Parser Object
     '''
@@ -278,11 +289,17 @@ class Parser(BaseParser):
         # The first thing we need to do here is query the API and find out if
         # the plugin already exists.  If it doesn't then we will start with a
         # completely clean dictionary.
-        plugin = self._api_get('plugin', {'plugin.server': 'bukkit', 'plugin.slug': slug})
+        plugin = self._api_get({'plugin.server': 'bukkit', 'plugin.slug': slug})
         if plugin:
             log.info('PARSER: Updating Bukkit Plugin %s' % slug)
         else:
-            plugin = {}
+            plugin = {
+                'slug': slug,
+                'server': 'bukkit',
+                'description': '',
+                'authors': [],
+                'plugin_name': '',
+            }
             log.info('PARSER: Adding Bukkit Plugin %s' % slug)
         
         yml = False         # Variable to house the most recent version yaml.
@@ -303,7 +320,7 @@ class Parser(BaseParser):
                     versions.append(vdata)
                 if not yml:
                     yml = tyml
-            if page.find('li', {'class': 'listing-pagination-pages-next'}):
+            if page.find('li', {'class': 'listing-pagination-pages-next'}) is not None:
                 filepage += 1
             else:
                 running = False
@@ -337,7 +354,11 @@ class Parser(BaseParser):
         # Now to pull in all of the data from the YAML definitions.
         if 'name' in yml: plugin['plugin_name'] = yml['name']
         if 'description' in yml: plugin['description'] = yml['description']
-        if 'author' in yml: plugin['authors'] = [yml['author'],]
+        if 'author' in yml: 
+            if isinstance(yml['author'], list): 
+                plugin['authors'] = yml['authors']
+            else:
+                plugin['authors'] = [yml['author'],]
         if 'authors' in yml: plugin['authors'] = yml['authors']
         if 'website' in yml: 
             plugin['website'] = yml['website']
@@ -347,11 +368,13 @@ class Parser(BaseParser):
 
         # These don't really require any work, as we can determine these without
         # parsing either the YAML or scraping it out of the page.
-        plugin['slug'] = slug
         plugin['dbo_page'] = '%s/%s' % (self.config_base, slug)
-        plugin['server'] = 'bukkit'
         plugin['versions'] = versions
-        self._update_plugin(plugin)
+
+        # Lastly, we only want to even bother to commit this up if there is at
+        # least 1 version of the plugin uploaded.
+        if len(versions) > 0:
+            self._update_plugin(plugin)
 
 
     def version(self, plugin, slug):
@@ -359,15 +382,20 @@ class Parser(BaseParser):
         '''
         # The very first thing we need to do if check to see if this version
         # already exists in the API.
-        version = self._api_get('version', {'plugin.slug': plugin,
-                                            'plugin.server': 'bukkit',
-                                            'plugin.versions.slug': slug})
+        version = None
+        p = self._api_get({'plugin.slug': plugin,
+                           'plugin.server': 'bukkit',
+                           'plugin.versions.slug': slug})
+        if p is not None:
+            version = ([v for v in p['versions'] if v['slug'] == slug])[0]
         if version:
             if self.config_type == 'speedy': 
                 return False, version
             log.info('PARSER: Updating Bukkit Plugin %s Version %s' % (plugin, slug))
         else:
-            version = {}
+            version = {
+                'slug': slug,
+            }
             log.info('PARSER: Adding Bukkit Plugin %s Version %s' % (plugin, slug))
 
         # Now we need to pull the page.  While we are at it, we might as well

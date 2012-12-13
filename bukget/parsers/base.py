@@ -55,7 +55,7 @@ class BaseParser(threading.Thread):
                 else:
                     log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                     time.sleep(self.config_delay)
-            except URLError:
+            except:
                 log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                 time.sleep(self.config_delay)
         return data
@@ -71,8 +71,8 @@ class BaseParser(threading.Thread):
         return h.hexdigest()
 
 
-    def _api_get(self, obj, filters):
-        return None
+    def _api_get(self, filters):
+        return db.plugins.find_one(filters)        
 
 
     def _add_geninfo(self, data):
@@ -82,7 +82,7 @@ class BaseParser(threading.Thread):
     def _update_plugin(self, data):
         # Debugging hackery
         try:
-            db.plugins.insert(data)
+            db.plugins.save(data)
         except:
             del(data['_id'])
             with open('json_dicts/%s.json' % data['slug'], 'w') as jfile:
