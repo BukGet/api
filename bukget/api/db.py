@@ -1,21 +1,44 @@
 import pymongo
-import json
-from bottle import Bottle, run, redirect, response, request
+from bson.code import Code
 
-connection = Connection('localhost', 27017)
+amap = Code('''
+function () {
+    this.authors.forEach(function(z) {
+        emit(z, 1);
+    });
+}
+''')
+
+cmap = Code('''
+function () {
+    this.categories.forEach(function(z) {
+        emit(z, 1);
+    });
+}
+
+''')
+
+reduceall = Code('''
+function (key, values) {
+    var total = 0;
+    for (var i = 0; i < values.length; i++) {
+        total += values[i];
+    }
+    return total;
+}
+''')
+
+connection = pymongo.MongoClient('localhost', 27017)
 db = connection.bukget
-plugins = db.plugins
-geninfo = dp.geninfo
-app = Bottle()
 
-
-def getplugins(filters=[], finc=[], fexc=[], sub=False, single=False):
+def plugins(filters=[], finc=[], fexc=[], size=-1, start=-1, sort='slug',
+            sub=False, single=False):
     '''
     '''
     fields = {'_id': 0}
     f = {}
-    for item in finc: fields[item] = 1
     for item in fexc: fields[item] = 0
+    for item in finc: fields[item] = 1
     for item in filters:
         if item['action'] == '=': f[item['field']] = item['value']
         if item['action'] == '!=': f[item['field']] = {'$ne': item['value']}
@@ -47,84 +70,28 @@ def getplugins(filters=[], finc=[], fexc=[], sub=False, single=False):
     if sub:
         return f
     elif single:
-        return plugins.find_one(filters, fields)
+        return db.plugins.find_one(f, fields)
     else:
-        return plugins.find(filters, fields)
+        data = list(db.plugins.find(f, fields).sort(sort))
+        if size > 0 and start >= 0:
+            data = data[start:start+size]
+        return data
 
 
-
-@app.post('/plugin')
-def update_plugin():
+def categories():
     '''
     '''
-    plugin = json.loads(request.forms.get('data'))
-    try:
-        db.plugins.update({'server': plugin['server'], 'slug': plugin['slug']}, 
-                          {'$set': plugin})
-    except:
-        db.plugins.insert(plugin)
+    data = []
+    for item in db.plugins.map_reduce(cmap, reduceall, 'clist').find().sort('_id'):
+        data.append({'name': item['_id'], 'count': item['value']})
+    return data
 
 
-@app.post('/geninfo')
-def new_gen():
+def authors():
     '''
     '''
-    geninfo = json.loads(request.forms.get('data'))
-    db.geninfo.insert(geninfo)
+    data = []
+    for item in db.plugins.map_reduce(amap, reduceall, 'alist').find().sort('_id'):
+        data.append({'name': item['_id'], 'count': item['value']})
+    return data
 
-
-@app.get('/plugins')
-@app.get('/plugins/')
-@app.get('/plugins/<server>')
-def plugin_list(server=None):
-    '''
-    '''
-
-
-
-@app.get('/plugins/<server>/<slug>')
-@app.get('/plugins/<server>/<slug>/')
-@app.get('/plugins/<server>/<slug>/<version>')
-def plugin_details(server, slug, version=None):
-    '''
-    '''
-
-
-@app.get('/plugins/<server>/<slug>/<version>/download')
-def plugin_download(server, slug, version):
-    '''
-    '''
-
-
-@app.get('/authors')
-@app.get('/authors/')
-def author_list():
-    '''
-    '''
-
-
-@app.get('/authors/<name>')
-def author_plugins(name):
-    '''
-    '''
-
-
-@app.get('/categories')
-@app.get('/categories/')
-def category_list():
-    '''
-    '''
-
-
-@app.get('/categories/<name>')
-@app.get('/categories/<server>/<name>')
-def category_plugins(name, server=None):
-    '''
-    '''
-
-
-@app.post('/search')
-@app.get('/search/<field>/<action>/<value>')
-def search(field=None, action=None, value=None):
-    '''
-    '''
