@@ -13,10 +13,9 @@ def set_json_header():
     response.set_header('Access-Control-Allow-Origin', '*')
 
 
-@app.get('/plugins')
-@app.get('/plugins/')
-@app.get('/plugins/<server>')
-@app.get('/plugins/<server>/')
+
+@app.get('/<server>/plugins')
+@app.get('/<server>/plugins/')
 def plugin_list(server=None):
     '''Plugin Listing
     Returns the plugin listing.  Can optionally be limited to a specific server
@@ -32,21 +31,36 @@ def plugin_list(server=None):
     return c.jsonify(data)
 
 
-@app.get('/plugins/<server>/<slug>')
-@app.get('/plugins/<server>/<slug>/')
-@app.get('/plugins/<server>/<slug>/<version>')
-@app.get('/plugins/<server>/<slug>/<version>/')
+@app.get('/<server>/plugin/<slug>')
+@app.get('/<server>/plugin/<slug>/')
+@app.get('/<server>/plugin/<slug>/<version>')
+@app.get('/<server>/plugin/<slug>/<version>/')
 def plugin_details(server, slug, version=None):
     '''Plugin Details 
     Returns the document for a specific plugin.  Optionally can return only a
     specific version as part of the data as well.
     '''
     fields = bleach.clean(request.query.fields or '').split(',')
-    size = c.sint(bleach.clean(request.query.size or None))
-    data = c.plugin_details(server, slug, version, fields))
-    if size is not None:
-        data['versions'] = data['versions'][:size]
+    data = c.plugin_details(server, slug, version, fields)
+    data['link'] = data['dbo_page']
+    data['repo'] = data['server']
+    data['pluginname'] = data['plugin_name']
+    del(data['plugin_name'])
+    del(data['dbo_page'])
+    del(data['server'])
+    del(data['logo'])
+    del(data['logo_full'])
+    del(data['website'])
+
+    versions = []
+    for version in data['versions']:
+        del(version['slug'])
+        del(version['changelog'])
+        versions.append(version)
+    data['versions'] = versions
     return c.jsonify(data)
+
+
 
 
 @app.get('/plugins/<server>/<slug>/<version>/download')
@@ -74,26 +88,24 @@ def author_list():
     Returns a full listing of the authors in the system and the number of
     plugins that they have in the database.
     '''
-    return c.jsonify(c.list_authors())
+    return c.jsonify([a['name'] for a in c.list_authors()])
 
 
-@app.get('/authors/<name>')
-@app.get('/authors/<name>/')
-@app.get('/authors/<server>/<name>')
-@app.get('/authors/<server>/<name>/')
+@app.get('/author/<name>')
+@app.get('/author/<name>/')
 def author_plugins(name, server=None):
     '''Author Plugin Listing
     Returns the plugins associated with a specific author.  Optionally can also
     be restricted to a specific server binary compatability.
     '''
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
+    fields = ['slug',]
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
     data = c.list_author_plugins(server, name, fields, sort)
     if size is not None and start is not None:
-        return c.jsonify(data[start:start+size])
-    return c.jsonify(data)
+        return c.jsonify([a['slug'] for a in data[start:start+size]])
+    return c.jsonify([a['slug'] for a in data])
 
 
 @app.get('/categories')
@@ -103,29 +115,26 @@ def category_list():
     Returns the categories in the database and the number of plugins that each
     category holds.
     '''
-    return c.jsonify(c.list_categories())
+    return c.jsonify([a['name'] for a in c.list_categories()])
 
 
 @app.get('/categories/<name>')
 @app.get('/categories/<name>/')
-@app.get('/categories/<server>/<name>')
-@app.get('/categories/<server>/<name>/')
 def category_plugins(name, server=None):
     '''Category Plugin listing
     returns the list of plugins that match a specific category.  Optionally a
     specific server binary compatability can be specified.
     '''
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
+    fields = ['slug',]
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
     data = c.list_category_plugins(server, name, fields, sort)
     if size is not None and start is not None:
-        return c.jsonify(data[start:start+size])
-    return c.jsonify(data)
+        return c.jsonify([a['slug'] for a in data[start:start+size]])
+    return c.jsonify([a['slug'] for a in data])
 
 
-@app.post('/search')
 @app.get('/search/<field>/<action>/<value>')
 @app.get('/search/<field>/<action>/<value>/')
 def search(field=None, action=None, value=None):
@@ -133,28 +142,19 @@ def search(field=None, action=None, value=None):
     A generalized search system that accepts both single-criteria get requests
     as well as multi-criteria posts.
     '''
-    filters = []
-    if request.method == 'GET':
-        fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
-        start = c.sint(bleach.clean(request.query.start or None))
-        size = c.sint(bleach.clean(request.query.size or None))
-        sort = bleach.clean(request.query.sort or 'slug')
-        field = bleach.clean(field)
-        value = bleach.clean(value)
-        filters = [
-            {'field': field, 'action': action, 'value': value}
-        ]
-    else:
-        req = json.dumps(request.forms.get('search'))
-        fields = req['fields'] if 'fields' in req else ['slug', 'plugin_name', 'description']
-        start = req['start'] if 'sort' in req else None
-        size = req['size'] if 'size' in req else None
-        sort = req['sort'] if 'sort' in req else 'slug'
-        filters = req['filters'] if 'filters' in req else []
+    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
+    start = c.sint(bleach.clean(request.query.start or None))
+    size = c.sint(bleach.clean(request.query.size or None))
+    sort = bleach.clean(request.query.sort or 'slug')
+    field = bleach.clean(field)
+    value = bleach.clean(value)
+    filters = [
+        {'field': field, 'action': action, 'value': value}
+    ]
     try:
         data = c.plugin_search(filters, fields, sort)
     except:
-        raise bottle.HTTPError(400, '{"error": "invalid post"}')
+        raise bottle.HTTPError(400, '{"error": "invalid search"}')
     else:
         if start is not None and size is not None:
             return c.jsonify(data[start:start+size])
