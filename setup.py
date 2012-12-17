@@ -14,7 +14,7 @@ setup(
             'bukget_api = bukget.api:start',
             'bukget_bukkit = bukget.parsers.bukkit:speedy',
             'bukget_bukkit-full = bukget.parsers.bukkit:full',
-            'bukget_bukkit-status = bukget.parsers.bukkit:status_update'
+            'bukget_bukkit-status = bukget.parsers.bukkit:stage_update',
             ]
     },
     data_files=[
