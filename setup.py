@@ -3,7 +3,7 @@ import sys
 
 setup(
     name='BukGet',
-    version='0.2.3',
+    version='0.3',
     description='DBO Parser and web API for Minecraft Plugins',
     author='Steven McGrath',
     author_email='steve@chigeek.com',
@@ -11,24 +11,25 @@ setup(
     packages=['bukget', 'bukget.parsers'],
     entry_points = {
         'console_scripts': [
-            'bukget-web = bukget.svc:website',
-            'bukget-updater = bukget.svc:updater',
+            'bukget_api = bukget.api:start',
+            'bukget_bukkit = bukget.parsers.bukkit:speedy',
+            'bukget_bukkit-full = bukget.parsers.bukkit:full',
+            'bukget_bukkit-status = bukget.parsers.bukkit:status_update'
             ]
     },
     data_files=[
         ('/etc', ['bukget.conf']),
     ],
     install_requires=[
-        'bottle == 0.10.11', 
+        'bottle', 
         'Markdown >= 2.0',
-        'SQLAlchemy == 0.7.9',
-        'bottle-sqlalchemy',
+        'pymongo',
         'beautifulsoup',
         'PyYAML',
         'bleach',
     ],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Information Technology',
         'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
         'Natural Language :: English',
