@@ -6,7 +6,7 @@ import base64
 from StringIO import StringIO
 from zipfile import ZipFile
 from bukget.log import log
-from bukget.parsers.base import BaseParser
+from bukget.parsers.base import BaseParser, db
 
 
 def speedy():
@@ -17,6 +17,12 @@ def speedy():
 def full():
     p = Parser()
     p.config_type = 'full'
+    p.run()
+
+
+def stage_update():
+    p = Parser()
+    p.config_type = 'stage_update'
     p.run()
 
 
@@ -292,9 +298,7 @@ class Parser(BaseParser):
         # the plugin already exists.  If it doesn't then we will start with a
         # completely clean dictionary.
         plugin = self._api_get({'server': 'bukkit', 'slug': slug})
-        if plugin:
-            log.info('PARSER: Updating Bukkit Plugin %s' % slug)
-        else:
+        if not plugin:
             plugin = {
                 'slug': slug,
                 'server': 'bukkit',
@@ -303,12 +307,14 @@ class Parser(BaseParser):
                 'plugin_name': '',
             }
             log.info('PARSER: Adding Bukkit Plugin %s' % slug)
+        changes = len(self.changes)
+
         
         yml = False         # Variable to house the most recent version yaml.
         running = True      # Will stay true as long as we are parsing versions
         filepage = 1        # The current page of versions.
         versions = []       # The versions list.
-        while running:
+        while running and self.config_type != 'stage_update':
             page = self._get_page('%s/%s/files/?page=%s' % (self.config_base, slug, filepage))
             try:
                 rows = page.findChild('tbody').findAll('tr')
@@ -375,8 +381,10 @@ class Parser(BaseParser):
 
         # Lastly, we only want to even bother to commit this up if there is at
         # least 1 version of the plugin uploaded.
-        if len(versions) > 0:
+        if len(versions) > 0 and len(self.changes) > changes:
             self._update_plugin(plugin)
+        elif self.config_type == 'stage_update'
+            db.update({'_id': plugin['_id']}, {'$set': {'stage': plugin['stage']}})
 
 
     def version(self, plugin, slug):
