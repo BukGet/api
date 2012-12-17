@@ -1,6 +1,5 @@
 import json
 import bleach
-from bukget.api.db import db
 from bukget.config import config
 from bottle import Bottle
 
