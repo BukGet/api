@@ -383,7 +383,7 @@ class Parser(BaseParser):
         # least 1 version of the plugin uploaded.
         if len(versions) > 0 and len(self.changes) > changes:
             self._update_plugin(plugin)
-        elif self.config_type == 'stage_update'
+        elif self.config_type == 'stage_update':
             db.update({'_id': plugin['_id']}, {'$set': {'stage': plugin['stage']}})
 
 
