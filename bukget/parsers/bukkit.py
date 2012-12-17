@@ -263,6 +263,8 @@ class Parser(BaseParser):
                     self.plugin(slug)
             if page.find(attrs={'class': 'listing-pagination-pages-next'}):
                 pagenum += 1
+            else:
+                parsing = False
             if len(self.changes) == count and self.config_type == 'speedy':
                 parsing = False
             else:
@@ -289,7 +291,7 @@ class Parser(BaseParser):
         # The first thing we need to do here is query the API and find out if
         # the plugin already exists.  If it doesn't then we will start with a
         # completely clean dictionary.
-        plugin = self._api_get({'plugin.server': 'bukkit', 'plugin.slug': slug})
+        plugin = self._api_get({'server': 'bukkit', 'slug': slug})
         if plugin:
             log.info('PARSER: Updating Bukkit Plugin %s' % slug)
         else:
@@ -356,7 +358,7 @@ class Parser(BaseParser):
         if 'description' in yml: plugin['description'] = yml['description']
         if 'author' in yml: 
             if isinstance(yml['author'], list): 
-                plugin['authors'] = yml['authors']
+                plugin['authors'] = yml['author']
             else:
                 plugin['authors'] = [yml['author'],]
         if 'authors' in yml: plugin['authors'] = yml['authors']
@@ -383,9 +385,9 @@ class Parser(BaseParser):
         # The very first thing we need to do if check to see if this version
         # already exists in the API.
         version = None
-        p = self._api_get({'plugin.slug': plugin,
-                           'plugin.server': 'bukkit',
-                           'plugin.versions.slug': slug})
+        p = self._api_get({'slug': plugin,
+                           'server': 'bukkit',
+                           'versions.slug': slug})
         if p is not None:
             version = ([v for v in p['versions'] if v['slug'] == slug])[0]
         if version:
@@ -407,8 +409,10 @@ class Parser(BaseParser):
                 page.find(attrs={'class': 'unit size2of3'}).findNext('h1').text)[0]
         except:
             version['version'] = 'UNKNOWN'
+        version['link'] = dbo_page
         version['date'] = int(page.find(attrs={'class': 'standard-date'}).get('data-epoch'))
         version['download'] = page.find('dt', text='Filename').findNext('a').get('href')
+        version['filename'] = page.find('dt', text='Filename').findNext('a').text
         version['md5'] = page.find('dt', text='MD5').findNext('dd').text
         version['status'] = page.find(attrs={'class': self.r_status}).text
         version['type'] = page.find(attrs={'class': self.r_filetype}).text
