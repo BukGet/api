@@ -91,7 +91,7 @@ def get_geninfo(idnum):
     '''
     Returns a specific generation IDs information.
     '''
-    item = db.geninfo.find_one({'_id': ObjectId(idnum))
+    item = db.geninfo.find_one({'_id': ObjectId(idnum)})
     if item is not None:
         item['id'] == str(item['_id'])
         del(item['_id'])
