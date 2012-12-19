@@ -19,6 +19,16 @@ def start():
     @app.get('/')
     def home(): redirect('/3')
 
+    @app.get('/api')
+    @app.get('/api/')
+    @app.get('/api/<path:re:(.*)>')
+    def api1(path=''): redirect('/1/%s' % path)
+
+    @app.get('/api2')
+    @app.get('/api2/')
+    @app.get('/api2/<path:re:(.*)>')
+    def api2(path=''): redirect('/2/%s' % path)
+
     debug(config.getboolean('Settings', 'debug'))
     run(app=app,
         port=config.getint('Settings', 'port'),
