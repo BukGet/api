@@ -13,6 +13,18 @@ def set_json_header():
     response.set_header('Access-Control-Allow-Origin', '*')
 
 
+@app.get('/')
+@app.get('/geninfo')
+@app.get('/geninfo/')
+def generation_info():
+    '''Generation Information
+    Returns the generation information as requested.  User can optionall request
+    to look X number of versions back.
+    '''
+    size = c.sint(bleach.clean(request.query.size or None))
+    return c.jsonify(c.list_geninfo(size))
+
+
 @app.get('/plugins')
 @app.get('/plugins/')
 def plugin_list(server=None):

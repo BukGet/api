@@ -2,6 +2,7 @@ import pymongo
 import json
 import re
 from bson.code import Code
+from bson.objectid import ObjectId
 
 connection = pymongo.MongoClient('localhost', 27017)
 db = connection.bukget
@@ -70,6 +71,31 @@ def fieldgen(fields):
             else:
                 f[item] = 1
     return f
+
+
+def list_geninfo(size=1):
+    '''
+    This function allows for the retreival of the last X number of generations
+    based on the value of the size variable.
+    '''
+    infos = db.geninfo.find().sort({'_id': -1}).limit(size)
+    data = []
+    for item in infos:
+        item['id'] == str(item['_id'])
+        del(item['_id'])
+        data.append(item)
+    return data
+
+
+def get_geninfo(idnum):
+    '''
+    Returns a specific generation IDs information.
+    '''
+    item = db.geninfo.find_one({'_id': ObjectId(idnum))
+    if item is not None:
+        item['id'] == str(item['_id'])
+        del(item['_id'])
+    return item
 
 
 def list_plugins(server, fields, sort):
