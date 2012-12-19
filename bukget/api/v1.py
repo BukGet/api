@@ -51,7 +51,7 @@ def plugin_details(slug, version=None, server='bukkit'):
     Returns the document for a specific plugin.  Optionally can return only a
     specific version as part of the data as well.
     '''
-    fields = bleach.clean(request.query.fields or '').split(',')
+    fields = []
     data = c.plugin_details(server, slug, version, fields)
 
     # Moving data to the old format
@@ -164,7 +164,7 @@ def search(field=None, action=None, value=None):
     A generalized search system that accepts both single-criteria get requests
     as well as multi-criteria posts.
     '''
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
+    fields = ['slug',]
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
