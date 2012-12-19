@@ -160,8 +160,8 @@ def category_list():
     return c.jsonify([a['name'] for a in c.list_categories()])
 
 
-@app.get('/<server>/categories/<name>')
-@app.get('/<server>/categories/<name>/')
+@app.get('/<server>/category/<name>')
+@app.get('/<server>/category/<name>/')
 def category_plugins(server, name):
     '''Category Plugin listing
     returns the list of plugins that match a specific category.  Optionally a
