@@ -4,7 +4,7 @@ import v2
 import v3
 import update
 import stats
-from bottle import Bottle, run, debug, redirect
+from bottle import Bottle, run, debug, redirect, request
 from bukget.config import config
 
 
@@ -22,12 +22,12 @@ def start():
     @app.get('/api')
     @app.get('/api/')
     @app.get('/api/<path:re:(.*)>')
-    def api1(path=''): redirect('/1/%s' % path)
+    def api1(path=''): redirect('/1/%s?%s' % (path, request.query_string))
 
     @app.get('/api2')
     @app.get('/api2/')
     @app.get('/api2/<path:re:(.*)>')
-    def api2(path=''): redirect('/2/%s' % path)
+    def api2(path=''): redirect('/2/%s?%s' % (path, request.query_string))
 
     debug(config.getboolean('Settings', 'debug'))
     run(app=app,
