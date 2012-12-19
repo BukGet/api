@@ -58,6 +58,9 @@ def plugin_list(server=None):
         if 'plugin_name' in item:
             item['plugname'] = item['plugin_name']
             del(item['plugin_name'])
+        if 'slug' in item:
+            item['name'] = item['slug']
+            del(item['slug'])
         data.append(item)
     if size is not None and start is not None:
         return c.jsonify(data[start:start+size])
