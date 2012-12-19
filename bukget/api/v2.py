@@ -135,7 +135,7 @@ def author_plugins(server, name):
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = v3to2(c.list_author_plugins(server, name, fields, sort))
+    data = c.list_author_plugins(server, name, fields, sort)
     if size is not None and start is not None:
         return c.jsonify(v3to2(data[start:start+size]))
     return c.jsonify(v3to2(data))
@@ -163,7 +163,7 @@ def category_plugins(server, name):
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_category_plugins(server, name, fields, sort))
+    data = c.list_category_plugins(server, name, fields, sort)
     if size is not None and start is not None:
         return c.jsonify(v3to2(data[start:start+size]))
     return c.jsonify(v3to2(data))
