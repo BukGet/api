@@ -367,7 +367,11 @@ class Parser(BaseParser):
                 plugin['authors'] = yml['author']
             else:
                 plugin['authors'] = [yml['author'],]
-        if 'authors' in yml: plugin['authors'] = yml['authors']
+        if 'authors' in yml: 
+            if isinstance(yml['authors'], list):
+                plugin['authors'] = yml['authors']
+            else:
+                plugin['authors'] = [yml['authors'],]
         if 'website' in yml: 
             plugin['website'] = yml['website']
         else:
