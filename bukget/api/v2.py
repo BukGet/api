@@ -24,6 +24,7 @@ def v2to3(items):
 
 
 def v3to2(items):
+    data = []
     for item in items:
         if 'dbo_page' in item:
             item['link'] = item['dbo_page']
