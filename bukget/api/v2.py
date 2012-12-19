@@ -10,6 +10,7 @@ v2to3 = {
     'name': 'slug',
     'repo': 'server',
     'dbo_page': 'link',
+    'slug': 'name',
 }
 
 @app.hook('before_request')
