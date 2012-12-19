@@ -52,7 +52,7 @@ def plugin_list(server=None):
     for item in c.list_plugins(server, fields, sort):
         if 'dbo_page' in item:
             item['link'] = item['dbo_page']
-            del(tem['dbo_page'])
+            del(item['dbo_page'])
         if 'server' in item:
             item['repo'] = item['server']
             del(item['server'])
