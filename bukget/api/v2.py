@@ -140,14 +140,33 @@ def author_plugins(server, name):
     Returns the plugins associated with a specific author.  Optionally can also
     be restricted to a specific server binary compatability.
     '''
-    fields = ['slug',]
+    fields = []
+    for item in bleach.clean(request.query.fields or 'name,plugname,description').split(','):
+        if item in v2to3:
+            fields.append(v2to3[item])
+        else: 
+            fields.append(item)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_author_plugins(server, name, fields, sort)
+    data = []
+    for item in c.list_author_plugins(server, name, fields, sort):
+        if 'dbo_page' in item:
+            item['link'] = item['dbo_page']
+            del(item['dbo_page'])
+        if 'server' in item:
+            item['repo'] = item['server']
+            del(item['server'])
+        if 'plugin_name' in item:
+            item['plugname'] = item['plugin_name']
+            del(item['plugin_name'])
+        if 'slug' in item:
+            item['name'] = item['slug']
+            del(item['slug'])
+        data.append(item)
     if size is not None and start is not None:
-        return c.jsonify([a['slug'] for a in data[start:start+size]])
-    return c.jsonify([a['slug'] for a in data])
+        return c.jsonify(data[start:start+size])
+    return c.jsonify(data)
 
 
 @app.get('/categories')
@@ -167,14 +186,33 @@ def category_plugins(server, name):
     returns the list of plugins that match a specific category.  Optionally a
     specific server binary compatability can be specified.
     '''
-    fields = ['slug',]
+    fields = []
+    for item in bleach.clean(request.query.fields or 'name,plugname,description').split(','):
+        if item in v2to3:
+            fields.append(v2to3[item])
+        else: 
+            fields.append(item)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_category_plugins(server, name, fields, sort)
+    data = []
+    for item in c.list_category_plugins(server, name, fields, sort):
+        if 'dbo_page' in item:
+            item['link'] = item['dbo_page']
+            del(item['dbo_page'])
+        if 'server' in item:
+            item['repo'] = item['server']
+            del(item['server'])
+        if 'plugin_name' in item:
+            item['plugname'] = item['plugin_name']
+            del(item['plugin_name'])
+        if 'slug' in item:
+            item['name'] = item['slug']
+            del(item['slug'])
+        data.append(item)
     if size is not None and start is not None:
-        return c.jsonify([a['slug'] for a in data[start:start+size]])
-    return c.jsonify([a['slug'] for a in data])
+        return c.jsonify(data[start:start+size])
+    return c.jsonify(data)
 
 
 @app.get('/search/<field>/<action>/<value>')
