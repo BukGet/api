@@ -67,7 +67,7 @@ def plugin_list(server=None):
     Returns the plugin listing.  Can optionally be limited to a specific server
     binary compatability type.
     '''
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(','):
+    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
     fields = v2to3(fields)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
@@ -87,7 +87,7 @@ def plugin_details(server, slug, version=None):
     Returns the document for a specific plugin.  Optionally can return only a
     specific version as part of the data as well.
     '''
-    fields = bleach.clean(request.query.fields or '').split(','):
+    fields = bleach.clean(request.query.fields or '').split(',')
     fields = v2to3(fields)
     data = c.plugin_details(server, slug, version, fields)
     return c.jsonify(v3to2([data])[0])
@@ -130,7 +130,7 @@ def author_plugins(server, name):
     Returns the plugins associated with a specific author.  Optionally can also
     be restricted to a specific server binary compatability.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(','):
+    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
@@ -158,7 +158,7 @@ def category_plugins(server, name):
     returns the list of plugins that match a specific category.  Optionally a
     specific server binary compatability can be specified.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(','):
+    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
@@ -176,7 +176,7 @@ def search(base=None, field=None, action=None, value=None):
     A generalized search system that accepts both single-criteria get requests
     as well as multi-criteria posts.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(','):
+    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
