@@ -78,10 +78,12 @@ def list_geninfo(size=1):
     This function allows for the retreival of the last X number of generations
     based on the value of the size variable.
     '''
-    infos = db.geninfo.find().sort({'_id': -1}).limit(size)
+    if size is None:
+        size = 1
+    infos = db.geninfo.find().sort('_id', -1).limit(size)
     data = []
     for item in infos:
-        item['id'] == str(item['_id'])
+        item['id'] = str(item['_id'])
         del(item['_id'])
         data.append(item)
     return data
@@ -93,7 +95,7 @@ def get_geninfo(idnum):
     '''
     item = db.geninfo.find_one({'_id': ObjectId(idnum)})
     if item is not None:
-        item['id'] == str(item['_id'])
+        item['id'] = str(item['_id'])
         del(item['_id'])
     return item
 
