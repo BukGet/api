@@ -27,6 +27,7 @@ setup(
         'beautifulsoup',
         'PyYAML',
         'bleach',
+        'paste',
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
