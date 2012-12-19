@@ -133,9 +133,9 @@ def author_list():
     return c.jsonify([a['name'] for a in c.list_authors()])
 
 
-@app.get('/author/<name>')
-@app.get('/author/<name>/')
-def author_plugins(name, server=None):
+@app.get('/<server>/author/<name>')
+@app.get('/<server>/author/<name>/')
+def author_plugins(server, name):
     '''Author Plugin Listing
     Returns the plugins associated with a specific author.  Optionally can also
     be restricted to a specific server binary compatability.
@@ -160,9 +160,9 @@ def category_list():
     return c.jsonify([a['name'] for a in c.list_categories()])
 
 
-@app.get('/categories/<name>')
-@app.get('/categories/<name>/')
-def category_plugins(name, server=None):
+@app.get('/<server>/categories/<name>')
+@app.get('/<server>/categories/<name>/')
+def category_plugins(server, name):
     '''Category Plugin listing
     returns the list of plugins that match a specific category.  Optionally a
     specific server binary compatability can be specified.
