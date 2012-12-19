@@ -9,7 +9,7 @@ v2to3 = {
     'plugname': 'plugin_name',
     'name': 'slug',
     'repo': 'server',
-    'dbo_page': 'link',
+    'link': 'dbo_page',
     'slug': 'name',
 }
 
