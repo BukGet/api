@@ -5,6 +5,12 @@ import common as c
 
 app = Bottle()
 
+v2to3 = {
+    'plugname': 'plugin_name',
+    'name': 'slug',
+    'repo': 'server',
+    'dbo_page': 'link',
+}
 
 @app.hook('before_request')
 def set_json_header():
@@ -32,11 +38,27 @@ def plugin_list(server=None):
     Returns the plugin listing.  Can optionally be limited to a specific server
     binary compatability type.
     '''
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
+    fields = []
+    for item in bleach.clean(request.query.fields or 'slug,plugin_name,description').split(','):
+        if item in v2to3:
+            fields.append(v2to3[item])
+        else: 
+            fields.append(item)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_plugins(server, fields, sort)
+    data = []
+    for item in c.list_plugins(server, fields, sort):
+        if 'dbo_page' in item:
+            item['link'] = item['dbo_page']
+            del(tem['dbo_page'])
+        if 'server' in item:
+            item['repo'] = item['server']
+            del(item['server'])
+        if 'plugin_name' in item:
+            item['plugname'] = item['plugin_name']
+            del(item['plugin_name'])
+        data.append(item)
     if size is not None and start is not None:
         return c.jsonify(data[start:start+size])
     return c.jsonify(data)
@@ -51,11 +73,16 @@ def plugin_details(server, slug, version=None):
     Returns the document for a specific plugin.  Optionally can return only a
     specific version as part of the data as well.
     '''
-    fields = bleach.clean(request.query.fields or '').split(',')
+    fields = []
+    for item in bleach.clean(request.query.fields or '').split(','):
+        if item in v2to3:
+            fields.append(v2to3[item])
+        else: 
+            fields.append(item)
     data = c.plugin_details(server, slug, version, fields)
     data['link'] = data['dbo_page']
     data['repo'] = data['server']
-    data['pluginname'] = data['plugin_name']
+    data['plugname'] = data['plugin_name']
     del(data['plugin_name'])
     del(data['dbo_page'])
     del(data['server'])
@@ -153,7 +180,12 @@ def search(field=None, action=None, value=None):
     A generalized search system that accepts both single-criteria get requests
     as well as multi-criteria posts.
     '''
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
+    fields = []
+    for item in bleach.clean(request.query.fields or 'name,plugname,description').split(','):
+        if item in v2to3:
+            fields.append(v2to3[item])
+        else: 
+            fields.append(item)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
