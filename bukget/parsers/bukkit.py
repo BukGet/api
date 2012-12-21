@@ -377,6 +377,16 @@ class Parser(BaseParser):
         else:
             plugin['website'] = '%s/%s' % (self.config_base, slug)
 
+        # This solves what I have called the 'dean79' issue.  Basically people
+        # who have no understanding how to peroperly format a list in their
+        # plugin.yml.
+        authors = []
+        for author in plugin['authors']:
+            if isinstance(author, list):
+                [authors.append(a) for a in author]
+            else:
+                authors.append(author)
+        plugin['authors'] = authors
 
         # These don't really require any work, as we can determine these without
         # parsing either the YAML or scraping it out of the page.
