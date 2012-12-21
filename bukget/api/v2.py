@@ -38,6 +38,14 @@ def v3to2(items):
         if 'slug' in item:
             item['name'] = item['slug']
             del(item['slug'])
+        if 'logo' in item: del(item['logo'])
+        if 'logo_full' in item: del(item['logo_full'])
+        if 'versions' in item:
+            versions = []
+            for version in item['versions']:
+                if 'slug' in version: del(item['slug'])
+                if 'changelog' in version: del(item['changelog'])
+            item['versions'] = versions
         data.append(item)
     return data        
 
@@ -96,7 +104,7 @@ def plugin_details(server, slug, version=None):
 
 
 
-@app.get('/plugins/<server>/<slug>/<version>/download')
+@app.get('/<server>/plugin/<slug>/<version>/download')
 def plugin_download(server, slug, version):
     '''Plugin Download Redirector
     Will attempt to redirect to the plugin download for the version specified.
