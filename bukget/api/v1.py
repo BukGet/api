@@ -27,18 +27,12 @@ def generation_info():
 
 @app.get('/plugins')
 @app.get('/plugins/')
-def plugin_list(server=None):
+def plugin_list():
     '''Plugin Listing
     Returns the plugin listing.  Can optionally be limited to a specific server
     binary compatability type.
     '''
-    fields = ['slug',]
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_plugins(server, fields, sort)
-    if size is not None and start is not None:
-        return c.jsonify([a['slug'] for a in data[start:start+size]])
+    data = c.list_plugins('bukkit', ['slug',], 'slug')
     return c.jsonify([a['slug'] for a in data])
 
 
@@ -46,13 +40,12 @@ def plugin_list(server=None):
 @app.get('/plugin/<slug>/')
 @app.get('/plugin/<slug>/<version>')
 @app.get('/plugin/<slug>/<version>/')
-def plugin_details(slug, version=None, server='bukkit'):
+def plugin_details(slug, version=None):
     '''Plugin Details 
     Returns the document for a specific plugin.  Optionally can return only a
     specific version as part of the data as well.
     '''
-    fields = []
-    data = c.plugin_details(server, slug, version, fields)
+    data = c.plugin_details('bukkit', slug, version, [])
 
     # Moving data to the old format
     data['name'] = data['slug']
@@ -66,6 +59,7 @@ def plugin_details(slug, version=None, server='bukkit'):
     del(data['logo'])
     del(data['logo_full'])
     del(data['server'])
+    del(data['website'])
 
     # Now we will perform the same actions for each version.
     versions = []
