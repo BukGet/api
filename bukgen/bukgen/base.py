@@ -12,7 +12,7 @@ import logging
 
 # Lets go ahead and read in the configuration file...
 config = ConfigParser()
-config.read('/etc/bukget.conf')
+config.read('/etc/bukget/bukgen.conf')
 
 # The usual boring database connection stuff.  Nothing really worthwhile to
 # see here ;)
