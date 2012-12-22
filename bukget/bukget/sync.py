@@ -1,6 +1,5 @@
 import json
 import bleach
-from bukget.config import config
 from bottle import Bottle
 
 app = Bottle()

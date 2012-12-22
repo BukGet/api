@@ -5,8 +5,10 @@ import v3
 import update
 import stats
 from bottle import Bottle, run, debug, redirect, request
-from bukget.config import config
+from ConfigParser import ConfigParser
 
+config = ConfigParser()
+config.read('/etc/bukget/bukget.conf')
 
 def start():
     app = Bottle()
@@ -14,7 +16,7 @@ def start():
     app.mount('/2', v2.app)
     app.mount('/3', v3.app)
     app.mount('/stats', stats.app)
-    app.mount('/update', update.app)
+    app.mount('/sync', sync.app)
 
     @app.get('/')
     def home(): redirect('/3')

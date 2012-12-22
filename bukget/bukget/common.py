@@ -1,10 +1,12 @@
 import pymongo
 import json
 import re
+from bukget import config
 from bson.code import Code
 from bson.objectid import ObjectId
 
-connection = pymongo.MongoClient('localhost', 27017)
+connection = MongoClient(config.get('Settings', 'database_host'), 
+                         config.getint('Settings', 'database_port'))
 db = connection.bukget
 
 amap = Code('''
