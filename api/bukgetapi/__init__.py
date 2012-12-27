@@ -2,7 +2,7 @@ import common
 import v1
 import v2
 import v3
-import update
+import sync
 import stats
 from bottle import Bottle, run, debug, redirect, request
 
