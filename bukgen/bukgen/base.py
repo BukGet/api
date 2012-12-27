@@ -3,10 +3,10 @@ import threading
 import json
 import os
 import sys
+import pymongo
 from hashlib import md5
 from urllib2 import urlopen, HTTPError, URLError
 from BeautifulSoup import BeautifulSoup
-from pymongo import MongoClient
 from ConfigParser import ConfigParser
 import logging
 
