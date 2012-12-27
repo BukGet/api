@@ -24,7 +24,7 @@ db = connection.bukget
 # the database.  While this rarely happens, it's nice to be able to see the
 # actual data that failed to insert.
 if not os.path.exists(config.get('Settings', 'json_dump')):
-    os.mkdir(config.get('Settings', 'json_dump'))
+    os.mkdirs(config.get('Settings', 'json_dump'))
 
 
 def genlog(name):
