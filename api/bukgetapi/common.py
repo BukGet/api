@@ -1,6 +1,7 @@
 import pymongo
 import json
 import re
+from datetime import date
 from bson.code import Code
 from bson.objectid import ObjectId
 from ConfigParser import ConfigParser
@@ -176,7 +177,24 @@ def plugin_details(server, plugin, version, fields):
             p['versions'] = [p['versions'][0]]
         else:
             p['versions'] = [v for v in p['versions'] if v['version'] == version]
+
+    # This is all for the stats engine
+    if p is not None: stats_update(p['slug'], p['server'])
     return p
+
+
+def stats_update(plugin, server):
+    '''
+    Increments the stat counter for the plugin for today by one.  Will also
+    create the needed stats entry and date fields if needed.
+    '''
+    stat = db.stats.find_one({'slug': plugin, 'server': server})
+    if stat is None: stat = {'slug': plugin, 'server': server, 'counts': {}}
+    today = date.today().strftime('%Y-%m-%d')
+    if today not in stat['counts']: stat['counts'][today] = 0
+    stat['counts'][today] += 1
+    db.stats.save(stat)
+    return None
 
 
 def plugin_search(filters, fields, sort, sub=False):
