@@ -133,4 +133,9 @@ class BaseParser(threading.Thread):
             with open('json_dicts/%s.json' % data['slug'], 'w') as jfile:
                 jfile.write(json.dumps(data, sort_keys=True, indent=4))
             log.error('PARSER: Could not import %s' % data['slug'])
+
+
+    def _update_status(self, data):
+        db.plugins.update({'_id': data['_id']}, 
+                          {'$set': {'stage': data['stage']}})
         

@@ -390,7 +390,7 @@ class Parser(base.BaseParser):
         if len(versions) > 0 and len(self.changes) > changes:
             self._update_plugin(plugin)
         elif self.config_type == 'stage_update':
-            db.update({'_id': plugin['_id']}, {'$set': {'stage': plugin['stage']}})
+            self._update_status(plugin)
 
 
     def version(self, plugin, slug):
