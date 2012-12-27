@@ -6,50 +6,6 @@ import common as c
 app = Bottle()
 
 
-def v2to3(items):
-    convert = {
-        'plugname': 'plugin_name',
-        'name': 'slug',
-        'repo': 'server',
-        'link': 'dbo_page',
-        'slug': 'name',
-    }
-    data = []
-    for item in items:
-        if item in convert:
-            data.append(convert[item])
-        else:
-            data.append(item)
-    return data
-
-
-def v3to2(items):
-    data = []
-    for item in items:
-        if 'dbo_page' in item:
-            item['link'] = item['dbo_page']
-            del(item['dbo_page'])
-        if 'server' in item:
-            item['repo'] = item['server']
-            del(item['server'])
-        if 'plugin_name' in item:
-            item['plugname'] = item['plugin_name']
-            del(item['plugin_name'])
-        if 'slug' in item:
-            item['name'] = item['slug']
-            del(item['slug'])
-        if 'logo' in item: del(item['logo'])
-        if 'logo_full' in item: del(item['logo_full'])
-        if 'versions' in item:
-            versions = []
-            for version in item['versions']:
-                if 'slug' in version: del(item['slug'])
-                if 'changelog' in version: del(item['changelog'])
-            item['versions'] = versions
-        data.append(item)
-    return data        
-
-
 @app.hook('before_request')
 def set_json_header():
     # We will need these set for everything in the API ;)
@@ -69,48 +25,57 @@ def generation_info():
     return c.jsonify(c.list_geninfo(size))
 
 
-@app.get('/<server>/plugins')
-@app.get('/<server>/plugins/')
+@app.get('/geninfo/<idnum>')
+def get_geninfo(idnum):
+    '''Specific Generation Information
+    Return information on a specific generation.
+    '''
+    return c.jsonify(c.get_geninfo(idnum))
+
+
+@app.get('/plugins')
+@app.get('/plugins/')
+@app.get('/plugins/<server>')
+@app.get('/plugins/<server>/')
 def plugin_list(server=None):
     '''Plugin Listing
     Returns the plugin listing.  Can optionally be limited to a specific server
     binary compatability type.
     '''
     fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
-    fields = v2to3(fields)
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
     data = c.list_plugins(server, fields, sort)
     if size is not None and start is not None:
-        return c.jsonify(v3to2(data[start:start+size]))
-    return c.jsonify(v3to2(data))
+        return c.jsonify(data[start:start+size])
+    return c.jsonify(data)
 
 
-@app.get('/<server>/plugin/<slug>')
-@app.get('/<server>/plugin/<slug>/')
-@app.get('/<server>/plugin/<slug>/<version>')
-@app.get('/<server>/plugin/<slug>/<version>/')
+@app.get('/plugins/<server>/<slug>')
+@app.get('/plugins/<server>/<slug>/')
+@app.get('/plugins/<server>/<slug>/<version>')
+@app.get('/plugins/<server>/<slug>/<version>/')
 def plugin_details(server, slug, version=None):
     '''Plugin Details 
     Returns the document for a specific plugin.  Optionally can return only a
     specific version as part of the data as well.
     '''
     fields = bleach.clean(request.query.fields or '').split(',')
-    fields = v2to3(fields)
+    size = c.sint(bleach.clean(request.query.size or None))
     data = c.plugin_details(server, slug, version, fields)
-    return c.jsonify(v3to2([data])[0])
+    if size is not None:
+        data['versions'] = data['versions'][:size]
+    return c.jsonify(data)
 
 
-
-
-@app.get('/<server>/plugin/<slug>/<version>/download')
+@app.get('/plugins/<server>/<slug>/<version>/download')
 def plugin_download(server, slug, version):
     '''Plugin Download Redirector
     Will attempt to redirect to the plugin download for the version specified.
     If no version exists, then it will throw a 404 error.
     '''
-    plugin = c.plugin_details()
+    plugin = c.plugin_details(server, slug, version, {})
     if version.lower() == 'latest':
         link = [plugin['versions'][0]['download'],]
     else:
@@ -129,25 +94,26 @@ def author_list():
     Returns a full listing of the authors in the system and the number of
     plugins that they have in the database.
     '''
-    return c.jsonify([a['name'] for a in c.list_authors()])
+    return c.jsonify(c.list_authors())
 
 
-@app.get('/<server>/author/<name>')
-@app.get('/<server>/author/<name>/')
-def author_plugins(server, name):
+@app.get('/authors/<name>')
+@app.get('/authors/<name>/')
+@app.get('/authors/<server>/<name>')
+@app.get('/authors/<server>/<name>/')
+def author_plugins(name, server=None):
     '''Author Plugin Listing
     Returns the plugins associated with a specific author.  Optionally can also
     be restricted to a specific server binary compatability.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
-    fields = v2to3(fields)
+    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
     data = c.list_author_plugins(server, name, fields, sort)
     if size is not None and start is not None:
-        return c.jsonify(v3to2(data[start:start+size]))
-    return c.jsonify(v3to2(data))
+        return c.jsonify(data[start:start+size])
+    return c.jsonify(data)
 
 
 @app.get('/categories')
@@ -157,52 +123,59 @@ def category_list():
     Returns the categories in the database and the number of plugins that each
     category holds.
     '''
-    return c.jsonify([a['name'] for a in c.list_categories()])
+    return c.jsonify(c.list_categories())
 
 
-@app.get('/<server>/category/<name>')
-@app.get('/<server>/category/<name>/')
-def category_plugins(server, name):
+@app.get('/categories/<name>')
+@app.get('/categories/<name>/')
+@app.get('/categories/<server>/<name>')
+@app.get('/categories/<server>/<name>/')
+def category_plugins(name, server=None):
     '''Category Plugin listing
     returns the list of plugins that match a specific category.  Optionally a
     specific server binary compatability can be specified.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
-    fields = v2to3(fields)
+    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
     data = c.list_category_plugins(server, name, fields, sort)
     if size is not None and start is not None:
-        return c.jsonify(v3to2(data[start:start+size]))
-    return c.jsonify(v3to2(data))
+        return c.jsonify(data[start:start+size])
+    return c.jsonify(data)
 
 
-@app.get('/search/<base>/<field>/<action>/<value>')
-@app.get('/search/<base>/<field>/<action>/<value>/')
-def search(base=None, field=None, action=None, value=None):
+@app.post('/search')
+@app.get('/search/<field>/<action>/<value>')
+@app.get('/search/<field>/<action>/<value>/')
+def search(field=None, action=None, value=None):
     '''Plugin search
     A generalized search system that accepts both single-criteria get requests
     as well as multi-criteria posts.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
-    fields = v2to3(fields)
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
-    field = bleach.clean(field)
-    value = bleach.clean(value)
-    base = bleach.clean(base)
-    if base == 'version':
-        field = 'versions.%s' % field
-    filters = [
-        {'field': field, 'action': action, 'value': value}
-    ]
+    filters = []
+    if request.method == 'GET':
+        fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
+        start = c.sint(bleach.clean(request.query.start or None))
+        size = c.sint(bleach.clean(request.query.size or None))
+        sort = bleach.clean(request.query.sort or 'slug')
+        field = bleach.clean(field)
+        value = bleach.clean(value)
+        filters = [
+            {'field': field, 'action': action, 'value': value}
+        ]
+    else:
+        req = json.dumps(request.forms.get('search'))
+        fields = req['fields'] if 'fields' in req else ['slug', 'plugin_name', 'description']
+        start = req['start'] if 'sort' in req else None
+        size = req['size'] if 'size' in req else None
+        sort = req['sort'] if 'sort' in req else 'slug'
+        filters = req['filters'] if 'filters' in req else []
     try:
         data = c.plugin_search(filters, fields, sort)
     except:
-        raise bottle.HTTPError(400, '{"error": "invalid search"}')
+        raise bottle.HTTPError(400, '{"error": "invalid post"}')
     else:
         if start is not None and size is not None:
-            return c.jsonify(v3to2(data[start:start+size]))
-        return c.jsonify(v3to2(data))
+            return c.jsonify(data[start:start+size])
+        return c.jsonify(data)

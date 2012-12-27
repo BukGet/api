@@ -2,20 +2,20 @@ from distutils.core import setup
 import sys
 
 setup(
-    name='BukGet',
+    name='Bukgetapi',
     version='1.0',
     description='BukGet JSON API for Minecraft Plugins',
     author='Steven McGrath',
     author_email='steve@chigeek.com',
     url='https://github.com/BukGet/bukget',
-    packages=['bukget'],
+    packages=['bukgetapi'],
     entry_points = {
         'console_scripts': [
-            'bukget = bukget:start',
+            'bukget = bukgetapi:start',
             ]
     },
     data_files=[
-        ('/etc/bukget', ['bukget.conf']),
+        ('/etc/bukget', ['api.conf']),
     ],
     install_requires=[
         'bottle', 
