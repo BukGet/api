@@ -8,7 +8,7 @@ from bottle import Bottle, run, debug, redirect, request
 from ConfigParser import ConfigParser
 
 config = ConfigParser()
-config.read('/etc/bukget/bukget.conf')
+config.read('/etc/bukget/api.conf')
 
 def start():
     app = Bottle()
