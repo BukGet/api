@@ -1,9 +1,12 @@
 import pymongo
 import json
 import re
-from bukgetapi import config
 from bson.code import Code
 from bson.objectid import ObjectId
+from ConfigParser import ConfigParser
+
+config = ConfigParser()
+config.read('/etc/bukget/api.conf')
 
 connection = pymongo.MongoClient(config.get('Settings', 'database_host'), 
                                  config.getint('Settings', 'database_port'))
