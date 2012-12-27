@@ -5,8 +5,8 @@ from bukget import config
 from bson.code import Code
 from bson.objectid import ObjectId
 
-connection = MongoClient(config.get('Settings', 'database_host'), 
-                         config.getint('Settings', 'database_port'))
+connection = pymongo.MongoClient(config.get('Settings', 'database_host'), 
+                                 config.getint('Settings', 'database_port'))
 db = connection.bukget
 
 amap = Code('''

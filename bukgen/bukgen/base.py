@@ -16,8 +16,8 @@ config.read('/etc/bukget/bukgen.conf')
 
 # The usual boring database connection stuff.  Nothing really worthwhile to
 # see here ;)
-connection = MongoClient(config.get('Settings', 'database_host'), 
-                         config.getint('Settings', 'database_port'))
+connection = pymongo.MongoClient(config.get('Settings', 'database_host'), 
+                                 config.getint('Settings', 'database_port'))
 db = connection.bukget
 
 # This is a dumping ground ofr any JSONs that have failed to be inserted into
