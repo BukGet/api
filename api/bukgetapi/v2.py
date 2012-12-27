@@ -43,8 +43,8 @@ def v3to2(items):
         if 'versions' in item:
             versions = []
             for version in item['versions']:
-                if 'slug' in version: del(item['slug'])
-                if 'changelog' in version: del(item['changelog'])
+                if 'slug' in version: del(version['slug'])
+                if 'changelog' in version: del(version['changelog'])
             item['versions'] = versions
         data.append(item)
     return data        
