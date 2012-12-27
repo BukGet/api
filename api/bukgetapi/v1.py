@@ -84,7 +84,7 @@ def plugin_download(slug, version, server='bukkit'):
     Will attempt to redirect to the plugin download for the version specified.
     If no version exists, then it will throw a 404 error.
     '''
-    plugin = c.plugin_details()
+    plugin = c.plugin_details(server, slug, version, {})
     if version.lower() == 'latest':
         link = [plugin['versions'][0]['download'],]
     else:
