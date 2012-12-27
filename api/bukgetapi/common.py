@@ -1,7 +1,7 @@
 import pymongo
 import json
 import re
-from bukget import config
+from bukgetapi import config
 from bson.code import Code
 from bson.objectid import ObjectId
 
