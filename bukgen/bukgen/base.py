@@ -10,22 +10,6 @@ from BeautifulSoup import BeautifulSoup
 from ConfigParser import ConfigParser
 import logging
 
-# Lets go ahead and read in the configuration file...
-config = ConfigParser()
-config.read('/etc/bukget/bukgen.conf')
-
-# The usual boring database connection stuff.  Nothing really worthwhile to
-# see here ;)
-connection = pymongo.MongoClient(config.get('Settings', 'database_host'), 
-                                 config.getint('Settings', 'database_port'))
-db = connection.bukget
-
-# This is a dumping ground ofr any JSONs that have failed to be inserted into
-# the database.  While this rarely happens, it's nice to be able to see the
-# actual data that failed to insert.
-if not os.path.exists(config.get('Settings', 'json_dump')):
-    os.makedirs(config.get('Settings', 'json_dump'))
-
 
 def genlog(name):
     '''Log Generator
@@ -58,6 +42,24 @@ def run(parser, ctype=None):
     if ctype is None: ctype = sys.argv[1]
     parser.config_type = ctype
     parser.run()
+
+
+# Lets go ahead and read in the configuration file...
+config = ConfigParser()
+config.read('/etc/bukget/bukgen.conf')
+log = genlog('base')
+
+# The usual boring database connection stuff.  Nothing really worthwhile to
+# see here ;)
+connection = pymongo.MongoClient(config.get('Settings', 'database_host'), 
+                                 config.getint('Settings', 'database_port'))
+db = connection.bukget
+
+# This is a dumping ground ofr any JSONs that have failed to be inserted into
+# the database.  While this rarely happens, it's nice to be able to see the
+# actual data that failed to insert.
+if not os.path.exists(config.get('Settings', 'json_dump')):
+    os.makedirs(config.get('Settings', 'json_dump'))
 
 
 class BaseParser(threading.Thread):
