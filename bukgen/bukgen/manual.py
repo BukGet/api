@@ -19,4 +19,4 @@ def manual_update():
             update['_id'] = oid
             print 'Updating %s using ObjectId %s' % (update['slug'], oid)
             db.plugins.save(update)
-            os.path.remove(fname)
+            os.remove(fname)
