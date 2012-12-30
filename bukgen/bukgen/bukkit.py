@@ -385,6 +385,10 @@ class Parser(base.BaseParser):
         plugin['dbo_page'] = '%s/%s' % (self.config_base, slug)
         plugin['versions'] = versions
 
+        # Here are some last minute re-classifications to make sure we are
+        # sending the right data to the API.
+        plugin['description'] = str(plugin['description'])
+
         # Lastly, we only want to even bother to commit this up if there is at
         # least 1 version of the plugin uploaded.
         if len(versions) > 0 and len(self.changes) > changes:
