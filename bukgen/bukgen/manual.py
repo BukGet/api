@@ -14,9 +14,9 @@ def manual_update():
         for fname in os.listdir(fixpath):
             fname = os.path.join(fixpath, fname)
             with open(fname) as jfile:
-                updated = json.loads(jfile.read())
-            oid = db.plugins.find_one({'slug': update['slug'], 'server': updated['server']})['_id']
-            updated['_id'] = oid
+                update = json.loads(jfile.read())
+            oid = db.plugins.find_one({'slug': update['slug'], 'server': update['server']})['_id']
+            update['_id'] = oid
             print 'Updating %s using ObjectId %s' % (update['slug'], oid)
-            db.plugins.save(updated)
+            db.plugins.save(update)
             os.path.remove(fname)
