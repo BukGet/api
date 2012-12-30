@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import pymongo
 import json
 import os
@@ -21,6 +20,3 @@ def manual_update():
             print 'Updating %s using ObjectId %s' % (update['slug'], oid)
             db.plugins.save(updated)
             os.path.remove(fname)
-
-if __name__ == '__main__':
-    manual_update()

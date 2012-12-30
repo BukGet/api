@@ -12,6 +12,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'bukgen_bukkit = bukgen.bukkit:run',
+            'bukgen_manual = bukgen.manual:manual_update',
             ]
     },
     data_files=[
