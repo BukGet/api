@@ -387,7 +387,7 @@ class Parser(base.BaseParser):
 
         # Here are some last minute re-classifications to make sure we are
         # sending the right data to the API.
-        plugin['description'] = str(plugin['description'])
+        plugin['description'] = unicode(plugin['description']).convert('ascii', 'replace')
 
         # Lastly, we only want to even bother to commit this up if there is at
         # least 1 version of the plugin uploaded.
