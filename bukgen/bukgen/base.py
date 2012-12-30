@@ -41,7 +41,12 @@ def run(parser, ctype=None):
     '''
     if ctype is None: ctype = sys.argv[1]
     parser.config_type = ctype
-    parser.run()
+    if ctype == 'stage_update':
+        for plugin in db.plugins.find():
+            print plugin['slug']
+            parser.plugin(plugin['slug'])
+    else:
+        parser.run()
 
 
 # Lets go ahead and read in the configuration file...
