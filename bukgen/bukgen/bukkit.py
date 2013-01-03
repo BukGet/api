@@ -426,6 +426,8 @@ class Parser(base.BaseParser):
                            'versions.slug': slug})
         if p is not None:
             version = ([v for v in p['versions'] if v['slug'] == slug])[0]
+        else:
+            p = {}
         if version:
             if self.config_type == 'speedy': 
                 return False, version
