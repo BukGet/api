@@ -427,7 +427,8 @@ class Parser(base.BaseParser):
         if p is not None:
             version = ([v for v in p['versions'] if v['slug'] == slug])[0]
         else:
-            p = {}
+            p = self._api_get({'slug': plugin, 'server': 'bukkit'})
+            if p == None: p = {}
         if version:
             if self.config_type == 'speedy': 
                 return False, version
