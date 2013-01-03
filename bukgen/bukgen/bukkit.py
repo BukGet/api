@@ -518,7 +518,8 @@ class Parser(base.BaseParser):
         # This is a last-minute hack to check to see if we prefer the dbo
         # version over the plugin.yml version.  If this is the case, then we
         # have to override the version definition with the dbo_version def.
-        if '_use_dbo' in p: version['version'] = version['dbo_version']
+        if '_use_dbo' in p or 'version' not in version: 
+            version['version'] = version['dbo_version']
 
         self.changes.append({'plugin': plugin, 'version': version['version']})
         return yml, version
