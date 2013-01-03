@@ -401,7 +401,8 @@ class Parser(base.BaseParser):
                 plugin['_use_dbo'] = True
                 v2 = []
                 for version in versions:
-                    version['version'] = version['dbo_version']
+                    if version['dbo_version'] is not None:
+                        version['version'] = version['dbo_version']
                     v2.append(version)
                 plugin['versions'] = v2
 
@@ -441,9 +442,9 @@ class Parser(base.BaseParser):
         page = self._get_page(dbo_page)
         try:
             version['dbo_version'] = self.r_versionnum.findall(\
-                page.find(attrs={'class': 'unit size2of3'}).findNext('h1').text)[0]
+                page.find(attrs={'class': self.r_vtitle}).findNext('h1').text)[0]
         except:
-            version['version'] = 'UNKNOWN'
+            version['dbo_version'] = None
         version['link'] = dbo_page
         version['date'] = int(page.find(attrs={'class': 'standard-date'}).get('data-epoch'))
         version['download'] = page.find('dt', text='Filename').findNext('a').get('href')
