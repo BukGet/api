@@ -24,6 +24,7 @@ class Parser(base.BaseParser):
     config_type = 'speedy'
     config_base = 'http://dev.bukkit.org/server-mods'
     config_start = 1
+    r_vtitle = re.compile(r'size2of3')
     r_version = re.compile(r'\/files\/(.*?)\/')
     r_plugin = re.compile(r'\/server-mods\/(.*?)\/')
     r_versionnum = re.compile(\
@@ -234,7 +235,7 @@ class Parser(base.BaseParser):
         '''server_mods
         '''
         start = time.time()
-        log.info('PARSER: Starting DBO Parsing at page %s' % self.config_start)
+        log.info('Starting DBO Parsing at page %s' % self.config_start)
 
         # So here is the meat and potatos of this function.  We will be looping
         # as long as there is either more changes being added to the changes
@@ -256,7 +257,7 @@ class Parser(base.BaseParser):
                     # will be used as
                     slug = self.r_plugin.findall(plugin)[0]
                 except:
-                    log.debug('PARSER: Could not parse %s' % plugin)
+                    log.debug('Could not parse %s' % plugin)
                 else:
                     self.plugin(slug)
             if page.find(attrs={'class': 'listing-pagination-pages-next'}):
@@ -266,7 +267,7 @@ class Parser(base.BaseParser):
             if len(self.changes) == count and self.config_type == 'speedy':
                 parsing = False
             else:
-                log.info('PARSER: Parsing DBO Page %s' % pagenum)
+                log.info('Parsing DBO Page %s' % pagenum)
 
         # The geninfo for this generation.
         geninfo = {
@@ -278,7 +279,7 @@ class Parser(base.BaseParser):
         }
 
         # Lets send a log and then upload the generation info to the API.
-        log.info('PARSER: DBO Parsing complete. Time: %s' % geninfo['duration'])
+        log.info('DBO Parsing complete. Time: %s' % geninfo['duration'])
         self._add_geninfo(geninfo)
 
 
@@ -298,7 +299,7 @@ class Parser(base.BaseParser):
                 'authors': [],
                 'plugin_name': '',
             }
-            log.info('PARSER: Adding Bukkit Plugin %s' % slug)
+            log.info('Adding Bukkit Plugin %s' % slug)
         changes = len(self.changes)
 
         
@@ -389,6 +390,22 @@ class Parser(base.BaseParser):
         # sending the right data to the API.
         plugin['description'] = unicode(plugin['description']).encode('ascii', 'replace')
 
+        # This is a quick check to see if there is a improper version condition
+        # with this plugin.  If there is, we will then rely on the dbo_version
+        # instead of the version.  dbo_version is more unreliable however, so
+        # we don't want to use it unless we have to.
+        vitems = [v['version'] for v in versions]
+        if len(vitems) > 2 and len(set(vitems)) == 1:
+            if '_use_dbo' not in plugin:
+                log.info('Can no longer trust %s\'s plugin.yml version...' % plugin['slug'])
+                plugin['_use_dbo'] = True
+                v2 = []
+                for version in versions:
+                    version['version'] = version['dbo_version']
+                    v2.append(version)
+                plugin['versions'] = v2
+
+
         # Lastly, we only want to even bother to commit this up if there is at
         # least 1 version of the plugin uploaded.
         if len(versions) > 0 and len(self.changes) > changes:
@@ -411,19 +428,19 @@ class Parser(base.BaseParser):
         if version:
             if self.config_type == 'speedy': 
                 return False, version
-            log.info('PARSER: Updating Bukkit Plugin %s Version %s' % (plugin, slug))
+            log.info('Updating Bukkit Plugin %s Version %s' % (plugin, slug))
         else:
             version = {
                 'slug': slug,
             }
-            log.info('PARSER: Adding Bukkit Plugin %s Version %s' % (plugin, slug))
+            log.info('Adding Bukkit Plugin %s Version %s' % (plugin, slug))
 
         # Now we need to pull the page.  While we are at it, we might as well
         # parse as much out of the page as we can.
         dbo_page = '%s/%s/files/%s/' % (self.config_base, plugin, slug)
         page = self._get_page(dbo_page)
         try:
-            version['version'] = self.r_versionnum.findall(\
+            version['dbo_version'] = self.r_versionnum.findall(\
                 page.find(attrs={'class': 'unit size2of3'}).findNext('h1').text)[0]
         except:
             version['version'] = 'UNKNOWN'
@@ -477,16 +494,22 @@ class Parser(base.BaseParser):
             try:
                 version['commands'] = self._commands(yml['commands'])
             except:
-                log.warn('PARSER: Could not Parse commands for %s:%s' % (plugin, slug))
+                log.warn('Could not Parse commands for %s:%s' % (plugin, slug))
                 version['commands'] = []
         if 'permissions' in yml and yml['permissions'] is not None:
             try:
                 version['permissions'] = self._permissions(yml['permissions'])
             except:
-                log.warn('PARSER: Could not Parse permissions for %s:%s' % (plugin, slug))
+                log.warn('Could not Parse permissions for %s:%s' % (plugin, slug))
                 version['permissions'] = []
         if 'version' in yml and yml['version'] is not None:
             version['version'] = str(yml['version'])
+
+
+        # This is a last-minute hack to check to see if we prefer the dbo
+        # version over the plugin.yml version.  If this is the case, then we
+        # have to override the version definition with the dbo_version def.
+        if '_use_dbo' in p: version['version'] = version['dbo_version']
 
         self.changes.append({'plugin': plugin, 'version': version['version']})
         return yml, version
