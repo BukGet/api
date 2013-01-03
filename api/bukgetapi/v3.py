@@ -1,6 +1,6 @@
 import json
 import bleach
-from bottle import Bottle, run, redirect, response, request
+from bottle import Bottle, redirect, response, request
 import common as c
 
 app = Bottle()
