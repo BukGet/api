@@ -444,8 +444,13 @@ class Parser(base.BaseParser):
         dbo_page = '%s/%s/files/%s/' % (self.config_base, plugin, slug)
         page = self._get_page(dbo_page)
         try:
+            # Here we are going to try to pull out the DBO Version on the page.
+            # Yes this is pretty hackish, however its needed as it's the only
+            # way I have found to reliably pull out the proper versioning
             version['dbo_version'] = self.r_versionnum.findall(\
                 page.find(attrs={'class': self.r_vtitle}).findNext('h1').text)[0]
+            if version['dbo_version'][-4:].lower() == '.jar':
+                version['dbo_version'] = version['dbo_version'][:-4]
         except:
             version['dbo_version'] = None
         version['link'] = dbo_page
