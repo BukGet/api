@@ -60,6 +60,7 @@ def plugin_details(slug, version=None):
     del(data['logo_full'])
     del(data['server'])
     del(data['website'])
+    if '_use_dbo' in data: del(data['_use_dbo'])
 
     # Now we will perform the same actions for each version.
     versions = []
@@ -72,6 +73,7 @@ def plugin_details(slug, version=None):
         del(version['md5'])
         del(version['slug'])
         del(version['download'])
+        if 'dbo_version' in version: del(version['dbo_version'])
         versions.append(version)
     data['versions'] = versions
     return c.jsonify(data)

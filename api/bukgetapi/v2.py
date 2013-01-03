@@ -38,12 +38,14 @@ def v3to2(items):
         if 'slug' in item:
             item['name'] = item['slug']
             del(item['slug'])
+        if '_use_dbo' in item: del(item['_use_dbo'])
         if 'logo' in item: del(item['logo'])
         if 'logo_full' in item: del(item['logo_full'])
         if 'versions' in item:
             versions = []
             for version in item['versions']:
                 if 'slug' in version: del(version['slug'])
+                if 'dbo_version' in version: del(version['dbo_version'])
                 if 'changelog' in version: del(version['changelog'])
                 versions.append(version)
             item['versions'] = versions
