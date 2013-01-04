@@ -179,7 +179,7 @@ def plugin_details(server, plugin, version, fields):
             p['versions'] = [v for v in p['versions'] if v['version'] == version]
 
     # This is all for the stats engine
-    if p is not None: stats_update(p['slug'], p['server'])
+    if p is not None: stats_update(plugin, server)
     return p
 
 
