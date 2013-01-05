@@ -171,10 +171,16 @@ def plugin_details(server, plugin, version, fields):
     other than None is specified in the version variable.
     '''
     filters = {'slug': plugin, 'server': server}
+
+    # Query Time!!!
     p = db.plugins.find_one(filters, fieldgen(fields))
+
+    # If the version is set, then we need to only return what was requested.
     if version is not None:
         if version.lower() == 'latest':
             p['versions'] = [p['versions'][0]]
+        elif version.lower() in ['release', 'alpha', 'beta']:
+            p['versions'] = [[v for v in p['versions'] if v['type'] == version.capitalize()][0]]
         else:
             p['versions'] = [v for v in p['versions'] if v['version'] == version]
 
