@@ -1,13 +1,18 @@
 import pymongo
 import json
 import re
+import os
 from datetime import date
 from bson.code import Code
 from bson.objectid import ObjectId
 from ConfigParser import ConfigParser
 
 config = ConfigParser()
-config.read('/etc/bukget/api.conf')
+if os.path.exists(os.path.join(os.path.dirname(os.path.realpath(__file__)_, 
+                               'api.conf')):
+    config.read('api.conf')
+else:
+    config.read('/etc/bukget/api.conf')
 
 connection = pymongo.MongoClient(config.get('Settings', 'database_host'), 
                                  config.getint('Settings', 'database_port'))
