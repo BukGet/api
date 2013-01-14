@@ -102,7 +102,10 @@ def plugin_details(server, slug, version=None):
     fields = bleach.clean(request.query.fields or '').split(',')
     fields = v2to3(fields)
     data = c.plugin_details(server, slug, version, fields)
-    return c.jsonify(v3to2([data])[0])
+    data = v3to2([data])[0]
+    if 'versions' in data and len(data['versions']) == 1:
+        data['versions'] = data['versions'][0] 
+    return c.jsonify(data)
 
 
 
