@@ -8,7 +8,7 @@ from bson.objectid import ObjectId
 from ConfigParser import ConfigParser
 
 config = ConfigParser()
-if os.path.exists(os.path.join(os.path.dirname(os.path.realpath(__file__)_, 
+if os.path.exists(os.path.join(os.path.dirname(os.path.realpath(__file__)), 
                                'api.conf')):
     config.read('api.conf')
 else:
