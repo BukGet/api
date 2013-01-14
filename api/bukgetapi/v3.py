@@ -165,12 +165,11 @@ def search(field=None, action=None, value=None):
             {'field': field, 'action': action, 'value': value}
         ]
     else:
-        req = json.loads(request.forms.get('search'))
-        fields = req['fields'] if 'fields' in req else ['slug', 'plugin_name', 'description']
-        start = req['start'] if 'sort' in req else None
-        size = req['size'] if 'size' in req else None
-        sort = req['sort'] if 'sort' in req else 'slug'
-        filters = req['filters'] if 'filters' in req else []
+        filters = json.loads(request.forms.get('filters') or '[]')
+        fields = (bleach.clean(request.forms.get('fields')) or 'slug,plugin_name,description').split(',')
+        start = c.sint(bleach.clean(request.forms.get('start') or None))
+        size = c.sint(bleach.clean(request.forms.get('start') or None))
+        sort = bleach.clean(request.forms.get('start') or 'slug')
     try:
         data = c.plugin_search(filters, fields, sort)
     except:
