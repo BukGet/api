@@ -165,7 +165,7 @@ def search(field=None, action=None, value=None):
             {'field': field, 'action': action, 'value': value}
         ]
     else:
-        req = json.dumps(request.forms.get('search'))
+        req = json.loads(request.forms.get('search'))
         fields = req['fields'] if 'fields' in req else ['slug', 'plugin_name', 'description']
         start = req['start'] if 'sort' in req else None
         size = req['size'] if 'size' in req else None
