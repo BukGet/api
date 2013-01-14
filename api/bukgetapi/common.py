@@ -160,7 +160,7 @@ def list_categories():
     '''
     data = []
     for item in db.plugins.map_reduce(cmap, reduceall, 'categories').find().sort('_id'):
-        data.append({'name': item['_id'], 'count': item['value']})
+        data.append({'name': item['_id'], 'count': int(item['value'])})
     return data
 
 
