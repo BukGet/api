@@ -199,8 +199,10 @@ def search(base=None, field=None, action=None, value=None):
     field = bleach.clean(field)
     value = bleach.clean(value)
     base = bleach.clean(base)
+    if action == 'in': action = 'like'
     if base == 'version':
         field = 'versions.%s' % field
+    field = v2to3({field: True})[0]
     filters = [
         {'field': field, 'action': action, 'value': value}
     ]
