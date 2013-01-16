@@ -22,7 +22,8 @@ def generation_info():
     to look X number of versions back.
     '''
     size = c.sint(bleach.clean(request.query.size or None))
-    return c.jsonify(c.list_geninfo(size))
+    callback = bleach.clean(request.query.callback or None)
+    return c.jsonify(c.list_geninfo(size), callback)
 
 
 @app.get('/geninfo/<idnum>')
@@ -30,7 +31,8 @@ def get_geninfo(idnum):
     '''Specific Generation Information
     Return information on a specific generation.
     '''
-    return c.jsonify(c.get_geninfo(idnum))
+    callback = bleach.clean(request.query.callback or None)
+    return c.jsonify(c.get_geninfo(idnum), callback)
 
 
 @app.get('/plugins')
@@ -46,10 +48,11 @@ def plugin_list(server=None):
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
+    callback = bleach.clean(request.query.callback or None)
     data = c.list_plugins(server, fields, sort)
     if size is not None and start is not None:
         return c.jsonify(data[start:start+size])
-    return c.jsonify(data)
+    return c.jsonify(data, callback)
 
 
 @app.get('/plugins/<server>/<slug>')
@@ -64,9 +67,10 @@ def plugin_details(server, slug, version=None):
     fields = bleach.clean(request.query.fields or '').split(',')
     size = c.sint(bleach.clean(request.query.size or None))
     data = c.plugin_details(server, slug, version, fields)
+    callback = bleach.clean(request.query.callback or None)
     if size is not None:
         data['versions'] = data['versions'][:size]
-    return c.jsonify(data)
+    return c.jsonify(data, callback)
 
 
 @app.get('/plugins/<server>/<slug>/<version>/download')
@@ -94,7 +98,8 @@ def author_list():
     Returns a full listing of the authors in the system and the number of
     plugins that they have in the database.
     '''
-    return c.jsonify(c.list_authors())
+    callback = bleach.clean(request.query.callback or None)
+    return c.jsonify(c.list_authors(), callback)
 
 
 @app.get('/authors/<name>')
@@ -106,14 +111,15 @@ def author_plugins(name, server=None):
     Returns the plugins associated with a specific author.  Optionally can also
     be restricted to a specific server binary compatability.
     '''
+    callback = bleach.clean(request.query.callback or None)
     fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
     data = c.list_author_plugins(server, name, fields, sort)
     if size is not None and start is not None:
-        return c.jsonify(data[start:start+size])
-    return c.jsonify(data)
+        return c.jsonify(data[start:start+size], callback)
+    return c.jsonify(data, callback)
 
 
 @app.get('/categories')
@@ -123,7 +129,8 @@ def category_list():
     Returns the categories in the database and the number of plugins that each
     category holds.
     '''
-    return c.jsonify(c.list_categories())
+    callback = bleach.clean(request.query.callback or None)
+    return c.jsonify(c.list_categories(), callback)
 
 
 @app.get('/categories/<name>')
@@ -135,14 +142,15 @@ def category_plugins(name, server=None):
     returns the list of plugins that match a specific category.  Optionally a
     specific server binary compatability can be specified.
     '''
+    callback = bleach.clean(request.query.callback or None)
     fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
     data = c.list_category_plugins(server, name, fields, sort)
     if size is not None and start is not None:
-        return c.jsonify(data[start:start+size])
-    return c.jsonify(data)
+        return c.jsonify(data[start:start+size], callback)
+    return c.jsonify(data, callback)
 
 
 @app.post('/search')
@@ -155,6 +163,7 @@ def search(field=None, action=None, value=None):
     '''
     filters = []
     if request.method == 'GET':
+        callback = bleach.clean(request.query.callback or None)
         fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
         start = c.sint(bleach.clean(request.query.start or None))
         size = c.sint(bleach.clean(request.query.size or None))
@@ -165,6 +174,7 @@ def search(field=None, action=None, value=None):
             {'field': field, 'action': action, 'value': value}
         ]
     else:
+        callback = bleach.clean(request.forms.get('callback') or None)
         filters = json.loads(request.forms.get('filters') or '[]')
         fields = (bleach.clean(request.forms.get('fields')) or 'slug,plugin_name,description').split(',')
         start = c.sint(bleach.clean(request.forms.get('start') or None))
@@ -176,5 +186,5 @@ def search(field=None, action=None, value=None):
         raise bottle.HTTPError(400, '{"error": "invalid post"}')
     else:
         if start is not None and size is not None:
-            return c.jsonify(data[start:start+size])
-        return c.jsonify(data)
+            return c.jsonify(data[start:start+size], callback)
+        return c.jsonify(data, callback)

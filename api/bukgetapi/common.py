@@ -64,10 +64,15 @@ def ignore_exception(IgnoreException=Exception,DefaultVal=None):
 sint = ignore_exception(ValueError)(int)
 
 
-def jsonify(data):
+def jsonify(data, callback=None):
+    '''Returns JSON Encoded string
+    This function is here to centralize any JSON-encoding logic.
     '''
-    '''
-    return json.dumps(data)
+    data = json.dumps(data)
+    if callback:
+        return '%s(%s);' % (callback, data)
+    else:
+        return data
 
 
 def fieldgen(fields):
