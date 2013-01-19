@@ -301,7 +301,6 @@ class Parser(base.BaseParser):
             }
             log.info('Adding Bukkit Plugin %s' % slug)
         changes = len(self.changes)
-
         
         yml = False         # Variable to house the most recent version yaml.
         running = True      # Will stay true as long as we are parsing versions
@@ -331,12 +330,20 @@ class Parser(base.BaseParser):
 
         # Before we bother to get too much further, lets make sure there are
         # actually plugin revisions uploaded to DBO.  If there isn't, then there
-        # isn't too much of a new to import this into the API.
+        # isn't too much of a new to import this into the API.  Furthermore, we
+        # need to check to make sure that the plugin hasnt been deleted and the
+        # references on BukkitDev just havent bheen updated yet.  Also if the
+        # project has been deleted, then we should clean it up in the database.
 
         # First lets scrape out everything we need from the plugins main page.
         # Some of these will be overrided by the YAML settings, so it's easier
         # to pre-load here and then opverload if needed.
         page = self._get_page('%s/%s' % (self.config_base, slug))
+
+        # If the plugin has been deleted, then shortcut everything and tell the
+        # base parser to just delete the entry.
+        if page.find('p', text='This project has been deleted.'):
+            return self._delete_plugin(plugin)
         
         # Plugin Stage
         plugin['stage'] = page.find('span', {'class': self.r_stage}).text

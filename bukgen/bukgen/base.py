@@ -138,6 +138,10 @@ class BaseParser(threading.Thread):
                 jfile.write(json.dumps(data, sort_keys=True, indent=4))
             log.error('PARSER: Could not import %s' % data['slug'])
 
+    def _delete_plugin(self, data):
+        db.plugins.remove(data)
+        log.info('Removing %s From database.' % data['slug'])
+
 
     def _update_status(self, data):
         db.plugins.update({'_id': data['_id']}, 
