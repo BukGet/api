@@ -8,8 +8,8 @@ from bson.objectid import ObjectId
 from ConfigParser import ConfigParser
 
 config = ConfigParser()
-if os.path.exists('api.conf'):
-    config.read('api.conf')
+if len(sys.argv) > 1:
+    config.read(sys.argv[1])
 else:
     config.read('/etc/bukget/api.conf')
 
