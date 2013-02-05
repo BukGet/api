@@ -139,8 +139,10 @@ class BaseParser(threading.Thread):
             log.error('PARSER: Could not import %s' % data['slug'])
 
     def _delete_plugin(self, data):
-        db.plugins.remove(data)
-        log.info('Removing %s From database.' % data['slug'])
+        data['deleted'] = True
+        self._update_plugin(data)
+        #db.plugins.remove(data)
+        log.info('Tagging %s As Deleted.' % data['slug'])
 
 
     def _update_status(self, data):

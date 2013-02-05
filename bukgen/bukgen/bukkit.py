@@ -342,8 +342,10 @@ class Parser(base.BaseParser):
 
         # If the plugin has been deleted, then shortcut everything and tell the
         # base parser to just delete the entry.
-        if page.find('p', text='This project has been deleted.'):
+        if page == 'There was an error with cookies, please try again.':
             return self._delete_plugin(plugin)
+        elif 'deleted' in plugin:
+            del(plugin['deleted'])
         
         # Plugin Stage
         plugin['stage'] = page.find('span', {'class': self.r_stage}).text
