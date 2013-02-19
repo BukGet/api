@@ -35,6 +35,7 @@ ipaddy = re.compile(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 api1 = re.compile(r'plugin/([^/ \?]*)')
 #api2 = re.compile(r'bukkit/plugin/([^/ ]*)')
 api3 = re.compile(r'plugins/[^/ ]*/([^/ \?]*)')
+plist = [p['slug'] for p in plugins.find({})]
 
 for line in lfile.readlines():
     # Get the IP Address
@@ -64,6 +65,7 @@ for line in lfile.readlines():
 
     if len(plugin) > 0:
         p = plugin[0]
+        if p not in plist: continue
         if p not in data['plugins']:
             data['plugins'][p] = {'unique': 0, 'total': 0}
             ipaddys[p] = []
