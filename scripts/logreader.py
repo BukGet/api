@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from pymongo import MongoClient
-from commands import getoutput as run
 import gzip
 import re
 import json
