@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from pymongo import MongoClient
+from commands import getoutput as run
 import gzip
 import re
 import json
@@ -12,10 +13,22 @@ webstats = db.webstats
 plugins = db.plugins
 
 log_base = '/var/log/bukget/api-access.log'
+gen_base = '/var/log/bukget/bukgen.log'
 date = datetime.datetime.now() - datetime.timedelta(days=1)
 log = '%s-%s.gz' % (log_base, date.strftime('%Y%m%d'))
+genlog = '%s-%s.gz' % (gen_base, date.strftime('%Y%m%d'))
 
-data = {'total': 0, 'unique': 0, 'plugins': {}, 'timestamp': int(time.time())}
+data = {
+    'total': 0,
+    'api1': 0,
+    'api2': 0,
+    'api3': 0,
+    'unique': 0, 
+    'plugins': {},
+    'bukkitdev': 0, 
+    'timestamp': int(time.time())
+}
+
 lfile = gzip.open(log)
 
 ipaddys = {'total': []}
@@ -44,6 +57,12 @@ for line in lfile.readlines():
         ipaddys['total'].append(ip)
         data['unique'] += 1
 
+    # Next we need to determine what kind of api call this was
+    # and increment the appropriate counter.
+    if 'GET /1/' in line: data['api1'] += 1
+    elif 'GET /2/' in line: data['api2'] += 1
+    elif 'GET /3/' in line: data['api3'] += 1
+
     if len(plugin) > 0:
         p = plugin[0]
         if p not in data['plugins']:
@@ -53,7 +72,16 @@ for line in lfile.readlines():
             data['plugins'][p]['unique'] += 1
             ipaddys[p].append(ip)
         data['plugins'][p]['total'] += 1
+
+# This is a simple counter to read all of the times that we pulled data from
+# BukkitDev.  This was added to start tracking the number of requests we are 
+# making into BukkitDev.
+gfile = gzip.open(genlog)
+for line in gfile.readlines():
+    if 'Fetching' in line: data['bukkitdev'] += 1
+
 lfile.close()
+gfile.close()
 webstats.save(data)
 
 
