@@ -32,9 +32,9 @@ lfile = gzip.open(log)
 
 ipaddys = {'total': []}
 ipaddy = re.compile(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-api1 = re.compile(r'plugin/([^/ ]*)')
+api1 = re.compile(r'plugin/([^/ \?]*)')
 #api2 = re.compile(r'bukkit/plugin/([^/ ]*)')
-api3 = re.compile(r'plugins/[^/ *]*/([^/ ]*)')
+api3 = re.compile(r'plugins/[^/ ]*/([^/ \?]*)')
 
 for line in lfile.readlines():
     # Get the IP Address
