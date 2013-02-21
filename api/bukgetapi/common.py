@@ -115,7 +115,24 @@ def get_geninfo(idnum):
     return item
 
 
-def list_plugins(server, fields, sort):
+def query(filters, fields, sort, start, size):
+    '''
+    Generic Query Function to centralize querying the database.
+    '''
+    fields = fieldgen(fields)
+    if sort[0] == '-':
+        d = pymongo.DESCENDING
+    else:
+        d = pymongo.ASCENDING
+    if size is not None and start is not None:
+        results = db.plugins.find(filters, fields).sort(sort, d)\
+                            .skip(start).size(size)
+    else:
+        results = db.plugins.find(filters, fields).sort(sort, d)
+    return list(results)
+
+
+def list_plugins(server, fields, sort, start, size):
     '''
     This function returns a list of plugins with the fields specified.  The 
     list can be narrowed down to specific server binary compatability by
@@ -124,7 +141,7 @@ def list_plugins(server, fields, sort):
     filters = {}
     if server is not None:
         filters['server'] = server
-    return list(db.plugins.find(filters, fieldgen(fields)).sort(sort))
+    return query(filters, fields, sort, start, size)
 
 
 def list_author_plugins(server, author, fields, sort):
@@ -136,7 +153,7 @@ def list_author_plugins(server, author, fields, sort):
     filters = {'authors': author}
     if server is not None:
         filters['server'] = server
-    return list(db.plugins.find(filters, fieldgen(fields)).sort(sort))
+    return query(filters, fields, sort, start, size)
 
 
 def list_category_plugins(server, category, fields, sort):
@@ -148,7 +165,7 @@ def list_category_plugins(server, category, fields, sort):
     filters = {'categories': category}
     if server is not None:
         filters['server'] = server
-    return list(db.plugins.find(filters, fieldgen(fields)).sort(sort))
+    return query(filters, fields, sort, start, size)
 
 
 def list_authors():
@@ -192,27 +209,10 @@ def plugin_details(server, plugin, version, fields):
             p['versions'] = [[v for v in p['versions'] if v['type'] == version.capitalize()][0]]
         else:
             p['versions'] = [v for v in p['versions'] if v['version'] == version]
-
-    # This is all for the stats engine
-    if p is not None: stats_update(plugin, server)
     return p
 
 
-def stats_update(plugin, server):
-    '''
-    Increments the stat counter for the plugin for today by one.  Will also
-    create the needed stats entry and date fields if needed.
-    '''
-    stat = db.stats.find_one({'slug': plugin, 'server': server})
-    if stat is None: stat = {'slug': plugin, 'server': server, 'counts': {}}
-    today = date.today().strftime('%Y-%m-%d')
-    if today not in stat['counts']: stat['counts'][today] = 0
-    stat['counts'][today] += 1
-    db.stats.save(stat)
-    return None
-
-
-def plugin_search(filters, fields, sort, sub=False):
+def plugin_search(filters, fields, sort, start, size, sub=False):
     '''
     A generalized sort function for the database.  Returns a list of plugins
     with the fields specified in the incusion and exclusion variables.
@@ -248,4 +248,4 @@ def plugin_search(filters, fields, sort, sub=False):
             if isinstance(item['value'], list) and item['field'] == '':
                 f['$not'] = get(item['value'], sub=True)
     if sub: return f
-    return list(db.plugins.find(f, fieldgen(fields)).sort(sort))
+    return query(f, fields, sort, start, size)

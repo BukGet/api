@@ -45,8 +45,13 @@ def todays_trends():
     }, callback)
 
 
-@app.get('/trend/<server>/<name>')
-def plugin_trends(server, name):
+@app.get('/trend/<int:days>')
+@app.get('/trend/<int:days>/<names>')
+def plugin_trends(days, names=None):
     callback = bleach.clean(request.query.callback or None)
-    plugin = c.db.stats.find({'server': server, 'slug': name}, {'_id': 0})
-    return c.jsonify(plugin, callback)
+    names = bleach.clean(names or '')
+    fields = {'_id': 0}
+    for name in names.split(','):
+        fields['plugins.%s' % name] = 1
+    trends = c.db.webstats.find({}, fields).sort('_id', -1)
+    return c.jsonify(trends, callback)
