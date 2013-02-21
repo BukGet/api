@@ -122,9 +122,9 @@ def query(filters, fields, sort, start=None, size=None):
     '''
     fields = fieldgen(fields)
     if sort[0] == '-':
-        d = pymongo.DESCENDING
+        d = -1
     else:
-        d = pymongo.ASCENDING
+        d = 1
     if size is not None and start is not None:
         results = db.plugins.find(filters, fields).sort(sort, d)\
                             .skip(start).limit(size)
