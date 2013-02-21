@@ -49,9 +49,7 @@ def plugin_list(server=None):
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
     callback = bleach.clean(request.query.callback or None)
-    data = c.list_plugins(server, fields, sort)
-    if size is not None and start is not None:
-        return c.jsonify(data[start:start+size])
+    data = c.list_plugins(server, fields, sort, start, size)
     return c.jsonify(data, callback)
 
 
@@ -116,9 +114,7 @@ def author_plugins(name, server=None):
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_author_plugins(server, name, fields, sort)
-    if size is not None and start is not None:
-        return c.jsonify(data[start:start+size], callback)
+    data = c.list_author_plugins(server, name, fields, sort, start, size)
     return c.jsonify(data, callback)
 
 
@@ -147,9 +143,7 @@ def category_plugins(name, server=None):
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_category_plugins(server, name, fields, sort)
-    if size is not None and start is not None:
-        return c.jsonify(data[start:start+size], callback)
+    data = c.list_category_plugins(server, name, fields, sort, start, size)
     return c.jsonify(data, callback)
 
 
@@ -178,13 +172,11 @@ def search(field=None, action=None, value=None):
         filters = json.loads(request.forms.get('filters') or '[]')
         fields = (bleach.clean(request.forms.get('fields')) or 'slug,plugin_name,description').split(',')
         start = c.sint(bleach.clean(request.forms.get('start') or None))
-        size = c.sint(bleach.clean(request.forms.get('start') or None))
-        sort = bleach.clean(request.forms.get('start') or 'slug')
+        size = c.sint(bleach.clean(request.forms.get('size') or None))
+        sort = bleach.clean(request.forms.get('sort') or 'slug')
     try:
-        data = c.plugin_search(filters, fields, sort)
+        data = c.plugin_search(filters, fields, sort, start, size)
     except:
         raise bottle.HTTPError(400, '{"error": "invalid post"}')
     else:
-        if start is not None and size is not None:
-            return c.jsonify(data[start:start+size], callback)
         return c.jsonify(data, callback)
