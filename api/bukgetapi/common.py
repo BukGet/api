@@ -122,6 +122,7 @@ def query(filters, fields, sort, start=None, size=None):
     '''
     fields = fieldgen(fields)
     if sort[0] == '-':
+        sort = sort[1:]
         d = -1
     else:
         d = 1
