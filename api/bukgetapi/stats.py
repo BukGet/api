@@ -45,8 +45,8 @@ def todays_trends():
     }, callback)
 
 
-@app.get('/trend/<int:days>')
-@app.get('/trend/<int:days>/<names>')
+@app.get('/trend/<days:int>')
+@app.get('/trend/<days:int>/<names>')
 def plugin_trends(days, names=None):
     callback = bleach.clean(request.query.callback or None)
     names = bleach.clean(names or '')

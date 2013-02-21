@@ -84,9 +84,7 @@ def plugin_list(server=None):
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_plugins(server, fields, sort)
-    if size is not None and start is not None:
-        return c.jsonify(v3to2(data[start:start+size]))
+    data = c.list_plugins(server, fields, sort, start, size)
     return c.jsonify(v3to2(data))
 
 
@@ -150,9 +148,7 @@ def author_plugins(server, name):
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_author_plugins(server, name, fields, sort)
-    if size is not None and start is not None:
-        return c.jsonify(v3to2(data[start:start+size]))
+    data = c.list_author_plugins(server, name, fields, sort, start, size)
     return c.jsonify(v3to2(data))
 
 
@@ -178,9 +174,7 @@ def category_plugins(server, name):
     start = c.sint(bleach.clean(request.query.start or None))
     size = c.sint(bleach.clean(request.query.size or None))
     sort = bleach.clean(request.query.sort or 'slug')
-    data = c.list_category_plugins(server, name, fields, sort)
-    if size is not None and start is not None:
-        return c.jsonify(v3to2(data[start:start+size]))
+    data = c.list_category_plugins(server, name, fields, sort, start, size)
     return c.jsonify(v3to2(data))
 
 
@@ -207,10 +201,8 @@ def search(base=None, field=None, action=None, value=None):
         {'field': field, 'action': action, 'value': value}
     ]
     try:
-        data = c.plugin_search(filters, fields, sort)
+        data = c.plugin_search(filters, fields, sort, start, size)
     except:
         raise bottle.HTTPError(400, '{"error": "invalid search"}')
     else:
-        if start is not None and size is not None:
-            return c.jsonify(v3to2(data[start:start+size]))
         return c.jsonify(v3to2(data))

@@ -115,7 +115,7 @@ def get_geninfo(idnum):
     return item
 
 
-def query(filters, fields, sort, start, size):
+def query(filters, fields, sort, start=None, size=None):
     '''
     Generic Query Function to centralize querying the database.
     '''
@@ -132,7 +132,7 @@ def query(filters, fields, sort, start, size):
     return list(results)
 
 
-def list_plugins(server, fields, sort, start, size):
+def list_plugins(server, fields, sort, start=None, size=None):
     '''
     This function returns a list of plugins with the fields specified.  The 
     list can be narrowed down to specific server binary compatability by
@@ -212,7 +212,7 @@ def plugin_details(server, plugin, version, fields):
     return p
 
 
-def plugin_search(filters, fields, sort, start, size, sub=False):
+def plugin_search(filters, fields, sort, start=None, size=None, sub=False):
     '''
     A generalized sort function for the database.  Returns a list of plugins
     with the fields specified in the incusion and exclusion variables.
