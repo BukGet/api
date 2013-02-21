@@ -127,7 +127,7 @@ def query(filters, fields, sort, start=None, size=None):
         d = pymongo.ASCENDING
     if size is not None and start is not None:
         results = db.plugins.find(filters, fields).sort(sort, d)\
-                            .skip(start).size(size)
+                            .skip(start).limit(size)
     else:
         results = db.plugins.find(filters, fields).sort(sort, d)
     return list(results)
