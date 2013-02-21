@@ -48,10 +48,14 @@ def todays_trends():
 @app.get('/trend/<days:int>')
 @app.get('/trend/<days:int>/<names>')
 def plugin_trends(days, names=None):
+    fields = {'_id': 0}
+    if names == None: 
+        fields['plugins'] = 0
+    else:
+        for name in bleach.clean(names or '').split(','):
+            fields['plugins.%s' % name] = 1
     callback = bleach.clean(request.query.callback or None)
     names = bleach.clean(names or '')
-    fields = {'_id': 0}
-    for name in names.split(','):
-        fields['plugins.%s' % name] = 1
-    trends = c.db.webstats.find({}, fields).sort('_id', -1)
+    trends = list(c.db.webstats.find({}, fields).sort('_id', -1).limit(days))
     return c.jsonify(trends, callback)
+
