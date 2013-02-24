@@ -146,7 +146,7 @@ def list_plugins(server, fields, sort, start=None, size=None):
     return query(filters, fields, sort, start, size)
 
 
-def list_author_plugins(server, author, fields, sort):
+def list_author_plugins(server, author, fields, sort, start=None, size=None):
     '''
     Returns the plugin list for a given author.  Furthermore by setting the
     server to something other than None, it's possible to specify a specific
@@ -158,7 +158,7 @@ def list_author_plugins(server, author, fields, sort):
     return query(filters, fields, sort, start, size)
 
 
-def list_category_plugins(server, category, fields, sort):
+def list_category_plugins(server, category, fields, sort, start=None, size=None):
     '''
     Returns the plugin list for a given author.  Furthermore by setting the
     server to something other than None, it's possible to specify a specific
