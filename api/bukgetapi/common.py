@@ -228,6 +228,8 @@ def plugin_search(filters, fields, sort, start=None, size=None, sub=False):
         if item['action'] == '>': f[item['field']] = {'$gt': item['value']}
         if item['action'] == '>=': f[item['field']] = {'$gte': item['value']}
         if item['action'] == 'like': f[item['field']] = re.compile(r'%s' % item['value'])
+        if item['action'] == 'exists': f[item['field']] = {'$exists': True}
+        if item['action'] == 'nexists': f[item['field']] = {'$exists': False}
         if item['action'] == 'in': 
             if isinstance(item['value'], list):
                 f[item['field']] = {'$in': item['value']}
