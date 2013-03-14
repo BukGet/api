@@ -342,7 +342,7 @@ class Parser(base.BaseParser):
 
         # If the plugin has been deleted, then shortcut everything and tell the
         # base parser to just delete the entry.
-        if str(page) == 'There was an error with cookies, please try again.':
+        if not page:
             return self._delete_plugin(plugin)
         elif 'deleted' in plugin:
             del(plugin['deleted'])
