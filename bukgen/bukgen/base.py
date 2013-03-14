@@ -79,10 +79,7 @@ class BaseParser(threading.Thread):
         while (time.time() - self._timer) < self.config_delay:
             time.sleep(0.1)
         self._timer = time.time()
-        try:
-            return BeautifulSoup(self._get_url(url))
-        except:
-            return False
+        return BeautifulSoup(self._get_url(url))
     
     
     def _get_url(self, url):
@@ -100,7 +97,7 @@ class BaseParser(threading.Thread):
             except HTTPError, msg:
                 if msg.code == 404:
                     log.error('PARSER: File not found for %s' % url)
-                    raise Exception('URL %s Threw 404 Error')
+                    break
                 else:
                     log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                     time.sleep(self.config_delay)
