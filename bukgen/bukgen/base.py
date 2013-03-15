@@ -95,13 +95,13 @@ class BaseParser(threading.Thread):
                 data = urlopen(url, timeout=5).read()
                 comp = True
             except HTTPError, msg:
-                if msg.code == 404:
-                    log.error('PARSER: File not found for %s' % url)
+                if msg.code != 200:
+                    log.error('PARSER: URL did not return 200 Code %s' % url)
                     break
                 else:
                     log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                     time.sleep(self.config_delay)
-            except:
+            except URLError, msg:
                 log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                 time.sleep(self.config_delay)
         return data
