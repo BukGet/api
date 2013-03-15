@@ -101,7 +101,7 @@ class BaseParser(threading.Thread):
                 else:
                     log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                     time.sleep(self.config_delay)
-            except URLError, msg:
+            except:
                 log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                 time.sleep(self.config_delay)
         return data
