@@ -297,6 +297,8 @@ class Parser(base.BaseParser):
                 'server': 'bukkit',
                 'description': '',
                 'authors': [],
+                'categories': [],
+                'versions': [],
                 'plugin_name': '',
             }
             log.info('Adding Bukkit Plugin %s' % slug)
