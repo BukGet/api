@@ -90,14 +90,16 @@ class BaseParser(threading.Thread):
         log.debug('PARSER: Fetching: %s' % url)
         comp = False
         data = ''
+        tries = 0
         while not comp:
             try:
                 data = urlopen(url, timeout=5).read()
                 comp = True
             except HTTPError, msg:
                 if msg.code != 200:
-                    log.error('PARSER: URL did not return 200 Code %s' % url)
-                    break
+                    log.error('PARSER: URL returned %s Code %s' % (msg.code, url))
+                    if tries > 3:
+                        break
                 else:
                     log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                     time.sleep(self.config_delay)
