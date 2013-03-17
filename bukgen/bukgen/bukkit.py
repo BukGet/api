@@ -455,6 +455,13 @@ class Parser(base.BaseParser):
         # parse as much out of the page as we can.
         dbo_page = '%s/%s/files/%s/' % (self.config_base, plugin, slug)
         page = self._get_page(dbo_page)
+
+        # Simple hack to break out of parsing the page any further if we are
+        # getting empty data back from _get_page.  This should stop a lot of
+        # empty parsing.
+        if len(page) < 1:
+            return {}, None
+        
         try:
             # Here we are going to try to pull out the DBO Version on the page.
             # Yes this is pretty hackish, however its needed as it's the only
