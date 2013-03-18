@@ -60,6 +60,7 @@ def plugin_details(slug, version=None):
     del(data['logo_full'])
     del(data['server'])
     del(data['website'])
+    del(data['popularity'])
     if '_use_dbo' in data: del(data['_use_dbo'])
 
     # Now we will perform the same actions for each version.

@@ -40,6 +40,7 @@ def v3to2(items):
             del(item['slug'])
         if '_use_dbo' in item: del(item['_use_dbo'])
         if 'logo' in item: del(item['logo'])
+        if 'popularity' in item: del(item['popularity'])
         if 'logo_full' in item: del(item['logo_full'])
         if 'versions' in item:
             versions = []
