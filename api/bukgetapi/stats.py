@@ -54,6 +54,7 @@ def plugin_trends(days, names=None):
     else:
         for name in bleach.clean(names).split(','):
             fields['plugins.%s' % name] = 1
+        fields['timestamp'] = 1
     callback = bleach.clean(request.query.callback or None)
     trends = list(c.db.webstats.find({}, fields).sort('_id', -1).limit(days))
     return c.jsonify(trends, callback)
