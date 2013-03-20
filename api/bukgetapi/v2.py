@@ -41,6 +41,7 @@ def v3to2(items):
         if '_use_dbo' in item: del(item['_use_dbo'])
         if 'logo' in item: del(item['logo'])
         if 'popularity' in item: del(item['popularity'])
+        if 'main' in item: del(item['main'])
         if 'logo_full' in item: del(item['logo_full'])
         if 'versions' in item:
             versions = []
