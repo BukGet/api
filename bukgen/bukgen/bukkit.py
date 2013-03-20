@@ -365,6 +365,7 @@ class Parser(base.BaseParser):
 
         # Now to pull in all of the data from the YAML definitions.
         if 'name' in yml: plugin['plugin_name'] = yml['name']
+        if 'main' in yml: plugin['main'] = yml['main']
         if 'description' in yml: plugin['description'] = yml['description']
         if 'author' in yml: 
             if isinstance(yml['author'], list): 
