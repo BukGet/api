@@ -85,6 +85,7 @@ lfile.close()
 gfile.close()
 webstats.save(data)
 
+day_trend = db.webstats.find_one().sort('_id', -1).limit(7)
 week_trend = list(db.webstats.find().sort('_id', -1).limit(7))
 month_trend = list(db.webstats.find().sort('_id', -1).limit(30))
 
@@ -98,7 +99,7 @@ for plugin in plugins.find({}):
     # Daily Trending
     daily = 0
     if plugin['slug'] in data['plugins']:
-        plugin['popularity']['daily'] = data['plugins'][plugin['slug']]['unique']
+        daily = data['plugins'][plugin['slug']]['unique']
 
     # Weekly Trending
     weekly = 0
@@ -110,7 +111,7 @@ for plugin in plugins.find({}):
     monthly = 0
     for day in month_trend:
         if plugin['slug'] in day['plugins']:
-            weekly += day['plugins'][plugin['slug']]['unique']
+            monthly += day['plugins'][plugin['slug']]['unique']
 
     # Now to add all of the new values to the plugin...
     plugin['popularity']['daily'] = daily
