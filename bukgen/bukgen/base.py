@@ -97,9 +97,11 @@ class BaseParser(threading.Thread):
                 comp = True
             except HTTPError, msg:
                 if msg.code != 200:
+                    tries += 1
                     log.error('PARSER: URL returned %s Code %s' % (msg.code, url))
                     if tries > 3:
                         break
+                    time.sleep(self.config_delay)
                 else:
                     log.warn('PARSER: Connection to "%s" failed, retrying...' % url)
                     time.sleep(self.config_delay)
