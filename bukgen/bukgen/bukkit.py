@@ -348,6 +348,8 @@ class Parser(base.BaseParser):
             return self._delete_plugin(plugin)
         elif 'deleted' in plugin:
             del(plugin['deleted'])
+        if page == 'There was an error with cookies, please try again.':
+            return self._delete_plugin(plugin)
         
         # Plugin Stage
         plugin['stage'] = page.find('span', {'class': self.r_stage}).text

@@ -144,6 +144,7 @@ class BaseParser(threading.Thread):
 
     def _delete_plugin(self, data):
         data['deleted'] = True
+        data['stage'] = 'Deleted'
         self._update_plugin(data)
         #db.plugins.remove(data)
         log.info('Tagging %s As Deleted.' % data['slug'])
