@@ -140,7 +140,7 @@ def list_plugins(server, fields, sort, start=None, size=None):
     list can be narrowed down to specific server binary compatability by
     specifying the server as something other than None.
     '''
-    filters = {}
+    filters = {'deleted': {'$exists': False}}
     if server is not None:
         filters['server'] = server
     return query(filters, fields, sort, start, size)

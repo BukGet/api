@@ -28,10 +28,6 @@ def naughty_list():
 @app.get('/todays_trends')
 def todays_trends():
     callback = bleach.clean(request.query.callback or None)
-    today = datetime.date.today().strftime('%Y-%m-%d')
-    stats = list(c.db.stats.find({'counts.%s' % today: {'$exists': True}},
-                {'_id': 0, 'slug': 1, 'server': 1, 'counts.%s' % today: 1})\
-                .sort('counts.%s' % today, -1).limit(10))
     plugins = c.db.plugins.find({},{'slug': 1, 'versions.version': 1})
     pcount = 0
     vcount = 0
@@ -41,7 +37,6 @@ def todays_trends():
     return c.jsonify({
             'plugin_count': pcount,
             'version_count': vcount,
-            'top_plugs': stats,
     }, callback)
 
 
