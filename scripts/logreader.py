@@ -85,7 +85,7 @@ lfile.close()
 gfile.close()
 webstats.save(data)
 
-day_trend = db.webstats.find_one().sort('_id', -1).limit(7)
+day_trend = data
 week_trend = list(db.webstats.find().sort('_id', -1).limit(7))
 month_trend = list(db.webstats.find().sort('_id', -1).limit(30))
 
