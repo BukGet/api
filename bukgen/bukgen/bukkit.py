@@ -518,9 +518,9 @@ class Parser(base.BaseParser):
 
         # Now to populate the version dictionary based on the plugin.yml ;)
         if 'depend' in yml and yml['depend'] is not None: 
-            version['soft_dependencies'] = yml['depend']
+            version['hard_dependencies'] = yml['depend']
         if 'softdepend' in yml and yml['softdepend'] is not None:
-            version['hard_dependencies'] = yml['softdepend']
+            version['soft_dependencies'] = yml['softdepend']
         if 'commands' in yml and yml['commands'] is not None:
             try:
                 version['commands'] = self._commands(yml['commands'])
