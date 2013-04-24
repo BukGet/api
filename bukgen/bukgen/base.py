@@ -26,7 +26,7 @@ def genlog(name):
 
 
     log = logging.getLogger('bukgen:%s' % name)
-    hdlr = logging.FileHandler(config.get('Settings', 'log_file'))
+    hdlr = logging.WatchedFileHandler(config.get('Settings', 'log_file'))
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
     log.setLevel(_loglevels[config.get('Settings', 'log_level')])
