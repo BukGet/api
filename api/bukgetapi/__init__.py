@@ -15,18 +15,23 @@ def start():
     app.mount('/stats', stats.app)
     app.mount('/sync', sync.app)
 
+    # Mounted the applications for v1 and v2 on the legacy URLs as well.  It
+    # appears that some apps arent handling 302 redirects all that well.
+    app.mount('/api1', v1.app)
+    app.mount('/api2', v2.app)
+
     @app.get('/')
     def home(): redirect('/3')
 
-    @app.get('/api')
-    @app.get('/api/')
-    @app.get('/api/<path:re:(.*)>')
-    def api1(path=''): redirect('/1/%s?%s' % (path, request.query_string))
+    #@app.get('/api')
+    #@app.get('/api/')
+    #@app.get('/api/<path:re:(.*)>')
+    #def api1(path=''): redirect('/1/%s?%s' % (path, request.query_string))
 
-    @app.get('/api2')
-    @app.get('/api2/')
-    @app.get('/api2/<path:re:(.*)>')
-    def api2(path=''): redirect('/2/%s?%s' % (path, request.query_string))
+    #@app.get('/api2')
+    #@app.get('/api2/')
+    #@app.get('/api2/<path:re:(.*)>')
+    #def api2(path=''): redirect('/2/%s?%s' % (path, request.query_string))
 
     debug(common.config.getboolean('Settings', 'debug'))
     run(app=app,
