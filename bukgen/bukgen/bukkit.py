@@ -248,7 +248,7 @@ class Parser(base.BaseParser):
             # Lets go ahead and grab the page, then pull out all of the plugins
             # listed on this given page.
             page = self._get_page('%s/?page=%s' % (self.config_base, pagenum))
-            plugins = [a.findChild('a').get('href') for a in page.findAll('h2')]
+            plugins = [a.findChild('a').get('href') for a in page.find('table', {'class': 'listing'}).findChildren('h2')]
 
             # Now to iterate through all of the plugins we discovered...
             for plugin in plugins:

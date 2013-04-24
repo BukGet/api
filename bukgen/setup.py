@@ -3,7 +3,7 @@ import sys
 
 setup(
     name='BukGen',
-    version='0.1',
+    version='0.1.1',
     description='BukGet Parsing Engines',
     author='Steven McGrath',
     author_email='steve@chigeek.com',
