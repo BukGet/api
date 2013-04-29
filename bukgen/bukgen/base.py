@@ -9,6 +9,7 @@ from urllib2 import urlopen, HTTPError, URLError
 from BeautifulSoup import BeautifulSoup
 from ConfigParser import ConfigParser
 import logging
+from logging import handlers
 
 
 def genlog(name):
@@ -26,7 +27,7 @@ def genlog(name):
 
 
     log = logging.getLogger('bukgen:%s' % name)
-    hdlr = logging.WatchedFileHandler(config.get('Settings', 'log_file'))
+    hdlr = handlers.WatchedFileHandler(config.get('Settings', 'log_file'))
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
     log.setLevel(_loglevels[config.get('Settings', 'log_level')])
