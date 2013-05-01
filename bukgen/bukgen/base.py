@@ -41,7 +41,11 @@ def run(parser, ctype=None):
     for us to override the default engine type to perform different tasks.
     '''
     if ctype is None: ctype = sys.argv[1]
-    parser.config_type = ctype
+    if ctype == 'speedy_full':
+        parser.config_type = 'speedy'
+        parser.config_dbo_full = True
+    else:
+        parser.config_type = ctype
     if ctype == 'stage_update':
         for plugin in list(db.plugins.find()):
             parser.plugin(plugin['slug'])

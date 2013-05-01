@@ -22,6 +22,7 @@ class Parser(base.BaseParser):
     '''Bukkit Parser Object
     '''
     config_type = 'speedy'
+    config_dbo_full = False
     config_base = 'http://dev.bukkit.org/server-mods'
     config_start = 1
     r_vtitle = re.compile(r'size2of3')
@@ -264,7 +265,7 @@ class Parser(base.BaseParser):
                 pagenum += 1
             else:
                 parsing = False
-            if len(self.changes) == count and self.config_type == 'speedy':
+            if (len(self.changes) == count and self.config_type == 'speedy') or self.config_dbo_full:
                 parsing = False
             else:
                 log.info('Parsing DBO Page %s' % pagenum)
