@@ -265,7 +265,7 @@ class Parser(base.BaseParser):
                 pagenum += 1
             else:
                 parsing = False
-            if (len(self.changes) == count and self.config_type == 'speedy') or self.config_dbo_full:
+            if len(self.changes) == count and self.config_type == 'speedy' and not self.config_dbo_full:
                 parsing = False
             else:
                 log.info('Parsing DBO Page %s' % pagenum)
