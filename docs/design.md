@@ -29,7 +29,7 @@ __ Services List__
 
 ### MongoDB
 
-The Mongo Database has not had any customization that needs to be documented at this time.  We will eventually be looking at going multi-server, and will be using MongoDB's replication capabilities for distributing the 
+The Mongo Database has not had any customization that needs to be documented at this time.  We will eventually be looking at going multi-server, and will be using MongoDB's replication capabilities for distributing the database across all of the servers.
 
 
 ### Python 2.6/7
