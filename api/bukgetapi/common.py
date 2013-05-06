@@ -208,6 +208,8 @@ def plugin_details(server, plugin, version, fields):
     # Query Time!!!
     p = db.plugins.find_one(filters, fieldgen(fields))
 
+    if p is None: return None
+    
     # If the version is set, then we need to only return what was requested.
     if version is not None:
         if version.lower() in ['release', 'alpha', 'beta', 'latest']:

@@ -5,11 +5,6 @@ import common as c
 
 app = Bottle()
 
-@app.error(500)
-@app.error(404)
-def set_cors():
-    response.set_header('Access-Control-Allow-Origin', '*')
-
 
 @app.hook('before_request')
 def set_json_header():
@@ -51,7 +46,7 @@ def plugin_details(slug, version=None):
     specific version as part of the data as well.
     '''
     data = c.plugin_details('bukkit', slug, version, [])
-    #if data is None: abort(404, "Plugin does not exist.")
+    if not data: abort(404, "Plugin does not exist.")
 
     # Moving data to the old format
     data['name'] = data['slug']
