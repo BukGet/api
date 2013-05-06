@@ -47,7 +47,7 @@ Below is the configuration for the VHost that we use for BukGet.  Keep in mind t
 
 	server {
 	        listen          80;
-	        server_name     api.bukget.org;
+	        server_name     api.bukget.org XXX.api.bukget.org;
 
 	        access_log      /var/log/bukget/api-access.log;
 	        error_log       /var/log/bukget/api-error.log;
