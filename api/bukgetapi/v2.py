@@ -1,6 +1,6 @@
 import json
 import bleach
-from bottle import Bottle, redirect, response, request
+from bottle import Bottle, redirect, response, request, abort
 import common as c
 
 app = Bottle()
@@ -107,6 +107,7 @@ def plugin_details(server, slug, version=None):
     fields = bleach.clean(request.query.fields or '').split(',')
     fields = v2to3(fields)
     data = c.plugin_details(server, slug, version, fields)
+    if data is None: abort(404, "Plugin does not exist.")
     data = v3to2([data])[0]
     if 'versions' in data and len(data['versions']) == 1:
         data['versions'] = data['versions'][0] 

@@ -1,6 +1,6 @@
 import json
 import bleach
-from bottle import Bottle, redirect, response, request
+from bottle import Bottle, redirect, response, request, abort
 import common as c
 
 app = Bottle()
@@ -51,6 +51,7 @@ def plugin_details(slug, version=None):
     specific version as part of the data as well.
     '''
     data = c.plugin_details('bukkit', slug, version, [])
+    if data is None: abort(404, "Plugin does not exist.")
 
     # Moving data to the old format
     data['name'] = data['slug']
