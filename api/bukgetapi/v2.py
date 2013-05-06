@@ -5,6 +5,11 @@ import common as c
 
 app = Bottle()
 
+@app.error(500)
+@app.error(404)
+def set_cors():
+    response.set_header('Access-Control-Allow-Origin', '*')
+
 
 def v2to3(items):
     convert = {
