@@ -200,15 +200,18 @@ def plugin_details(server, plugin, version, fields):
     '''
     filters = {'slug': plugin, 'server': server}
 
+    # If the version is set to any of the keywords that DBO uses, then only
+    # return back those results.
+    if version is not None and version in ['release', 'alpha', 'beta']:
+        filters['versions.type'] = version.capitalize()
+
     # Query Time!!!
     p = db.plugins.find_one(filters, fieldgen(fields))
 
     # If the version is set, then we need to only return what was requested.
     if version is not None:
-        if version.lower() == 'latest':
+        if version.lower() in ['release', 'alpha', 'beta', 'latest']:
             p['versions'] = [p['versions'][0]]
-        elif version.lower() in ['release', 'alpha', 'beta']:
-            p['versions'] = [[v for v in p['versions'] if v['type'] == version.capitalize()][0]]
         else:
             p['versions'] = [v for v in p['versions'] if v['version'] == version]
     return p
