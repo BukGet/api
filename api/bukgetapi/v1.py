@@ -1,6 +1,6 @@
 import json
 import bleach
-from bottle import Bottle, redirect, response, request, abort
+from bottle import Bottle, redirect, response, request, abort, HTTPError
 import common as c
 
 app = Bottle()
@@ -103,7 +103,7 @@ def plugin_download(slug, version, server='bukkit'):
     if len(link) > 0:
         redirect(link[0])
     else:
-        raise bottle.HTTPError(404, '{"error": "could not find version"}')
+        raise HTTPError(404, '{"error": "could not find version"}')
 
 
 @app.get('/authors')
@@ -180,7 +180,7 @@ def search(field=None, action=None, value=None):
     try:
         data = c.plugin_search(filters, fields, sort)
     except:
-        raise bottle.HTTPError(400, '{"error": "invalid search"}')
+        raise HTTPError(400, '{"error": "invalid search"}')
     else:
         if start is not None and size is not None:
             return c.jsonify([a['slug'] for a in data[start:start+size]])

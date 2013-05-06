@@ -1,6 +1,6 @@
 import json
 import bleach
-from bottle import Bottle, redirect, response, request, abort
+from bottle import Bottle, redirect, response, request, abort, HTTPError
 import common as c
 
 app = Bottle()
@@ -107,7 +107,7 @@ def plugin_details(server, slug, version=None):
     fields = bleach.clean(request.query.fields or '').split(',')
     fields = v2to3(fields)
     data = c.plugin_details(server, slug, version, fields)
-    if data is None: abort(404, "Plugin does not exist.")
+    if data is None: raise HTTPError(404, "Plugin does not exist.")
     data = v3to2([data])[0]
     if 'versions' in data and len(data['versions']) == 1:
         data['versions'] = data['versions'][0] 
@@ -131,7 +131,7 @@ def plugin_download(server, slug, version):
     if len(link) > 0:
         redirect(link[0])
     else:
-        raise bottle.HTTPError(404, '{"error": "could not find version"}')
+        raise HTTPError(404, '{"error": "could not find version"}')
 
 
 @app.get('/authors')
@@ -211,6 +211,6 @@ def search(base=None, field=None, action=None, value=None):
     try:
         data = c.plugin_search(filters, fields, sort, start, size)
     except:
-        raise bottle.HTTPError(400, '{"error": "invalid search"}')
+        raise HTTPError(400, '{"error": "invalid search"}')
     else:
         return c.jsonify(v3to2(data))
