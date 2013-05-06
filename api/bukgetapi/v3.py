@@ -70,7 +70,7 @@ def plugin_details(server, slug, version=None):
     fields = bleach.clean(request.query.fields or '').split(',')
     size = c.sint(bleach.clean(request.query.size or None))
     data = c.plugin_details(server, slug, version, fields)
-    if data is None: raise HTTPError(404, "Plugin Does Not Exist")
+    #if data is None: raise HTTPError(404, "Plugin Does Not Exist")
     callback = bleach.clean(request.query.callback or None)
     if size is not None:
         data['versions'] = data['versions'][:size]

@@ -107,7 +107,7 @@ def plugin_details(server, slug, version=None):
     fields = bleach.clean(request.query.fields or '').split(',')
     fields = v2to3(fields)
     data = c.plugin_details(server, slug, version, fields)
-    if data is None: raise HTTPError(404, "Plugin does not exist.")
+    #if data is None: raise HTTPError(404, "Plugin does not exist.")
     data = v3to2([data])[0]
     if 'versions' in data and len(data['versions']) == 1:
         data['versions'] = data['versions'][0] 
