@@ -217,7 +217,7 @@ def plugin_details(server, plugin, version, fields):
         if version.lower() in ['latest']:
             p['versions'] = [p['versions'][0]]
         elif version.lower() in ['alpha', 'beta', 'release']:
-            p['versions'] = [v for v in p['versions'] if v['type'].lower() == version.lower()][0] or []
+            p['versions'] = [[v for v in p['versions'] if v['type'].lower() == version.lower()][0] or []]
         else:
             p['versions'] = [v for v in p['versions'] if v['version'] == version]
     return p
