@@ -4,7 +4,6 @@ import re
 import os
 import sys
 from datetime import date
-from bson.code import Code
 from bson.objectid import ObjectId
 from ConfigParser import ConfigParser
 
@@ -17,33 +16,6 @@ else:
 connection = pymongo.MongoClient(config.get('Settings', 'database_host'), 
                                  config.getint('Settings', 'database_port'))
 db = connection.bukget
-
-amap = Code('''
-function () {
-    this.authors.forEach(function(z) {
-        emit(z, 1);
-    });
-}
-''')
-
-cmap = Code('''
-function () {
-    this.categories.forEach(function(z) {
-        emit(z, 1);
-    });
-}
-
-''')
-
-reduceall = Code('''
-function (key, values) {
-    var total = 0;
-    for (var i = 0; i < values.length; i++) {
-        total += values[i];
-    }
-    return total;
-}
-''')
 
 
 def ignore_exception(IgnoreException=Exception,DefaultVal=None):
@@ -175,10 +147,7 @@ def list_authors():
     Returns a list of plugin authors and the number of plugins each one has
     created/worked on.
     '''
-    data = []
-    for item in db.plugins.map_reduce(amap, reduceall, 'authors').find().sort('_id'):
-        data.append({'name': item['_id'], 'count': item['value']})
-    return data
+    return list(db.authors.find())
 
 
 def list_categories():
@@ -186,10 +155,7 @@ def list_categories():
     Returns a list of plugin categories and the count of plugins that fall under
     each category.
     '''
-    data = []
-    for item in db.plugins.map_reduce(cmap, reduceall, 'categories').find().sort('_id'):
-        data.append({'name': item['_id'], 'count': int(item['value'])})
-    return data
+    return list(db.categories.find())
 
 
 def plugin_details(server, plugin, version, fields):

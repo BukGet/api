@@ -71,6 +71,33 @@ if not os.path.exists(config.get('Settings', 'json_dump')):
     os.makedirs(config.get('Settings', 'json_dump'))
 
 
+def update_cats_and_authors():
+    new_entry = {'count': 0, 'server': {'bukkit': 0}}
+    a = {}
+    c = {}
+    plugins = list(db.plugins.find())
+    for plugin in plugins:
+        for category in plugin['categories']:
+            if category not in c:
+                c[category] = new_entry
+                c[category]['name'] = category
+            c[category]['count'] += 1
+            c[category]['server'][plugin['server']] += 1
+        for author in plugin['authors']:
+            if author not in a:
+                a[author] = new_entry
+                a[author]['name'] = author
+            a[author]['count'] += 1
+            a[author]['server'][plugin['server']] += 1
+    authors = [a[i] for i in a]
+    categories = [c[i] for i in c]
+    db.categories.drop()
+    db.categories.insert(categories)
+    db.authors.drop()
+    db.authors.insert(authors)
+
+
+
 class BaseParser(threading.Thread):
     config_delay = 2
     config_api_host = 'localhost:9123'
