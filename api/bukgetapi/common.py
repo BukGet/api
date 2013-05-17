@@ -141,13 +141,22 @@ def list_category_plugins(server, category, fields, sort, start=None, size=None)
         filters['server'] = server
     return query(filters, fields, sort, start, size)
 
+def ca_convert(data):
+    '''
+    Reformats the data to what the API should be returning.
+    '''
+    dset = []
+    for item in data:
+        dset.append({'name': item['_id'], 'count': item['value']})
+    return dset
+
 
 def list_authors():
     '''
     Returns a list of plugin authors and the number of plugins each one has
     created/worked on.
     '''
-    return list(db.authors.find())
+    return ca_convert(db.authors.find().sort('_id'))
 
 
 def list_categories():
@@ -155,7 +164,7 @@ def list_categories():
     Returns a list of plugin categories and the count of plugins that fall under
     each category.
     '''
-    return list(db.categories.find())
+    return ca_convert(db.categories.find().sort('_id'))
 
 
 def plugin_details(server, plugin, version, fields):
