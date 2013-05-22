@@ -4,6 +4,8 @@ import json
 import os
 import sys
 import pymongo
+from bson.objectid import ObjectId
+from bson.code import Code
 from hashlib import md5
 from urllib2 import urlopen, HTTPError, URLError
 from BeautifulSoup import BeautifulSoup
