@@ -27,7 +27,7 @@ class Parser(base.BaseParser):
     config_start = 1
     r_vtitle = re.compile(r'size2of3')
     r_version = re.compile(r'\/files\/(.*?)\/')
-    r_plugin = re.compile(r'\/server-mods\/(.*?)\/')
+    r_plugin = re.compile(r'\/(?:server-mods|bukkit-mods|bukkit-plugins)\/(.*?)\/')
     r_versionnum = re.compile(\
         r'b{0,1}\d{1,3}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}\.{0,1}\d{0,3}\w{0,5}')
     r_stage = re.compile(r'project-stage')
