@@ -20,16 +20,31 @@ __Script List__
 * force_update.py
 * logreader.py
 
-__ Services List__
+__Services List__
 
 * nginx - sysv
 * mongod - sysv
 * bukget - upstart
 
 
+__Services Layout (By Server)__
+
+* dallas.api.bukget.org
+    * BukGet API (Nginx, Mongo, BukGet)
+    * logreader script (cronjob)
+    * BukGen Generator (bukgen_* applications)
+    * Maintinence Functions (force_update.py, bukgen_manual)
+* paris.api.bukget.org
+    * BukGet API (Nginx, Mongo, BukGet)
+* dev.vpn.bukget.org
+    * Development Services (Independent of Prod)
+        * BukGet API (Nginx, Mongo, BukGet)
+    * Production Database Nightly Backup
+
+
 ### MongoDB
 
-The Mongo Database has not had any customization that needs to be documented at this time.  We will eventually be looking at going multi-server, and will be using MongoDB's replication capabilities for distributing the database across all of the servers.
+The Mongo Database has not had any customization that needs to be documented at this time.  The Dallas server is the primary database engine, with the Paris server acting as the secondary.  This means that all Database writes has to go through the Dallas Mongo instance.
 
 
 ### Python 2.6/7
