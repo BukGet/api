@@ -425,7 +425,7 @@ class Parser(base.BaseParser):
 
         # Lastly, we only want to even bother to commit this up if there is at
         # least 1 version of the plugin uploaded.
-        if len(versions) > 0 and (len(self.changes) > changes or plugin != porig):
+        if len(versions) > 0:
             if self.config_type == 'stage_update':
                 self._update_status(plugin)
             else:
