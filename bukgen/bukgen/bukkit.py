@@ -304,6 +304,7 @@ class Parser(base.BaseParser):
             }
             log.info('Adding Bukkit Plugin %s' % slug)
         changes = len(self.changes)
+        porig = plugin
         
         yml = False         # Variable to house the most recent version yaml.
         running = True      # Will stay true as long as we are parsing versions
@@ -424,7 +425,7 @@ class Parser(base.BaseParser):
 
         # Lastly, we only want to even bother to commit this up if there is at
         # least 1 version of the plugin uploaded.
-        if len(versions) > 0 and len(self.changes) > changes:
+        if len(versions) > 0 and (len(self.changes) > changes or plugin != porig):
             if self.config_type == 'stage_update':
                 self._update_status(plugin)
             else:
@@ -446,11 +447,6 @@ class Parser(base.BaseParser):
             p = self._api_get({'slug': plugin, 'server': 'bukkit'})
             if p == None: p = {}
         if version:
-            # First we need to check if the PLugin version still exists.  If it
-            # doesn't, then there is no need to keep it here.
-            if self._get_page(version['link']) <= 0:
-                log.info('Removing %s Version %s' % (plugin, slug))
-                return {}, None
             if self.config_type == 'speedy': 
                 return False, version
             log.info('Updating Bukkit Plugin %s Version %s' % (plugin, slug))
