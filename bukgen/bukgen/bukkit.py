@@ -446,6 +446,10 @@ class Parser(base.BaseParser):
             p = self._api_get({'slug': plugin, 'server': 'bukkit'})
             if p == None: p = {}
         if version:
+            dbo_page = '%s/%s/files/%s/' % (self.config_base, plugin, slug)
+            if len(self._get_page(dbo_page)) > 1:
+                log.info('Removing Non-existant Version %s of %s' % (version, slug))
+                return {}, None
             if self.config_type == 'speedy': 
                 return False, version
             log.info('Updating Bukkit Plugin %s Version %s' % (plugin, slug))
