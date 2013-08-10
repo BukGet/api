@@ -446,6 +446,11 @@ class Parser(base.BaseParser):
             p = self._api_get({'slug': plugin, 'server': 'bukkit'})
             if p == None: p = {}
         if version:
+            # First we need to check if the PLugin version still exists.  If it
+            # doesn't, then there is no need to keep it here.
+            if self._get_page(version['link']) <= 0:
+                log.info('Removing %s Version %s' % (plugin, slug))
+                return {}, None
             if self.config_type == 'speedy': 
                 return False, version
             log.info('Updating Bukkit Plugin %s Version %s' % (plugin, slug))
