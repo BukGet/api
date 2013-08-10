@@ -23,7 +23,7 @@ class Parser(base.BaseParser):
     '''
     config_type = 'speedy'
     config_dbo_full = False
-    config_base = 'http://dev.bukkit.org/server-mods'
+    config_base = 'http://dev.bukkit.org/bukkit-plugins'
     config_start = 1
     r_vtitle = re.compile(r'size2of3')
     r_version = re.compile(r'\/files\/(.*?)\/')
@@ -257,6 +257,7 @@ class Parser(base.BaseParser):
                     # Here we are attemping to pull out the plugin slug.  This
                     # will be used as
                     slug = self.r_plugin.findall(plugin)[0]
+                    print self.r_plugin.findall(plugin)
                 except:
                     log.debug('Could not parse %s' % plugin)
                 else:
@@ -446,10 +447,15 @@ class Parser(base.BaseParser):
             p = self._api_get({'slug': plugin, 'server': 'bukkit'})
             if p == None: p = {}
         if version:
-            dbo_page = '%s/%s/files/%s/' % (self.config_base, plugin, slug)
-            if len(self._get_page(dbo_page)) > 1:
-                log.info('Removing Non-existant Version %s of %s' % (version, slug))
-                return {}, None
+            # Commented this code out, as after re-establishing how this works,
+            # it appears that deleted versions should be automatically removed
+            # from the DB based on how BukGet is working.  THere seems to be
+            # larger issues at play that is causing the DB not to update (again)
+            # and that is the root cause.
+            #dbo_page = '%s/%s/files/%s/' % (self.config_base, plugin, slug)
+            #if len(self._get_page(dbo_page)) > 1:
+            #    log.info('Removing Non-existant Version %s of %s' % (version, slug))
+            #    return {}, None
             if self.config_type == 'speedy': 
                 return False, version
             log.info('Updating Bukkit Plugin %s Version %s' % (plugin, slug))
