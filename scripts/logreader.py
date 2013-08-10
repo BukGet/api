@@ -11,8 +11,8 @@ import datetime
 
 class LogParser(object):
     servers = ['dallas.vpn.bukget.org', 'paris.vpn.bukget.org']
-    ignores = ['Java', 'PHP', 'Mozilla', 'Chrome', 'IE', 'Opera', 'wget', 
-               'curl', 'urllib', 'bot', 'spider', 'Apache']
+    ignores = ['java', 'php', 'mozilla', 'chrome', 'opera', 'wget', 
+               'curl', 'urllib', 'bot', 'spider', 'apache']
     ua = re.compile(r'\"[^ ]*\" \"([^\(\/ ]*).*\"$')
     rcode = re.compile(r'HTTP/\d\.\d\" (\d{3})')
 
@@ -135,7 +135,7 @@ class LogParser(object):
                 # strings.
                 uastring = self.ignore_ua(line)
                 if uastring:
-                    if uastring not in data['user_agents']:
+                    if uastring.lower() not in data['user_agents']:
                         data['user_agents'][uastring] = 0
                     data['user_agents'][uastring] += 1
 
