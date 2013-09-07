@@ -88,7 +88,7 @@ def get_geninfo(idnum):
     return item
 
 
-def query(filters, fields, sort, start=None, size=None):
+def query(filters, fields, sort, start=0, size=None):
     '''
     Generic Query Function to centralize querying the database.
     '''
@@ -98,7 +98,7 @@ def query(filters, fields, sort, start=None, size=None):
         d = -1
     else:
         d = 1
-    if size is not None and start is not None:
+    if size is not None:
         results = db.plugins.find(filters, fields).sort(sort, d)\
                             .skip(start).limit(size)
     else:
