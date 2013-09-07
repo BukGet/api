@@ -70,8 +70,27 @@ def plugin_details(server, slug, version=None):
     if size is not None:
         data['versions'] = data['versions'][:size]
     return c.jsonify(data, callback)
-
-
+    
+ @app.get('/plugins/versioncheck/<server>/<slugs>')
+ @app.get('/plugins/versioncheck/<server>/<slugs>/')
+ def versions_check(server,slugs):
+    '''Versions Check
+    Checks the versions of a comma delimited list of slugs
+    '''
+    data = []
+    callback = bleach.clean(request.query.callback or None)
+    fields = ["slug","plugin_name","versions.version"]
+    slugs = bleach.clean(slugs or '').split(',')
+    if len(slugs) > 0:
+        for slug in slugs:
+        	twixted = c.plugin_details(server, slug, version, fields)
+        	if not twixted: twixted['slug'],twixted['plugin_name'],twixted['versions']['version'] = slug,"Unknown","Plugin does not exist"
+        	chaox['slug'],chaox['plugin_name'],chaox['version'] = twixted['slug'],twixted['plugin_name'],twixted['versions']['version']
+        	data.append(chaox)
+        return c.jsonify(data, callback)
+     else:
+        raise HTTPError(400, '{"error": "invalid post"}')
+        	
 @app.get('/plugins/<server>/<slug>/<version>/download')
 def plugin_download(server, slug, version):
     '''Plugin Download Redirector
