@@ -80,7 +80,26 @@ def plugin_details(slug, version=None):
         versions.append(version)
     data['versions'] = versions
     return c.jsonify(data)
-
+    
+ @app.get('/plugins/versioncheck/<slugs>')
+ @app.get('/plugins/versioncheck/<slugs>/')
+ def versions_check(slugs):
+    '''Versions Check
+    Checks the versions of a comma delimited list of slugs
+    '''
+    data = []
+    callback = bleach.clean(request.query.callback or None)
+    fields = ["slug","plugin_name","versions.version"]
+    slugs = bleach.clean(slugs or '').split(',')
+    if len(slugs) > 0:
+        for slug in slugs:
+        	twixted = c.plugin_details('bukkit', slug, version, fields)
+        	if not twixted: twixted['slug'],twixted['versions']['version'] = slug,"Plugin does not exist"
+        	chaox['name'],chaox['version'] = twixted['slug'],twixted['versions']['version']
+        	data.append(chaox)
+        return c.jsonify(data, callback)
+     else:
+        raise HTTPError(400, '{"error": "invalid post"}')
 
 
 @app.get('/plugins/<server>/<slug>/<version>/download')
