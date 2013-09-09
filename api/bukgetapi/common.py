@@ -98,7 +98,9 @@ def query(filters, fields, sort, start=None, size=None):
         d = -1
     else:
         d = 1
-    if size is not None and start is not None:
+    if size is not None:
+        if start is None:
+            start = 0
         results = db.plugins.find(filters, fields).sort(sort, d)\
                             .skip(start).limit(size)
     else:
