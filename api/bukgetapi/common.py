@@ -214,7 +214,6 @@ def plugins_up_to_date(plugins_list, server):
         entry = {
             'slug': item['slug'],
             'plugin_name': item['plugin_name'],
-            'name': item['name'],
             'versions': {
                 'latest': item['versions'][0]['version'],
             },
