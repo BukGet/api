@@ -148,6 +148,23 @@ def category_plugins(name, server=None):
     return c.jsonify(data, callback)
 
 
+@app.post('/updates')
+def get_updates():
+    '''Plugin updates
+    Returns a list of dictionaries with the latest, release, beta, and alpha
+    version numbers.
+    '''
+    callback = bleach.clean(request.forms.get('callback') or None)
+    slugs = bleach.clean(request.forms.get('slugs') or '').split(',')
+    server = bleach.clean(request.forms.get('server') or 'bukkit')
+    try:
+        data = c.plugins_up_to_date(slugs, server)
+    except:
+        raise HTTPError(400, '{"error": "invalid post"}')
+    else:
+        return c.jsonify(data, callback)
+
+
 @app.post('/search')
 @app.get('/search/<field>/<action>/<value>')
 @app.get('/search/<field>/<action>/<value>/')

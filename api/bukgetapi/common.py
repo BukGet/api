@@ -198,6 +198,37 @@ def plugin_details(server, plugin, version, fields):
     return p
 
 
+def plugins_up_to_date(plugins_list, server):
+    '''
+    Takes a list of plugin slugs and returns a list of dictionaries with the
+    plugin and the most recent version.
+    '''
+    data = []
+    result = list(db.plugins.find({
+        '$or': [{'slug': p} for p in plugins_list],
+        'server': server
+    }))
+    for item in result:
+        entry = {
+            'slug': item['slug'],
+            'plugin_name': item['plugin_name'],
+            'name': item['name'],
+            'versions': [
+                'latest': item['versions'][0]['version'],
+            ],
+        }
+        fin = False
+        for version in item['versions']:
+            if version['type'] == 'Release' and 'release' not in entry['versions']:
+                entry['versions']['release'] = version['version']
+            if version['type'] == 'Beta' and 'beta' not in entry['versions']:
+                entry['versions']['beta'] = version['version']
+            if version['type'] == 'Alpha' and 'alpha' not in entry['versions']:
+                entry['versions']['alpha'] = version['version']
+        data.append(entry)
+    return data
+
+
 def plugin_search(filters, fields, sort, start=None, size=None, sub=False):
     '''
     A generalized sort function for the database.  Returns a list of plugins
