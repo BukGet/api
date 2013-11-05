@@ -406,7 +406,6 @@ class Parser(base.BaseParser):
         # Here are some last minute re-classifications to make sure we are
         # sending the right data to the API.
         plugin['description'] = unicode(plugin['description']).encode('ascii', 'replace')
-        plugin['name'] = unicode(plugin['name']).encode('ascii', 'replace')
 
         # This is a quick check to see if there is a improper version condition
         # with this plugin.  If there is, we will then rely on the dbo_version
