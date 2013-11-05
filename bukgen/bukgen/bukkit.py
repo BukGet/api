@@ -73,6 +73,7 @@ class Parser(base.BaseParser):
             # fix the problem where sometimes we get a null value.
             p = {} if perms[perm] is None else perms[perm]
             if isinstance(p, str): p = {}
+            if isinstance(p, unicode): p = {}
 
             pdict[perm] = {'role': perm}
 
@@ -405,6 +406,7 @@ class Parser(base.BaseParser):
         # Here are some last minute re-classifications to make sure we are
         # sending the right data to the API.
         plugin['description'] = unicode(plugin['description']).encode('ascii', 'replace')
+        plugin['name'] = unicode(plugin['name']).encode('ascii', 'replace')
 
         # This is a quick check to see if there is a improper version condition
         # with this plugin.  If there is, we will then rely on the dbo_version
@@ -536,7 +538,7 @@ class Parser(base.BaseParser):
                 log.warn('Could not Parse permissions for %s:%s' % (plugin, slug))
                 version['permissions'] = []
         if 'version' in yml and yml['version'] is not None:
-            version['version'] = str(yml['version'])
+            version['version'] = unicode(yml['version']).encode('ascii', 'replace')
 
 
         # This is a last-minute hack to check to see if we prefer the dbo
