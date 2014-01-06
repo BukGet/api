@@ -492,7 +492,7 @@ class Parser(base.BaseParser):
         version['link'] = dbo_page
         version['date'] = int(page.find(attrs={'class': 'standard-date'}).get('data-epoch'))
         version['download'] = page.find('dt', text='Filename').findNext('a').get('href')
-        version['file_id'] = int(''.join(version['download'].split('/')[5,6]))
+        version['file_id'] = int(''.join(version['download'].split('/')[5:7]))
         version['filename'] = page.find('dt', text='Filename').findNext('a').text
         version['md5'] = page.find('dt', text='MD5').findNext('dd').text
         version['status'] = page.find(attrs={'class': self.r_status}).text
