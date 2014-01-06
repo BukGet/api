@@ -62,6 +62,8 @@ def plugin_details(slug, version=None):
     del(data['server'])
     del(data['website'])
     del(data['popularity'])
+    if 'curse_link' in data: del(data['curse_link'])
+    if 'curse_id' in data: del(data['curse_id'])
     if 'main' in data: del(data['main'])
     if '_use_dbo' in data: del(data['_use_dbo'])
 

@@ -43,6 +43,8 @@ def v3to2(items):
         if 'popularity' in item: del(item['popularity'])
         if 'main' in item: del(item['main'])
         if 'logo_full' in item: del(item['logo_full'])
+        if 'curse_link' in data: del(data['curse_link'])
+        if 'curse_id' in data: del(data['curse_id'])
         if 'versions' in item:
             versions = []
             for version in item['versions']:

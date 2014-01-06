@@ -354,6 +354,14 @@ class Parser(base.BaseParser):
         if page == 'There was an error with cookies, please try again.':
             return self._delete_plugin(plugin)
         
+        # Lets get the Curse_id.  This requires us to follow the curse link and
+        # pull up their page to get the ID.
+        plugin['curse_link'] = page.find('li', {'class': 'curse-tab'})\
+                                   .findChild('a').get('href')
+        cursepage = self._get_page(plugin['curse_link'])
+        plugin['curse_id'] = int(cursepage.find('li', {'class': 'grats'})\
+                                          .findChild('span').get('data-id'))
+
         # Plugin Stage
         plugin['stage'] = page.find('span', {'class': self.r_stage}).text
         plugin['authors'] = list(set([a.text for a in page.find('li', {'class': 'user-list-item'})\
