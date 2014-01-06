@@ -51,6 +51,7 @@ def v3to2(items):
                 if 'slug' in version: del(version['slug'])
                 if 'dbo_version' in version: del(version['dbo_version'])
                 if 'changelog' in version: del(version['changelog'])
+                if 'file_id' in version: del(version['file_id'])
                 versions.append(version)
             item['versions'] = versions
         data.append(item)

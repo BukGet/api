@@ -78,6 +78,7 @@ def plugin_details(slug, version=None):
         del(version['md5'])
         del(version['slug'])
         del(version['download'])
+        if 'file_id' in version: del(version['file_id'])
         if 'dbo_version' in version: del(version['dbo_version'])
         versions.append(version)
     data['versions'] = versions
