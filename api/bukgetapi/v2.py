@@ -72,7 +72,7 @@ def generation_info():
     Returns the generation information as requested.  User can optionall request
     to look X number of versions back.
     '''
-    size = c.sint(request.query.size or None)
+    size = c.sint(request.query.size or '')
     return c.jsonify(c.list_geninfo(size))
 
 
@@ -85,8 +85,8 @@ def plugin_list(server=None):
     '''
     fields = (request.query.fields or 'slug,plugin_name,description').split(',')
     fields = v2to3(fields)
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     data = c.list_plugins(server, fields, sort, start, size)
     return c.jsonify(v3to2(data))
@@ -150,8 +150,8 @@ def author_plugins(server, name):
     '''
     fields = (request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     data = c.list_author_plugins(server, name, fields, sort, start, size)
     return c.jsonify(v3to2(data))
@@ -176,8 +176,8 @@ def category_plugins(server, name):
     '''
     fields = (request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     data = c.list_category_plugins(server, name, fields, sort, start, size)
     return c.jsonify(v3to2(data))
@@ -192,8 +192,8 @@ def search(base=None, field=None, action=None, value=None):
     '''
     fields = (request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     field = field
     value = value

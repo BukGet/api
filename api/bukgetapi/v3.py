@@ -21,7 +21,7 @@ def generation_info():
     Returns the generation information as requested.  User can optionall request
     to look X number of versions back.
     '''
-    size = c.sint(request.query.size or None)
+    size = c.sint(request.query.size or '')
     callback = request.query.callback or None
     return c.jsonify(c.list_geninfo(size), callback)
 
@@ -45,8 +45,8 @@ def plugin_list(server=None):
     binary compatability type.
     '''
     fields = (request.query.fields or 'slug,plugin_name,description').split(',')
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     callback = request.query.callback or None
     data = c.list_plugins(server, fields, sort, start, size)
@@ -63,7 +63,7 @@ def plugin_details(server, slug, version=None):
     specific version as part of the data as well.
     '''
     fields = (request.query.fields or '').split(',')
-    size = c.sint(request.query.size or None)
+    size = c.sint(request.query.size or '')
     data = c.plugin_details(server, slug, version, fields)
     if not data: abort(404, "Plugin Does Not Exist")
     callback = request.query.callback or None
@@ -112,8 +112,8 @@ def author_plugins(name, server=None):
     '''
     callback = request.query.callback or None
     fields = (request.query.fields or 'slug,plugin_name,description').split(',')
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     data = c.list_author_plugins(server, name, fields, sort, start, size)
     return c.jsonify(data, callback)
@@ -141,8 +141,8 @@ def category_plugins(name, server=None):
     '''
     callback = request.query.callback or None
     fields = (request.query.fields or 'slug,plugin_name,description').split(',')
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     data = c.list_category_plugins(server, name, fields, sort, start, size)
     return c.jsonify(data, callback)
@@ -177,8 +177,8 @@ def search(field=None, action=None, value=None):
     if request.method == 'GET':
         callback = request.query.callback or None
         fields = (request.query.fields or 'slug,plugin_name,description').split(',')
-        start = c.sint(request.query.start or None)
-        size = c.sint(request.query.size or None)
+        start = c.sint(request.query.start or '')
+        size = c.sint(request.query.size or '')
         sort = request.query.sort or 'slug'
         field = field
         value = value
@@ -189,8 +189,8 @@ def search(field=None, action=None, value=None):
         callback = request.forms.get('callback') or None
         filters = json.loads(request.forms.get('filters') or '[]')
         fields = (request.forms.get('fields') or 'slug,plugin_name,description').split(',')
-        start = c.sint(request.forms.get('start') or None)
-        size = c.sint(request.forms.get('size') or None)
+        start = c.sint(request.forms.get('start') or '')
+        size = c.sint(request.forms.get('size') or '')
         sort = request.forms.get('sort') or 'slug'
     try:
         data = c.plugin_search(filters, fields, sort, start, size)

@@ -20,7 +20,7 @@ def generation_info():
     Returns the generation information as requested.  User can optionall request
     to look X number of versions back.
     '''
-    size = c.sint(request.query.size or None)
+    size = c.sint(request.query.size or '')
     return c.jsonify(c.list_geninfo(size))
 
 
@@ -121,8 +121,8 @@ def author_plugins(name, server=None):
     be restricted to a specific server binary compatability.
     '''
     fields = ['slug',]
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     data = c.list_author_plugins(server, name, fields, sort)
     if size is not None and start is not None:
@@ -148,8 +148,8 @@ def category_plugins(name, server=None):
     specific server binary compatability can be specified.
     '''
     fields = ['slug',]
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     data = c.list_category_plugins(server, name, fields, sort)
     if size is not None and start is not None:
@@ -166,8 +166,8 @@ def search(field=None, action=None, value=None):
     as well as multi-criteria posts.
     '''
     fields = ['slug',]
-    start = c.sint(request.query.start or None)
-    size = c.sint(request.query.size or None)
+    start = c.sint(request.query.start or '')
+    size = c.sint(request.query.size or '')
     sort = request.query.sort or 'slug'
     field = field
     value = value
