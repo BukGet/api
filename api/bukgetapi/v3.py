@@ -188,9 +188,9 @@ def search(field=None, action=None, value=None):
     else:
         callback = request.forms.get('callback') or None
         filters = json.loads(request.forms.get('filters') or '[]')
-        fields = (request.forms.get('fields')) or 'slug,plugin_name,description').split(',')
-        start = c.sint(request.forms.get('start') or None
-        size = c.sint(request.forms.get('size') or None
+        fields = (request.forms.get('fields') or 'slug,plugin_name,description').split(',')
+        start = c.sint(request.forms.get('start') or None)
+        size = c.sint(request.forms.get('size') or None)
         sort = request.forms.get('sort') or 'slug'
     try:
         data = c.plugin_search(filters, fields, sort, start, size)
