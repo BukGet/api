@@ -1,5 +1,4 @@
 import json
-import bleach
 from bottle import Bottle, redirect, response, request, abort, HTTPError
 import common as c
 
@@ -73,7 +72,7 @@ def generation_info():
     Returns the generation information as requested.  User can optionall request
     to look X number of versions back.
     '''
-    size = c.sint(bleach.clean(request.query.size or None))
+    size = c.sint(request.query.size or None)
     return c.jsonify(c.list_geninfo(size))
 
 
@@ -84,11 +83,11 @@ def plugin_list(server=None):
     Returns the plugin listing.  Can optionally be limited to a specific server
     binary compatability type.
     '''
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
+    fields = (request.query.fields or 'slug,plugin_name,description').split(',')
     fields = v2to3(fields)
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
     data = c.list_plugins(server, fields, sort, start, size)
     return c.jsonify(v3to2(data))
 
@@ -102,7 +101,7 @@ def plugin_details(server, slug, version=None):
     Returns the document for a specific plugin.  Optionally can return only a
     specific version as part of the data as well.
     '''
-    fields = bleach.clean(request.query.fields or '').split(',')
+    fields = (request.query.fields or '').split(',')
     fields = v2to3(fields)
     data = c.plugin_details(server, slug, version, fields)
     if not data: abort(404, "Plugin does not exist.")
@@ -149,11 +148,11 @@ def author_plugins(server, name):
     Returns the plugins associated with a specific author.  Optionally can also
     be restricted to a specific server binary compatability.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
+    fields = (request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
     data = c.list_author_plugins(server, name, fields, sort, start, size)
     return c.jsonify(v3to2(data))
 
@@ -175,11 +174,11 @@ def category_plugins(server, name):
     returns the list of plugins that match a specific category.  Optionally a
     specific server binary compatability can be specified.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
+    fields = (request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
     data = c.list_category_plugins(server, name, fields, sort, start, size)
     return c.jsonify(v3to2(data))
 
@@ -191,14 +190,14 @@ def search(base=None, field=None, action=None, value=None):
     A generalized search system that accepts both single-criteria get requests
     as well as multi-criteria posts.
     '''
-    fields = bleach.clean(request.query.fields or 'name,plugname,description').split(',')
+    fields = (request.query.fields or 'name,plugname,description').split(',')
     fields = v2to3(fields)
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
-    field = bleach.clean(field)
-    value = bleach.clean(value)
-    base = bleach.clean(base)
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
+    field = field
+    value = value
+    base = base
     if action == 'in': action = 'like'
     if base == 'version':
         field = 'versions.%s' % field

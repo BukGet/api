@@ -21,8 +21,8 @@ def generation_info():
     Returns the generation information as requested.  User can optionall request
     to look X number of versions back.
     '''
-    size = c.sint(bleach.clean(request.query.size or None))
-    callback = bleach.clean(request.query.callback or None)
+    size = c.sint(request.query.size or None)
+    callback = request.query.callback or None
     return c.jsonify(c.list_geninfo(size), callback)
 
 
@@ -31,7 +31,7 @@ def get_geninfo(idnum):
     '''Specific Generation Information
     Return information on a specific generation.
     '''
-    callback = bleach.clean(request.query.callback or None)
+    callback = request.query.callback or None
     return c.jsonify(c.get_geninfo(idnum), callback)
 
 
@@ -44,11 +44,11 @@ def plugin_list(server=None):
     Returns the plugin listing.  Can optionally be limited to a specific server
     binary compatability type.
     '''
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
-    callback = bleach.clean(request.query.callback or None)
+    fields = (request.query.fields or 'slug,plugin_name,description').split(',')
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
+    callback = request.query.callback or None
     data = c.list_plugins(server, fields, sort, start, size)
     return c.jsonify(data, callback)
 
@@ -62,11 +62,11 @@ def plugin_details(server, slug, version=None):
     Returns the document for a specific plugin.  Optionally can return only a
     specific version as part of the data as well.
     '''
-    fields = bleach.clean(request.query.fields or '').split(',')
-    size = c.sint(bleach.clean(request.query.size or None))
+    fields = (request.query.fields or '').split(',')
+    size = c.sint(request.query.size or None)
     data = c.plugin_details(server, slug, version, fields)
     if not data: abort(404, "Plugin Does Not Exist")
-    callback = bleach.clean(request.query.callback or None)
+    callback = request.query.callback or None)
     if size is not None:
         data['versions'] = data['versions'][:size]
     return c.jsonify(data, callback)
@@ -97,7 +97,7 @@ def author_list():
     Returns a full listing of the authors in the system and the number of
     plugins that they have in the database.
     '''
-    callback = bleach.clean(request.query.callback or None)
+    callback = request.query.callback or None
     return c.jsonify(c.list_authors(), callback)
 
 
@@ -110,11 +110,11 @@ def author_plugins(name, server=None):
     Returns the plugins associated with a specific author.  Optionally can also
     be restricted to a specific server binary compatability.
     '''
-    callback = bleach.clean(request.query.callback or None)
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
+    callback = request.query.callback or None
+    fields = (request.query.fields or 'slug,plugin_name,description').split(',')
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
     data = c.list_author_plugins(server, name, fields, sort, start, size)
     return c.jsonify(data, callback)
 
@@ -126,7 +126,7 @@ def category_list():
     Returns the categories in the database and the number of plugins that each
     category holds.
     '''
-    callback = bleach.clean(request.query.callback or None)
+    callback = request.query.callback or None
     return c.jsonify(c.list_categories(), callback)
 
 
@@ -139,11 +139,11 @@ def category_plugins(name, server=None):
     returns the list of plugins that match a specific category.  Optionally a
     specific server binary compatability can be specified.
     '''
-    callback = bleach.clean(request.query.callback or None)
-    fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
+    callback = request.query.callback or None
+    fields = (request.query.fields or 'slug,plugin_name,description').split(',')
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
     data = c.list_category_plugins(server, name, fields, sort, start, size)
     return c.jsonify(data, callback)
 
@@ -154,9 +154,9 @@ def get_updates():
     Returns a list of dictionaries with the latest, release, beta, and alpha
     version numbers.
     '''
-    callback = bleach.clean(request.forms.get('callback') or None)
-    slugs = bleach.clean(request.forms.get('slugs') or '').split(',')
-    server = bleach.clean(request.forms.get('server') or 'bukkit')
+    callback = request.forms.get('callback') or None
+    slugs = (request.forms.get('slugs') or '').split(',')
+    server = request.forms.get('server') or 'bukkit'
     try:
         data = c.plugins_up_to_date(slugs, server)
     except:
@@ -175,23 +175,23 @@ def search(field=None, action=None, value=None):
     '''
     filters = []
     if request.method == 'GET':
-        callback = bleach.clean(request.query.callback or None)
-        fields = bleach.clean(request.query.fields or 'slug,plugin_name,description').split(',')
-        start = c.sint(bleach.clean(request.query.start or None))
-        size = c.sint(bleach.clean(request.query.size or None))
-        sort = bleach.clean(request.query.sort or 'slug')
-        field = bleach.clean(field)
-        value = bleach.clean(value)
+        callback = request.query.callback or None
+        fields = (request.query.fields or 'slug,plugin_name,description').split(',')
+        start = c.sint(request.query.start or None)
+        size = c.sint(request.query.size or None)
+        sort = request.query.sort or 'slug'
+        field = field
+        value = value
         filters = [
             {'field': field, 'action': action, 'value': value}
         ]
     else:
-        callback = bleach.clean(request.forms.get('callback') or None)
-        filters = json.loads(request.forms.get('filters') or '[]')
-        fields = (bleach.clean(request.forms.get('fields')) or 'slug,plugin_name,description').split(',')
-        start = c.sint(bleach.clean(request.forms.get('start') or None))
-        size = c.sint(bleach.clean(request.forms.get('size') or None))
-        sort = bleach.clean(request.forms.get('sort') or 'slug')
+        callback = request.forms.get('callback') or None
+        filters = json.loads(request.forms.get('filters') or '[]'
+        fields = (request.forms.get('fields')) or 'slug,plugin_name,description').split(',')
+        start = c.sint(request.forms.get('start') or None
+        size = c.sint(request.forms.get('size') or None
+        sort = request.forms.get('sort') or 'slug'
     try:
         data = c.plugin_search(filters, fields, sort, start, size)
     except:

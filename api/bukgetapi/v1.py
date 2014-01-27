@@ -1,5 +1,4 @@
 import json
-import bleach
 from bottle import Bottle, redirect, response, request, abort, HTTPError
 import common as c
 
@@ -21,7 +20,7 @@ def generation_info():
     Returns the generation information as requested.  User can optionall request
     to look X number of versions back.
     '''
-    size = c.sint(bleach.clean(request.query.size or None))
+    size = c.sint(request.query.size or None)
     return c.jsonify(c.list_geninfo(size))
 
 
@@ -122,9 +121,9 @@ def author_plugins(name, server=None):
     be restricted to a specific server binary compatability.
     '''
     fields = ['slug',]
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
     data = c.list_author_plugins(server, name, fields, sort)
     if size is not None and start is not None:
         return c.jsonify([a['slug'] for a in data[start:start+size]])
@@ -149,9 +148,9 @@ def category_plugins(name, server=None):
     specific server binary compatability can be specified.
     '''
     fields = ['slug',]
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
     data = c.list_category_plugins(server, name, fields, sort)
     if size is not None and start is not None:
         return c.jsonify([a['slug'] for a in data[start:start+size]])
@@ -167,11 +166,11 @@ def search(field=None, action=None, value=None):
     as well as multi-criteria posts.
     '''
     fields = ['slug',]
-    start = c.sint(bleach.clean(request.query.start or None))
-    size = c.sint(bleach.clean(request.query.size or None))
-    sort = bleach.clean(request.query.sort or 'slug')
-    field = bleach.clean(field)
-    value = bleach.clean(value)
+    start = c.sint(request.query.start or None)
+    size = c.sint(request.query.size or None)
+    sort = request.query.sort or 'slug'
+    field = field
+    value = value
     filters = [
         {'field': field, 'action': action, 'value': value}
     ]
