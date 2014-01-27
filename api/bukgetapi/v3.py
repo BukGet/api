@@ -66,7 +66,7 @@ def plugin_details(server, slug, version=None):
     size = c.sint(request.query.size or None)
     data = c.plugin_details(server, slug, version, fields)
     if not data: abort(404, "Plugin Does Not Exist")
-    callback = request.query.callback or None)
+    callback = request.query.callback or None
     if size is not None:
         data['versions'] = data['versions'][:size]
     return c.jsonify(data, callback)
