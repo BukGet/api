@@ -149,7 +149,7 @@ def category_plugins(name, server=None):
 
 
 @app.post('/updates')
-@app.get('/updates/<plugins>')
+@app.get('/updates')
 def get_updates():
     '''Plugin updates
     Returns a list of dictionaries with the latest, release, beta, and alpha
