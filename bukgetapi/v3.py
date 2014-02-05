@@ -149,14 +149,20 @@ def category_plugins(name, server=None):
 
 
 @app.post('/updates')
+@app.get('/updates/<plugins>')
 def get_updates():
     '''Plugin updates
     Returns a list of dictionaries with the latest, release, beta, and alpha
     version numbers.
     '''
-    callback = bleach.clean(request.forms.get('callback') or None)
-    slugs = bleach.clean(request.forms.get('slugs') or '').split(',')
-    server = bleach.clean(request.forms.get('server') or 'bukkit')
+    if request.method == 'POST':
+        callback = bleach.clean(request.forms.get('callback') or None)
+        slugs = bleach.clean(request.forms.get('slugs') or '').split(',')
+        server = bleach.clean(request.forms.get('server') or 'bukkit')
+    else:
+        callback = bleach.clean(request.query.callback or None)
+        slugs = bleach.clean(request.query.slugs.split or '').split('')
+        server = bleach.clean(request.query.server or 'bukkit')
     try:
         data = c.plugins_up_to_date(slugs, server)
     except:
