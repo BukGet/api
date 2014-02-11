@@ -1,5 +1,4 @@
 //Imports
-
 var config = require('./config');
 var express = require('express');
 var redirect = require("express-redirect");
@@ -9,7 +8,6 @@ var ObjectID = require('mongode').ObjectID;
 
 
 //Connect to database
-
 var db = mongode.connect(config.database.host + config.database.name);
 db.collection('plugins');
 db.collection('webstats');
@@ -18,7 +16,6 @@ db.collection('authors');
 db.collection('categories');
 
 //Common methods
-
 var common = {
     fieldgen: function (fields, callback) {
         var f = {
@@ -74,9 +71,9 @@ var common = {
             })
         } else {
             db.plugins.find(filters, fields).sort(sort, d).toArray(function (err, docs) {
-            	if(err || docs == null) {
-            		return callback(null);
-            	}
+                if (err || docs == null) {
+                    return callback(null);
+                }
                 callback(docs);
             })
         }
@@ -176,29 +173,29 @@ var common = {
             if (version != undefined) {
                 if (version.toLowerCase() == "latest") {
                     p['versions'] = [p['versions'][0]];
-				} else if (version.toLowerCase() == "alpha" || version.toLowerCase() == "beta" || version.toLowerCase() == "release") {
-					var found = false;
-					for(var i = 0; i < p['versions'].length; i++) {
-						if (p['versions'][i]['type'].toLowerCase() == version.toLowerCase()) {
-							p['versions'] = [p['versions'][i]];
-							found = true;
-						}
-					}
-					if (!found) {
-						p['versions'] = [];
-					}
-				} else {
-					var found = false;
-					for(var i = 0; i < p['versions'].length; i++) {
-						if (p['versions'][i]['version'] == version) {
-							p['versions'] = [p['versions'][i]];
-							found = true;
-						}
-					}
-					if (!found) {
-						p['versions'] = [];
-					}
-				}
+                } else if (version.toLowerCase() == "alpha" || version.toLowerCase() == "beta" || version.toLowerCase() == "release") {
+                    var found = false;
+                    for (var i = 0; i < p['versions'].length; i++) {
+                        if (p['versions'][i]['type'].toLowerCase() == version.toLowerCase()) {
+                            p['versions'] = [p['versions'][i]];
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        p['versions'] = [];
+                    }
+                } else {
+                    var found = false;
+                    for (var i = 0; i < p['versions'].length; i++) {
+                        if (p['versions'][i]['version'] == version) {
+                            p['versions'] = [p['versions'][i]];
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        p['versions'] = [];
+                    }
+                }
             }
 
             callback(p);
@@ -206,124 +203,147 @@ var common = {
     },
 
     plugins_up_to_date: function (plugins_list, server, callback) {
-    	var data = [];
-    	var slugs = [];
-    	for (var i = 0; i < plugins_list.length; i++) {
-    		slugs.push({'slug': plugins_list[i]});
-    	}
-        db.plugins.find({ '$or': slugs, 'server': server }).toArray(function (err, docs) {
-	        for (var i = 0; i < docs.length; i++) {
-	        	var entry = {
-		            'slug': docs[i]['slug'],
-		            'plugin_name': docs[i]['plugin_name'],
-		            'versions': {
-		                'latest': docs[i]['versions'][0]['version'],
-		            },
-		        }
-		        for (var x = 0; x < docs[i]['versions'].length; x++) {
-		        	if (docs[i]['versions'][x]['type'] == 'Release' || docs[i]['versions'][x]['type'] == 'Beta' || docs[i]['versions'][x]['type'] == 'Alpha') {
-		        		if (entry['versions'][docs[i]['versions'][x]['type'].toLowerCase()] == null) {
-		        			entry['versions'][docs[i]['versions'][x]['type'].toLowerCase()] = docs[i]['versions'][x]['version'];
-		        		}
-		        	}
-		        }
-		        data.append(entry);
-	        }
-	        callback(data);
+        var data = [];
+        var slugs = [];
+        for (var i = 0; i < plugins_list.length; i++) {
+            slugs.push({
+                'slug': plugins_list[i]
+            });
+        }
+        db.plugins.find({
+            '$or': slugs,
+            'server': server
+        }).toArray(function (err, docs) {
+            for (var i = 0; i < docs.length; i++) {
+                var entry = {
+                    'slug': docs[i]['slug'],
+                    'plugin_name': docs[i]['plugin_name'],
+                    'versions': {
+                        'latest': docs[i]['versions'][0]['version'],
+                    },
+                }
+                for (var x = 0; x < docs[i]['versions'].length; x++) {
+                    if (docs[i]['versions'][x]['type'] == 'Release' || docs[i]['versions'][x]['type'] == 'Beta' || docs[i]['versions'][x]['type'] == 'Alpha') {
+                        if (entry['versions'][docs[i]['versions'][x]['type'].toLowerCase()] == null) {
+                            entry['versions'][docs[i]['versions'][x]['type'].toLowerCase()] = docs[i]['versions'][x]['version'];
+                        }
+                    }
+                }
+                data.append(entry);
+            }
+            callback(data);
         })
     },
 
     plugin_search: function (filters, fields, sort, start, size, sub, callback) {
-    	var f = {};
-    	if (sub == undefined) {
-    		sub = true;
-    	}
-    	for (var i = 0; i < filters.length; i++) {
-    		var item = filters[i];
-    		switch (item['action']) {
-    			case '=':
-    				f[item['field']] = item['value'];
-    				break;
-    			case '!=':
-    				f[item['field']] = {'$ne': item['value']};
-    				break;
-    			case '<':
-    				f[item['field']] = {'$lt': item['value']};
-    				break;
-    			case '<=':
-    				f[item['field']] = {'$lte': item['value']};
-    				break;
-    			case '>':
-    				f[item['field']] = {'$gt': item['value']};
-    				break;
-    			case '>=':
-    				f[item['field']] = {'$gte': item['value']};
-    				break;
-    			case 'like':
-    				f[item['field']] = new RegExp(item['value'], "i");
-    				break;
-    			case 'exists':
-    				f[item['field']] = {'$exists': true };
-    				break;
-    			case 'nexists':
-    				f[item['field']] = {'$exists': false };
-    				break;
-    			case 'in':
-    				if (item['value'].isArray()) {
-	                	f[item['field']] = {'$in': item['value']}
-    				}
-    				break;
-    			case 'not in':
-    				if (item['value'].isArray()) {
-	                	f[item['field']] = {'$nin': item['value']}
-    				} 
-    				break;
-    			case 'all':
-    				if (item['value'].isArray()) {
-	                	f[item['field']] = {'$all': item['value']}
-    				}
-    				break;
-    			case 'and':
-    				if (item['value'].isArray() && item['field'] == '') {
-	                	f['$and'] = (item['value'] == null ? sub : item['value']);
-    				}
-    				break;
-    			case 'or':
-    				if (item['value'].isArray() && item['field'] == '') {
-	                	f['$or'] = (item['value'] == null ? sub : item['value']);
-    				}
-    				break;
-    			case 'nor':
-    				if (item['value'].isArray() && item['field'] == '') {
-	                	f['$nor'] = (item['value'] == null ? sub : item['value']);
-    				}
-    				break;
-    			case 'not':
-    				if (item['value'].isArray() && item['field'] == '') {
-	                	f['$not'] = (item['value'] == null ? sub : item['value']);
-    				}
-    				break;
-    		}
+        var f = {};
+        if (sub == undefined) {
+            sub = true;
+        }
+        for (var i = 0; i < filters.length; i++) {
+            var item = filters[i];
+            switch (item['action']) {
+            case '=':
+                f[item['field']] = item['value'];
+                break;
+            case '!=':
+                f[item['field']] = {
+                    '$ne': item['value']
+                };
+                break;
+            case '<':
+                f[item['field']] = {
+                    '$lt': item['value']
+                };
+                break;
+            case '<=':
+                f[item['field']] = {
+                    '$lte': item['value']
+                };
+                break;
+            case '>':
+                f[item['field']] = {
+                    '$gt': item['value']
+                };
+                break;
+            case '>=':
+                f[item['field']] = {
+                    '$gte': item['value']
+                };
+                break;
+            case 'like':
+                f[item['field']] = new RegExp(item['value'], "i");
+                break;
+            case 'exists':
+                f[item['field']] = {
+                    '$exists': true
+                };
+                break;
+            case 'nexists':
+                f[item['field']] = {
+                    '$exists': false
+                };
+                break;
+            case 'in':
+                if (item['value'].isArray()) {
+                    f[item['field']] = {
+                        '$in': item['value']
+                    }
+                }
+                break;
+            case 'not in':
+                if (item['value'].isArray()) {
+                    f[item['field']] = {
+                        '$nin': item['value']
+                    }
+                }
+                break;
+            case 'all':
+                if (item['value'].isArray()) {
+                    f[item['field']] = {
+                        '$all': item['value']
+                    }
+                }
+                break;
+            case 'and':
+                if (item['value'].isArray() && item['field'] == '') {
+                    f['$and'] = (item['value'] == null ? sub : item['value']);
+                }
+                break;
+            case 'or':
+                if (item['value'].isArray() && item['field'] == '') {
+                    f['$or'] = (item['value'] == null ? sub : item['value']);
+                }
+                break;
+            case 'nor':
+                if (item['value'].isArray() && item['field'] == '') {
+                    f['$nor'] = (item['value'] == null ? sub : item['value']);
+                }
+                break;
+            case 'not':
+                if (item['value'].isArray() && item['field'] == '') {
+                    f['$not'] = (item['value'] == null ? sub : item['value']);
+                }
+                break;
+            }
 
-    		if (sub) {
-    			return callback(f);
-    		}
+            if (sub) {
+                return callback(f);
+            }
 
-    		common.query(f, fields, sort, start, size, function(the_callback) {
-    			callback(the_callback);
-    		})
-    	}
+            common.query(f, fields, sort, start, size, function (the_callback) {
+                callback(the_callback);
+            })
+        }
 
     }
 };
 
 //Initialize express app
-
 var app = express();
 redirect(app);
 
 //Define middleware for setting headers
-
 app.use(function (req, res, next) {
     res.header('Content-Type', 'application/json');
     res.header('Access-Control-Allow-Origin', '*');
@@ -334,13 +354,11 @@ app.use(express.bodyParser())
 app.use(app.router);
 
 //Include api handlers
-
 require('./v3')(app, db, bleach, common);
 require('./v2')(app, db, bleach, common);
 require('./v1')(app, db, bleach, common);
 
 //Setup redirects
-
 app.redirect('/', '/3');
 
 app.redirect('/api', '/1');
@@ -350,13 +368,8 @@ app.redirect('/api2', '/2');
 app.redirect('/api2/:query', '/2/:query');
 
 //Handle stats requests
-
 app.get('/stats/naughty_list', function (req, res) {
-    db.plugins.find({
-        '_use_dbo': {
-            '$exists': True
-        }
-    }, {
+    db.plugins.find({ '_use_dbo': { '$exists': True } }, {
         '_id': 0,
         'slug': 1,
         'plugin_name': 1,
@@ -429,5 +442,4 @@ app.get('/stats/trend/:days/:names', function (req, res) {
 });
 
 //Start webserver
-
 app.listen(config.port, config.address);
