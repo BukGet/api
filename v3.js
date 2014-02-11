@@ -1,7 +1,7 @@
 module.exports = function (app, db, bleach, common) {
     function geninfo (req, res) {
         size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size));
-        common.list_geninfo(size, function(callback) {
+        common.list_geninfo(size, function (callback) {
             res.jsonp(callback);
         });
     }
@@ -15,7 +15,7 @@ module.exports = function (app, db, bleach, common) {
     });
 
     app.get('/3/geninfo/:idnum', function (req, res) {
-        common.get_geninfo(req.params.idnum, function(callback) {
+        common.get_geninfo(req.params.idnum, function (callback) {
             res.jsonp(callback);
         });
     });
@@ -28,7 +28,7 @@ module.exports = function (app, db, bleach, common) {
         var start = req.query.start == null ? undefined : parseInt(bleach.sanitize(req.query.start))
         var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
         var sort = req.query.sort == null ? 'slug' : bleach.sanitize(req.query.sort)
-        common.list_plugins(req.params.server, fields, sort, start, size, function(callback) {
+        common.list_plugins(req.params.server, fields, sort, start, size, function (callback) {
             res.jsonp(callback);
         });
     }
@@ -41,7 +41,7 @@ module.exports = function (app, db, bleach, common) {
         plugin_list(req, res);
     });
 
-    function plugin_details(req, res) {
+    function plugin_details (req, res) {
         var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.query.fields)).split(','))
         var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
         common.plugin_details(server, slug, version, fields, function(data) {
@@ -84,7 +84,7 @@ module.exports = function (app, db, bleach, common) {
     });
 
     app.get('/3/authors', function (req, res) {
-        common.list_authors(function(callback) {
+        common.list_authors(function (callback) {
             res.jsonp(callback);
         });
     });
@@ -98,7 +98,7 @@ module.exports = function (app, db, bleach, common) {
         var start = req.query.start == null ? undefined : parseInt(bleach.sanitize(req.query.start))
         var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
         var sort = req.query.sort == null ? 'slug' : bleach.sanitize(req.query.sort)
-        common.list_author_plugins(req.params.server, req.params.name, fields, sort, start, size, function(callback) {
+        common.list_author_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
             res.jsonp(callback);
         });
     }
@@ -112,7 +112,7 @@ module.exports = function (app, db, bleach, common) {
     });
 
     app.get('/3/categories', function (req, res) {
-        common.list_categories(function(callback) {
+        common.list_categories(function (callback) {
             res.jsonp(callback);
         });
     });
@@ -125,7 +125,7 @@ module.exports = function (app, db, bleach, common) {
         var start = req.query.start == null ? undefined : parseInt(bleach.sanitize(req.query.start))
         var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
         var sort = req.query.sort == null ? 'slug' : bleach.sanitize(req.query.sort)
-        common.list_category_plugins(req.params.server, req.params.name, fields, sort, start, size, function(callback) {
+        common.list_category_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
             res.jsonp(callback);
         });
     }
@@ -141,7 +141,7 @@ module.exports = function (app, db, bleach, common) {
     app.post('/3/updates', function (req, res) {
         var slugs = (req.body.slugs == null ? '' : bleach.clean(req.body.slugs)).split(',');
         var server = req.body.server == null ? 'bukkit' : bleach.clean(req.body.server);
-        common.plugins_up_to_date(slugs, server, function(callback) {
+        common.plugins_up_to_date(slugs, server, function (callback) {
             res.jsonp(callback);
         });
     });
@@ -149,7 +149,7 @@ module.exports = function (app, db, bleach, common) {
     app.get('/3/updates', function (req, res) {
         var slugs = (req.query.slugs == null ? '' : bleach.clean(req.query.slugs)).split(',');
         var server = req.query.server == null ? 'bukkit' : bleach.clean(req.query.server);
-        common.plugins_up_to_date(slugs, server, function(callback) {
+        common.plugins_up_to_date(slugs, server, function (callback) {
             res.jsonp(callback);
         });
     });
@@ -175,7 +175,7 @@ module.exports = function (app, db, bleach, common) {
             var size = req.body.size == null ? undefined : parseInt(bleach.sanitize(req.body.size))
             var sort = req.body.sort == null ? 'slug' : bleach.sanitize(req.body.sort)
         }
-        common.plugin_search(filters, fields, sort, start, size, function(callback) {
+        common.plugin_search(filters, fields, sort, start, size, function (callback) {
             if (callback == null) {
                 return res.send(400, '{"error": "invalid post"}')
 
