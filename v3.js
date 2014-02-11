@@ -6,15 +6,15 @@ module.exports = function(app, db, bleach, common) {
     	});
 	}
 
-	app.get('/v3', function (req, res) {
+	app.get('/3', function (req, res) {
 		geninfo(req, res);
 	});
 
-	app.get('/v3/geninfo', function (req, res) {
+	app.get('/3/geninfo', function (req, res) {
 		geninfo(req, res);
 	});
 
-	app.get('/v3/geninfo/:idnum', function (req, res) {
+	app.get('/3/geninfo/:idnum', function (req, res) {
 		common.get_geninfo(req.params.idnum, function (callback) {
 			res.jsonp(callback);
 		});
@@ -33,11 +33,11 @@ module.exports = function(app, db, bleach, common) {
 		});
 	}
 
-	app.get('/v3/plugins', function (req, res) {
+	app.get('/3/plugins', function (req, res) {
 		plugin_list(req, res);
 	});
 
-	app.get('/v3/plugins/:server', function (req, res) {
+	app.get('/3/plugins/:server', function (req, res) {
 		plugin_list(req, res);
 	});
 
@@ -55,15 +55,15 @@ module.exports = function(app, db, bleach, common) {
 		});
 	}
 
-	app.get('/v3/plugins/:server/:slug', function (req, res) {
+	app.get('/3/plugins/:server/:slug', function (req, res) {
 		plugin_details(req, res);
 	});
 
-	app.get('/v3/plugins/:server/:slug/:version', function (req, res) {
+	app.get('/3/plugins/:server/:slug/:version', function (req, res) {
 		plugin_details(req, res);
 	});
 
-	app.get('/v3/plugins/:server/:slug/:version/download', function (req,res) {
+	app.get('/3/plugins/:server/:slug/:version/download', function (req,res) {
 		common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function (data) {
 			if (data == null) {
 				return res.send(404, "Plugin Does Not Exist");
@@ -83,7 +83,7 @@ module.exports = function(app, db, bleach, common) {
 		});
 	});
 
-	app.get('/v3/authors', function (req, res) {
+	app.get('/3/authors', function (req, res) {
 		common.list_authors(function (callback) {
 			res.jsonp(callback);
 		});
@@ -103,15 +103,15 @@ module.exports = function(app, db, bleach, common) {
 		});
 	}
 
-	app.get('/v3/authors/:name', function (req, res) {
+	app.get('/3/authors/:name', function (req, res) {
 		author_plugins(req, res);
 	});
 
-	app.get('/v3/authors/:server/:name', function (req, res) {
+	app.get('/3/authors/:server/:name', function (req, res) {
 		author_plugins(req, res);
 	});
 
-	app.get('/v3/categories', function (req, res) {
+	app.get('/3/categories', function (req, res) {
 		common.list_categories(function (callback) {
 			res.jsonp(callback);
 		});
@@ -130,15 +130,15 @@ module.exports = function(app, db, bleach, common) {
 		});
 	}
 
-	app.get('/v3/categories/:name', function (req, res) {
+	app.get('/3/categories/:name', function (req, res) {
 		category_plugins(req, res);
 	});
 
-	app.get('/v3/categories/:server/:name', function (req, res) {
+	app.get('/3/categories/:server/:name', function (req, res) {
 		category_plugins(req, res);
 	});
 
-	app.post('/v3/updates', function (req, res) {
+	app.post('/3/updates', function (req, res) {
         slugs = (req.body.slugs == null ? '' : bleach.clean(req.body.slugs)).split(',');
         server = req.body.server == null ? 'bukkit' : bleach.clean(req.body.server);
 		common.plugins_up_to_date(slugs, server, function (callback) {
@@ -146,7 +146,7 @@ module.exports = function(app, db, bleach, common) {
 		});
 	});
 
-	app.get('/v3/updates', function (req, res) {
+	app.get('/3/updates', function (req, res) {
 		slugs = (req.query.slugs == null ? '' : bleach.clean(req.query.slugs)).split(',');
         server = req.query.server == null ? 'bukkit' : bleach.clean(req.query.server);
 		common.plugins_up_to_date(slugs, server, function (callback) {
@@ -182,11 +182,11 @@ module.exports = function(app, db, bleach, common) {
 		});
 	}
 
-	app.post('/v3/search', function (req, res) {
+	app.post('/3/search', function (req, res) {
 		search (req, res);
 	})
 
-	app.get('/v3/search/:field/:action/:value', function (req, res) {
+	app.get('/3/search/:field/:action/:value', function (req, res) {
 		search (req, res);
 	})
 }
