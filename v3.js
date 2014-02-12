@@ -42,9 +42,15 @@ module.exports = function (app, db, bleach, common) {
     });
 
     function plugin_details (req, res) {
+        if (req.params.server == null) {
+            req.params.server = undefined;
+        }
+        if (req.params.version == null) {
+            req.params.version = undefined;
+        }
         var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.query.fields)).split(','))
         var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
-        common.plugin_details(server, slug, version, fields, function(data) {
+        common.plugin_details(req.params.server, req.params.slug, req.params.version, fields, function(data) {
             if (data == null) {
                 return res.send(404, "Plugin Does Not Exist");
             }
