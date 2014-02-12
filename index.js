@@ -18,6 +18,7 @@ db.collection('categories');
 //Common methods
 var common = {
     fieldgen: function (fields, callback) {
+        // Generates the field listing based on the include and exclude lists.
         var f = {
             '_id': 0
         }
@@ -36,6 +37,7 @@ var common = {
     },
 
     list_geninfo: function (size, callback) {
+        // Retrieves the last X number of generations based on the value of the size variable.
         if (size == undefined) {
             size = 1;
         }
@@ -47,6 +49,7 @@ var common = {
     },
 
     get_geninfo: function (idnum, callback) {
+        // Returns a specific generation ID's information.
         db.geninfo.findOne({
             '_id': ObjectID(idnum)
         }, function (err, document) {
@@ -55,6 +58,7 @@ var common = {
     },
 
     query: function (filters, fields, sort, start, size, callback) {
+        // Generic query function to centralize querying the database.
         var d = 1;
 
         if (sort.charAt(0) == '-') {
@@ -80,6 +84,7 @@ var common = {
     },
 
     list_plugins: function (server, fields, sort, start, size, callback) {
+        // Returns a list of plugins with the field specified, the list can be narrowed down to specific server binary compatability by setting it to other than undefined.
         var filters = {
             'deleted': {
                 '$exists': false
@@ -96,6 +101,7 @@ var common = {
     },
 
     list_author_plugins: function (server, author, fields, sort, start, size, callback) {
+        // Returns the plugin list for a given author. Can be filtered by server binary compatability using the server variable.
         var filters = {
             'authors': author
         };
@@ -110,6 +116,7 @@ var common = {
     },
 
     list_category_plugins: function (server, category, fields, sort, start, size, callback) {
+        // Returns the plugin list for a given category. Can be filtered by server binary compatability using the server variable.
         var filters = {
             'categories': category
         };
@@ -124,6 +131,7 @@ var common = {
     },
 
     ca_convert: function (data, callback) {
+        // Reformats the data to what the API should be returning.
         var dset = [];
 
         for (var i = 0; i < data.length; i++) {
@@ -137,6 +145,7 @@ var common = {
     },
 
     list_authors: function (callback) {
+        // Returns a list of plugin authors and the number of plugins each one has created/worked on.
         db.authors.find().sort('_id').toArray(function (err, docs) {
             common.ca_convert(docs, function (the_callback) {
                 callback(the_callback);
@@ -145,6 +154,7 @@ var common = {
     },
 
     list_categories: function (callback) {
+        // Returns a list of plugin categories and the count of plugins that fall under each category.
         db.categories.find().sort('_id').toArray(function (err, docs) {
             common.ca_convert(docs, function (the_callback) {
                 callback(the_callback);
@@ -153,6 +163,7 @@ var common = {
     },
 
     plugin_details: function (server, plugin, version, fields, callback) {
+        // Returns the plugin details for a given plugin. Optionally will also return a specific version of the plugin in the versions list if something other than undefined is specified in the version variable.
         var filters = {
             'slug': plugin,
             'server': server
@@ -203,6 +214,7 @@ var common = {
     },
 
     plugins_up_to_date: function (plugins_list, server, callback) {
+        // Takes a list of plugin slugs and returns an array of objects with the plugin and most recent version.
         var data = [];
         var slugs = [];
         for (var i = 0; i < plugins_list.length; i++) {
@@ -236,6 +248,7 @@ var common = {
     },
 
     plugin_search: function (filters, fields, sort, start, size, sub, callback) {
+        // A generalized sort function for the database. Returns a list of plugins with the fields specified in the inclusion and exclusion variables.
         var f = {};
         if (sub == undefined) {
             sub = true;
@@ -350,6 +363,7 @@ app.use(function (req, res, next) {
     next();
 });
 
+//Add express middlewares
 app.use(express.bodyParser())
 app.use(app.router);
 
