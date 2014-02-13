@@ -78,9 +78,9 @@ module.exports = function (app, db, bleach, common) {
 			if (req.params.version.toLowerCase() == "latest") {
 				return res.redirect(data['versions'][0]['download']);
 			} else {
-				for (var i = 0; i < data['versions']; i++) {
+				for (var i = 0; i < data['versions'].length; i++) {
 					if (data['versions'][i]['version'] == req.params.version) {
-						return res.redirect(data['versions'][i]['download'])
+						return res.redirect(data['versions'][i]['download']);
 					}
 				}
 			}
