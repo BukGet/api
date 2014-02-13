@@ -8,11 +8,11 @@ module.exports = function (app, db, bleach, common) {
 	        'slug': 'name',
 	    }
 	    var data = []
-	    for (var i = 0; i < items.length; i++) {
+	    for (var i in items) {
 	    	if (convert[items[i]] != null) {
 				data.push(convert[items[i]]);
 	        } else {
-				data.push(item);
+				data.push(items[i]);
 	        }
 	    }
 	    callback(data);
@@ -45,13 +45,13 @@ module.exports = function (app, db, bleach, common) {
 	        if (data['curse_link'] != null) { delete data['curse_link']; }
 	        if (data['curse_id'] != null) { delete data['curse_id']; }
 	        if (items[i]['versions'] != null) {
-	            var versions = []
+	            var versions = [];
 	        	for (var x = 0; x < items[i]['versions'].length; x++) {
-	                if (versions[x]['slug'] != null) { delete versions[x]['slug']; }
-	                if (versions[x]['dbo_version'] != null) { delete versions[x]['dbo_version']; }
-	                if (versions[x]['changelog'] != null) { delete versions[x]['changelog']; }
-	                if (versions[x]['file_id'] != null) { delete versions[x]['file_id']; }
-	                versions.push(versions[x]);
+	                if (items[i]['versions'][x]['slug'] != null) { delete items[i]['versions'][x]['slug']; }
+	                if (items[i]['versions'][x]['dbo_version'] != null) { delete items[i]['versions'][x]['dbo_version']; }
+	                if (items[i]['versions'][x]['changelog'] != null) { delete items[i]['versions'][x]['changelog']; }
+	                if (items[i]['versions'][x]['file_id'] != null) { delete items[i]['versions'][x]['file_id']; }
+	                versions.push(items[i]['versions'][x]);
 	        	}
 	            items[i]['versions'] = versions;
 	        }
@@ -79,7 +79,7 @@ module.exports = function (app, db, bleach, common) {
         if (req.params.server == null) {
             req.params.server = undefined;
         }
-        var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.query.fields)).split(','))
+        var fields = ((req.query.fields == null ? 'name,plugname,description' : bleach.sanitize(req.query.fields)).split(','))
         v2to3(fields, function (callback) {
         	fields = callback;
         })
@@ -92,7 +92,7 @@ module.exports = function (app, db, bleach, common) {
     });
 
     function plugin_details (req, res) {
-        var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.query.fields)).split(','))
+        var fields = ((req.query.fields == null ? '' : bleach.sanitize(req.query.fields)).split(','));
     	v2to3(fields, function (callback) {
         	fields = callback;
         })
@@ -119,23 +119,23 @@ module.exports = function (app, db, bleach, common) {
     });
 
     app.get('/2/:server/plugin/:slug/:version/download', function (req, res) {
-    	common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function(data) {
-			if (data == null) {
-				return res.send(404, "Plugin Does Not Exist");
-			}
+        common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function(data) {
+            if (data == null) {
+                return res.send(404, "Plugin Does Not Exist");
+            }
 
-			if (version.toLowerCase() == "latest") {
-				return res.redirect(data['versions'][0]['download']);
-			} else {
-				for (var i = 0; i < data['versions']; i++) {
-					if (data['versions'][i]['version'] == req.params.version) {
-						return res.redirect(data['versions'][i]['download'])
-					}
-				}
-			}
+            if (req.params.version.toLowerCase() == "latest") {
+                return res.redirect(data['versions'][0]['download']);
+            } else {
+                for (var i = 0; i < data['versions'].length; i++) {
+                    if (data['versions'][i]['version'] == req.params.version) {
+                        return res.redirect(data['versions'][i]['download']);
+                    }
+                }
+            }
 
-			res.send(404, '{"error": "could not find version"}');
-		});
+            res.send(404, '{"error": "could not find version"}');
+        });
     });
 
     app.get('/2/authors', function (req, res) {
@@ -152,7 +152,7 @@ module.exports = function (app, db, bleach, common) {
         if (req.params.server == null) {
             req.params.server = undefined;
         }
-        var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.query.fields)).split(','))
+        var fields = ((req.query.fields == null ? 'name,plugname,description' : bleach.sanitize(req.query.fields)).split(','))
         v2to3(fields, function (callback) {
         	fields = callback;
         })
@@ -177,7 +177,7 @@ module.exports = function (app, db, bleach, common) {
     });
 
     app.get('/2/:server/category/:name', function (req, res) {
-        var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.query.fields)).split(','))
+        var fields = ((req.query.fields == null ? 'name,plugname,description' : bleach.sanitize(req.query.fields)).split(','))
         v2to3(fields, function (callback) {
         	fields = callback;
         })
@@ -192,16 +192,16 @@ module.exports = function (app, db, bleach, common) {
     });
 
     app.get('/2/search/:base/:field/:action/:value', function (req, res) {
-        var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.query.fields)).split(','))
+        var fields = ((req.query.fields == null ? 'name,plugname,description' : bleach.sanitize(req.query.fields)).split(','))
     	v2to3(fields, function (callback) {
     		fields = callback;
-    	})
+    	});
         var start = req.query.start == null ? undefined : parseInt(bleach.sanitize(req.query.start))
         var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
         var sort = req.query.sort == null ? 'slug' : bleach.sanitize(req.query.sort)
-        var field = bleach.clean(req.params.field);
-        var value = bleach.clean(req.params.value);
-        var base = bleach.clean(req.params.base);
+        var field = bleach.sanitize(req.params.field);
+        var value = bleach.sanitize(req.params.value);
+        var base = bleach.sanitize(req.params.base);
         if (req.params.action == 'in') {
         	req.params.action = 'like';
         }
@@ -211,7 +211,7 @@ module.exports = function (app, db, bleach, common) {
         if (field == undefined) {
         	field = { field: true };
         }
-    	v2to3(field, function (callback) {
+    	v2to3([field], function (callback) {
     		field = callback[0];
     	})
         var filters = [{
@@ -220,10 +220,9 @@ module.exports = function (app, db, bleach, common) {
             'value': value
         }]
 
-        common.plugin_search(filters, fields, sort, start, size, function (callback) {
+        common.plugin_search(filters, fields, sort, start, size, false, function (callback) {
             if (callback == null) {
                 return res.send(400, '{"error": "invalid search"}')
-
             }
 	        v3to2(callback, function (the_callback) {
             	res.jsonp(the_callback);

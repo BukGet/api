@@ -79,23 +79,23 @@ module.exports = function (app, db, bleach, common) {
     });
 
     app.get('/1/plugins/:server/:slug/:version/download', function (req, res) {
-    	common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function(data) {
-			if (data == null) {
-				return res.send(404, "Plugin Does Not Exist");
-			}
+        common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function(data) {
+            if (data == null) {
+                return res.send(404, "Plugin Does Not Exist");
+            }
 
-			if (version.toLowerCase() == "latest") {
-				return res.redirect(data['versions'][0]['download']);
-			} else {
-				for (var i = 0; i < data['versions']; i++) {
-					if (data['versions'][i]['version'] == req.params.version) {
-						return res.redirect(data['versions'][i]['download'])
-					}
-				}
-			}
+            if (req.params.version.toLowerCase() == "latest") {
+                return res.redirect(data['versions'][0]['download']);
+            } else {
+                for (var i = 0; i < data['versions'].length; i++) {
+                    if (data['versions'][i]['version'] == req.params.version) {
+                        return res.redirect(data['versions'][i]['download']);
+                    }
+                }
+            }
 
-			res.send(404, '{"error": "could not find version"}');
-		});
+            res.send(404, '{"error": "could not find version"}');
+        });
     });
 
     app.get('/1/authors', function (req, res) {
@@ -159,15 +159,15 @@ module.exports = function (app, db, bleach, common) {
         var start = req.query.start == null ? undefined : parseInt(bleach.sanitize(req.query.start))
         var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
         var sort = req.query.sort == null ? 'slug' : bleach.sanitize(req.query.sort)
-        var field = bleach.clean(req.params.field);
-        var value = bleach.clean(req.params.value);
+        var field = bleach.sanitize(req.params.field);
+        var value = bleach.sanitize(req.params.value);
         var filters = [{
             'field': field,
             'action': req.params.action,
             'value': value
         }]
 
-        common.plugin_search(filters, fields, sort, undefined, undefined, function (callback) {
+        common.plugin_search(filters, fields, sort, undefined, undefined, false, function (callback) {
             if (callback == null) {
                 return res.send(400, '{"error": "invalid search"}')
 

@@ -32,7 +32,7 @@ var common = {
                 }
             }
         }
-        
+
         callback(f);
     },
 
@@ -42,8 +42,11 @@ var common = {
             size = 1;
         }
 
-        var data = [];
         db.geninfo.find().sort('_id', -1).limit(size).toArray(function (err, docs) {
+            for (var i in docs) {
+                docs[i]['id'] = docs[i]['_id'];
+                delete docs[i]['_id'];
+            }
             callback(docs);
         });
     },
@@ -53,6 +56,10 @@ var common = {
         db.geninfo.findOne({
             '_id': ObjectID(idnum)
         }, function (err, document) {
+            if (document != null) {
+                document['id'] = document['_id'];
+                document['_id'];
+            }
             callback(document);
         })
     },
@@ -142,7 +149,7 @@ var common = {
 
         for (var i = 0; i < data.length; i++) {
             dset.push({
-                'name': data[i]['id'],
+                'name': data[i]['_id'],
                 'count': data[i]['value']
             });
         }
@@ -251,7 +258,7 @@ var common = {
                         }
                     }
                 }
-                data.append(entry);
+                data.push(entry);
             }
             callback(data);
         })
@@ -261,7 +268,7 @@ var common = {
         // A generalized sort function for the database. Returns a list of plugins with the fields specified in the inclusion and exclusion variables.
         var f = {};
         if (sub == undefined) {
-            sub = true;
+            sub = false;
         }
         for (var i = 0; i < filters.length; i++) {
             var item = filters[i];
@@ -368,7 +375,6 @@ redirect(app);
 
 //Define middleware for setting headers
 app.use(function (req, res, next) {
-    res.header('Content-Type', 'application/json');
     res.header('Access-Control-Allow-Origin', '*');
     next();
 });

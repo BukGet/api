@@ -145,16 +145,16 @@ module.exports = function (app, db, bleach, common) {
     });
 
     app.post('/3/updates', function (req, res) {
-        var slugs = (req.body.slugs == null ? '' : bleach.clean(req.body.slugs)).split(',');
-        var server = req.body.server == null ? 'bukkit' : bleach.clean(req.body.server);
+        var slugs = (req.body.slugs == null ? '' : bleach.sanitize(req.body.slugs)).split(',');
+        var server = req.body.server == null ? 'bukkit' : bleach.sanitize(req.body.server);
         common.plugins_up_to_date(slugs, server, function (callback) {
             res.jsonp(callback);
         });
     });
 
     app.get('/3/updates', function (req, res) {
-        var slugs = (req.query.slugs == null ? '' : bleach.clean(req.query.slugs)).split(',');
-        var server = req.query.server == null ? 'bukkit' : bleach.clean(req.query.server);
+        var slugs = (req.query.slugs == null ? '' : bleach.sanitize(req.query.slugs)).split(',');
+        var server = req.query.server == null ? 'bukkit' : bleach.sanitize(req.query.server);
         common.plugins_up_to_date(slugs, server, function (callback) {
             res.jsonp(callback);
         });
@@ -167,24 +167,23 @@ module.exports = function (app, db, bleach, common) {
             var start = req.query.start == null ? undefined : parseInt(bleach.sanitize(req.query.start))
             var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
             var sort = req.query.sort == null ? 'slug' : bleach.sanitize(req.query.sort)
-            var field = bleach.clean(req.params.field);
-            var value = bleach.clean(req.params.value);
+            var field = bleach.sanitize(req.params.field);
+            var value = bleach.sanitize(req.params.value);
             filters = [{
                 'field': field,
                 'action': req.params.action,
                 'value': value
             }]
         } else {
-            var filters = request.body.filters == null ? [] : JSON.parse(request.body.filters);
+            var filters = req.body.filters == null ? [] : JSON.parse(req.body.filters);
             var fields = ((req.body.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.body.fields)).split(','))
             var start = req.body.start == null ? undefined : parseInt(bleach.sanitize(req.body.start))
             var size = req.body.size == null ? undefined : parseInt(bleach.sanitize(req.body.size))
             var sort = req.body.sort == null ? 'slug' : bleach.sanitize(req.body.sort)
         }
-        common.plugin_search(filters, fields, sort, start, size, function (callback) {
+        common.plugin_search(filters, fields, sort, start, size, false, function (callback) {
             if (callback == null) {
-                return res.send(400, '{"error": "invalid post"}')
-
+                return res.send(400, '{"error": "invalid post"}');
             }
             res.jsonp(callback);
         });
