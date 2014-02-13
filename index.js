@@ -26,13 +26,13 @@ var common = {
         for (var i = 0; i < fields.length; i++) {
             if (fields[i] != '') {
                 if (fields[i].charAt(0) == '-') {
-                    f[fields[i].substr(1)] = 0
+                    f[fields[i].substr(1)] = 0;
                 } else {
-                    f[fields[i]] = 1
+                    f[fields[i]] = 1;
                 }
             }
         }
-
+        
         callback(f);
     },
 
@@ -66,15 +66,21 @@ var common = {
             d = -1;
         }
 
+        var the_fields = {};
+        for (var i in fields) {
+            the_fields[fields[i]] = 1;
+        }
+        the_fields['_id'] = 0;
+
         if (size != undefined) {
             if (start == undefined) {
                 start = 0;
             }
-            db.plugins.find(filters, fields).sort(sort, d).skip(start).limit(size).toArray(function (err, docs) {
+            db.plugins.find(filters, the_fields).sort(sort, d).skip(start).limit(size).toArray(function (err, docs) {
                 callback(docs);
             })
         } else {
-            db.plugins.find(filters, fields).sort(sort, d).toArray(function (err, docs) {
+            db.plugins.find(filters, the_fields).sort(sort, d).toArray(function (err, docs) {
                 if (err || docs == null) {
                     return callback(null);
                 }
@@ -95,7 +101,7 @@ var common = {
             filters['server'] = server
         }
 
-        query(filters, fields, sort, start, size, function (the_callback) {
+        common.query(filters, fields, sort, start, size, function (the_callback) {
             callback(the_callback);
         })
     },
@@ -110,7 +116,7 @@ var common = {
             filters['server'] = server
         }
 
-        query(filters, fields, sort, start, size, function (the_callback) {
+        common.query(filters, fields, sort, start, size, function (the_callback) {
             callback(the_callback)
         })
     },
@@ -125,7 +131,7 @@ var common = {
             filters['server'] = server
         }
 
-        query(filters, fields, sort, start, size, function (the_callback) {
+        common.query(filters, fields, sort, start, size, function (the_callback) {
             callback(the_callback)
         })
     },
@@ -176,8 +182,12 @@ var common = {
             }
         }
 
-        db.plugins.findOne(filters, common.fieldgen(fields), function (err, document) {
-            if (err || document == null) {
+        common.fieldgen(fields, function (callback) {
+            fields = callback;
+        });
+
+        db.plugins.findOne(filters, fields, function (err, p) {
+            if (err || p == null) {
                 return callback(null);
             }
 
@@ -383,7 +393,7 @@ app.redirect('/api2/:query', '/2/:query');
 
 //Handle stats requests
 app.get('/stats/naughty_list', function (req, res) {
-    db.plugins.find({ '_use_dbo': { '$exists': True } }, {
+    db.plugins.find({ '_use_dbo': { '$exists': true } }, {
         '_id': 0,
         'slug': 1,
         'plugin_name': 1,

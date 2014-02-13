@@ -48,7 +48,7 @@ module.exports = function (app, db, bleach, common) {
         if (req.params.version == null) {
             req.params.version = undefined;
         }
-        var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : bleach.sanitize(req.query.fields)).split(','))
+        var fields = ((req.query.fields == null ? '' : bleach.sanitize(req.query.fields)).split(','))
         var size = req.query.size == null ? undefined : parseInt(bleach.sanitize(req.query.size))
         common.plugin_details(req.params.server, req.params.slug, req.params.version, fields, function(data) {
             if (data == null) {
@@ -75,7 +75,7 @@ module.exports = function (app, db, bleach, common) {
 				return res.send(404, "Plugin Does Not Exist");
 			}
 
-			if (version.toLowerCase() == "latest") {
+			if (req.params.version.toLowerCase() == "latest") {
 				return res.redirect(data['versions'][0]['download']);
 			} else {
 				for (var i = 0; i < data['versions']; i++) {
