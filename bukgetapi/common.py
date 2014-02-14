@@ -143,14 +143,12 @@ def list_category_plugins(server, category, fields, sort, start=None, size=None)
         filters['server'] = server
     return query(filters, fields, sort, start, size)
 
+
 def ca_convert(data):
     '''
     Reformats the data to what the API should be returning.
     '''
-    dset = []
-    for item in data:
-        dset.append({'name': item['_id'], 'count': item['value']})
-    return dset
+    return [{'name': d['_id'], 'count': d['value']} for d in data]
 
 
 def list_authors():
