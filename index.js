@@ -1,9 +1,35 @@
+ //Include the cluster module
+var cluster = require('cluster');
+
+// Code to run if we're in the master process
+if (cluster.isMaster) {
+
+    // Count the machine's CPUs
+    var cpuCount = require('os').cpus().length;
+
+    // Create a worker for each CPU
+    for (var i = 0; i < cpuCount; i += 1) {
+        cluster.fork();
+    }
+
+    // Listen for dying workers
+    cluster.on('exit', function (worker) {
+
+        // Replace the dead worker, we're not sentimental
+        console.log('Worker ' + worker.id + ' died :(');
+        cluster.fork();
+
+    });
+
+// Code to run if we're in a worker process
+} else {
+
+
 //Imports
 var config = require('./config');
-var express = require('express');
-var redirect = require("express-redirect");
+var restify = require('restify');
+//var redirect = require("express-redirect");
 var mongode = require('mongode');
-var bleach = require('bleach');
 var ObjectID = require('mongode').ObjectID;
 
 
@@ -14,6 +40,52 @@ db.collection('webstats');
 db.collection('geninfo');
 db.collection('authors');
 db.collection('categories');
+
+function setContentLength(res, length) {
+  if (res.getHeader('Content-Length') === undefined &&
+      res.contentLength === undefined) {
+    res.setHeader('Content-Length', length);
+  }
+}
+
+/* this function is basically a 'copy' of formatJSON from resify/lib/response.js */
+function formatJSONP(req, res, body) {
+  if (!body) {
+    setContentLength(res, 0);
+    return null;
+  }
+
+  if (body instanceof Error) {
+    // snoop for RestError or HttpError, but don't rely on instanceof
+    if ((body.restCode || body.httpCode) && body.body) {
+      body = body.body;
+    } else {
+      body = {
+        message: body.message
+      };
+    }
+  }
+
+  if (Buffer.isBuffer(body))
+    body = body.toString('base64');
+
+  var callback = req.query.callback || req.query.jsonp;
+  var data;
+  if(callback) {
+    data = callback + '(' + JSON.stringify(body) + ');';
+  } else {
+    data = JSON.stringify(body);
+  }
+  setContentLength(res, Buffer.byteLength(data));
+  return data;
+}
+
+function jsonpParser(req, res, next) {
+  if (req.query.callback || req.query.jsonp) {
+    res.contentType = 'application/javascript'; // force jsonp when it is requested
+  }
+  next();
+}
 
 //Common methods
 var common = {
@@ -370,35 +442,34 @@ var common = {
 };
 
 //Initialize express app
-var app = express();
-redirect(app);
+var app = restify.createServer({
+  formatters: {
+    'application/javascript': formatJSONP
+  }
+});
+app.pre(restify.pre.userAgentConnection());
+//redirect(app);
 
-//Define middleware for setting headers
+//Middlewares
+app.use(jsonpParser);
+
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     next();
 });
-
-//Add express middlewares
-app.use(express.bodyParser())
-app.use(app.router);
+app.use(restify.queryParser());
+app.use(restify.bodyParser())
 
 //Include api handlers
-require('./v3')(app, db, bleach, common);
-require('./v2')(app, db, bleach, common);
-require('./v1')(app, db, bleach, common);
+require('./v3')(app, db, common);
 
-//Setup redirects
-app.redirect('/', '/3');
+//Redirect
+app.get('/', function(req, res) {
 
-app.redirect('/api', '/1');
-app.redirect('/api/:query', '/1/:query');
-
-app.redirect('/api2', '/2');
-app.redirect('/api2/:query', '/2/:query');
+});
 
 //Handle stats requests
-app.get('/stats/naughty_list', function (req, res) {
+app.get('/stats/naughty_list', function (req, res, next) {
     db.plugins.find({ '_use_dbo': { '$exists': true } }, {
         '_id': 0,
         'slug': 1,
@@ -406,20 +477,23 @@ app.get('/stats/naughty_list', function (req, res) {
         'authors': 1,
     }).toArray(function (err, docs) {
         if (err) {
-            return res.status(500);
+            res.status(500);
+            return next();
         }
 
         res.jsonp(docs);
+        return next();
     });
 });
 
-app.get('/stats/todays_trends', function (req, res) {
+app.get('/stats/todays_trends', function (req, res, next) {
     db.plugins.find({}, {
         'slug': 1,
         'versions.version': 1
     }).toArray(function (err, plugins) {
         if (err) {
-            return res.status(500);
+            res.status(500);
+            return next();
         }
 
         var pcount = plugins.length;
@@ -433,29 +507,32 @@ app.get('/stats/todays_trends', function (req, res) {
             'plugin_count': pcount,
             'version_count': vcount
         });
+        return next();
     });
 });
 
-app.get('/stats/trend/:days', function (req, res) {
+app.get('/stats/trend/:days', function (req, res, next) {
     db.webstats.find({}, {
         '_id': 0,
         'plugins': 0
     }).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
         if (err) {
-            return res.status(500);
+            res.status(500);
+            return next();
         }
 
         res.jsonp(docs);
+        return next();
     });
 });
 
-app.get('/stats/trend/:days/:names', function (req, res) {
+app.get('/stats/trend/:days/:names', function (req, res, next) {
     var fields = {
         '_id': 0,
         'timestamp': 1
     }
 
-    var plugins = bleach.sanitize(req.params.names).split(',');
+    var plugins = req.params.names.split(',');
     var index = 0;
 
     for (index; index < plugins.length; index++) {
@@ -464,12 +541,15 @@ app.get('/stats/trend/:days/:names', function (req, res) {
 
     db.webstats.find({}, fields).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
         if (err) {
-            return res.status(500);
+            res.status(500);
+            return next();
         }
 
         res.jsonp(docs);
+        return next();
     });
 });
 
 //Start webserver
-app.listen(config.port, config.address);
+    app.listen(config.port, config.address);
+}

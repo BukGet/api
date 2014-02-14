@@ -9,8 +9,6 @@
   "author": "David Marby",
   "dependencies": {
     "mongode": "~0.1.6",
-    "express": "~3.4.8",
-    "express-redirect": "~1.1.0",
-    "bleach": "~0.2.1"
+    "restify": "~2.6.1"
   }
 }
