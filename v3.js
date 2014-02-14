@@ -81,7 +81,7 @@ module.exports = function (app, db, common) {
                 res.header('Location', data['versions'][0]['download']);
                 res.send(302);
 			} else {
-				for (var i = 0; i < data['versions'].length; i++) {
+				for (var i = 0, il=data['versions'].length; i < il; i++) {
 					if (data['versions'][i]['version'] == req.params.version) {
                         res.header('Location', data['versions'][i]['download']);
 						res.send(302);

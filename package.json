@@ -9,6 +9,7 @@
   "author": "David Marby",
   "dependencies": {
     "mongode": "~0.1.6",
-    "restify": "~2.6.1"
+    "restify": "~2.6.1",
+    "cluster": "~0.7.7"
   }
 }
