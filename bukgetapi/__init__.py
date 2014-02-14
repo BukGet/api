@@ -2,7 +2,7 @@ import common
 import api
 import sync
 import stats
-from bottle import Bottle, run, debug, redirect, request, ServerAdapter
+from bottle import Bottle, run, debug, redirect, request
 
 def start():
     app = Bottle()

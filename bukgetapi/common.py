@@ -227,43 +227,54 @@ def plugins_up_to_date(plugins_list, server):
         data.append(entry)
     return data
 
+# These are all for the gen_search function
+def _eq(value): return value
+def _neq(value): return {'$ne': value}
+def _lt(value): return {'$lt': value}
+def _lte(value): return {'$lte': value}
+def _gt(value): return {'$gt': value}
+def _gte(value): return {'$gte': value}
+def _like(value): return re.compile(r'%s' % item['value'], re.IGNORECASE)
+def _ex(value): return {'$exists': True}
+def _nex(value): return {'$exists': False}
+def _in(value): if isinstance(value, list): return {'$in': value}
+def _nin(value): if isinstance(value, list): return {'$nin': value}
+def _all(value): if isinstance(value, list): return {'$all': value}
+
+def gen_search(filters):
+    '''
+    Returns a MongoDB-compliant search string from the API input format.
+    '''
+    f = {}
+    for item in filters:
+        f[item['field']] = _actions[item['action']](item['value'])
+    return f
+
+
+_actions = {
+    '=': _eq,
+    '!=': _neq,
+    '<': _lt,
+    '<=': _lte,
+    '>': _gt,
+    '>=': _gte,
+    'like': _like,
+    'exists': _ex,
+    'nexists': _nex,
+    'in': _in,
+    'not in': _nin,
+    'all': _all,
+#    'and': _and,           # These technically should ever be called and were
+#    'or': _or,             # originally added for feature completion.  If it
+#    'nor': _nor,           # ends up that these actually are used, then I will
+#    'not': _not,           # have to figure out an efficient way to impliment
+                            # them.
+}
+
 
 def plugin_search(filters, fields, sort, start=None, size=None, sub=False):
     '''
     A generalized sort function for the database.  Returns a list of plugins
     with the fields specified in the incusion and exclusion variables.
     '''
-    f = {}
-    for item in filters:
-        if item['action'] == '=': f[item['field']] = item['value']
-        if item['action'] == '!=': f[item['field']] = {'$ne': item['value']}
-        if item['action'] == '<': f[item['field']] = {'$lt': item['value']}
-        if item['action'] == '<=': f[item['field']] = {'$lte': item['value']}
-        if item['action'] == '>': f[item['field']] = {'$gt': item['value']}
-        if item['action'] == '>=': f[item['field']] = {'$gte': item['value']}
-        if item['action'] == 'like': f[item['field']] = re.compile(r'%s' % item['value'], re.IGNORECASE)
-        if item['action'] == 'exists': f[item['field']] = {'$exists': True}
-        if item['action'] == 'nexists': f[item['field']] = {'$exists': False}
-        if item['action'] == 'in': 
-            if isinstance(item['value'], list):
-                f[item['field']] = {'$in': item['value']}
-        if item['action'] == 'not in':
-            if isinstance(item['value'], list):
-                f[item['field']] = {'$nin': item['value']}
-        if item['action'] == 'all':
-            if isinstance(item['value'], list):
-                f[item['field']] = {'$all': item['value']}
-        if item['action'] == 'and':
-            if isinstance(item['value'], list) and item['field'] == '':
-                f['$and'] = get(item['value'], sub=True)
-        if item['action'] == 'or':
-            if isinstance(item['value'], list) and item['field'] == '':
-                f['$or'] = get(item['value'], sub=True)
-        if item['action'] == 'nor':
-            if isinstance(item['value'], list) and item['field'] == '':
-                f['$nor'] = get(item['value'], sub=True)
-        if item['action'] == 'not':
-            if isinstance(item['value'], list) and item['field'] == '':
-                f['$not'] = get(item['value'], sub=True)
-    if sub: return f
-    return query(f, fields, sort, start, size)
+    return query(gen_search(filters), fields, sort, start, size)
