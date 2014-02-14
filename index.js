@@ -443,6 +443,7 @@ if (cluster.isMaster) {
       }
     });
     app.pre(restify.pre.userAgentConnection());
+    app.pre(restify.pre.sanitizePath());
     //redirect(app);
 
     //Middlewares
