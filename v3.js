@@ -149,8 +149,8 @@ module.exports = function (app, db, common) {
     });
 
     app.post('/3/updates', function (req, res, next) {
-        var slugs = (req.body.slugs == null ? '' : req.body.slugs).split(',');
-        var server = req.body.server == null ? 'bukkit' : req.body.server;
+        var slugs = (req.params.slugs == null ? '' : req.params.slugs).split(',');
+        var server = req.params.server == null ? 'bukkit' : req.params.server;
         common.plugins_up_to_date(slugs, server, function (callback) {
             res.send(callback);
         });
@@ -179,11 +179,11 @@ module.exports = function (app, db, common) {
                 'value': value
             }]
         } else {
-            var filters = req.body.filters == null ? [] : JSON.parse(req.body.filters);
-            var fields = ((req.body.fields == null ? 'slug,plugin_name,description' : req.body.fields).split(','))
-            var start = req.body.start == null ? undefined : parseInt(breq.body.start)
-            var size = req.body.size == null ? undefined : parseInt(req.body.size)
-            var sort = req.body.sort == null ? 'slug' : req.body.sort
+            var filters = req.params.filters == null ? [] : JSON.parse(req.params.filters);
+            var fields = ((req.params.fields == null ? 'slug,plugin_name,description' : req.params.fields).split(','))
+            var start = req.params.start == null ? undefined : parseInt(req.params.start)
+            var size = req.params.size == null ? undefined : parseInt(req.params.size)
+            var sort = req.params.sort == null ? 'slug' : req.params.sort;
         }
         common.plugin_search(filters, fields, sort, start, size, false, function (callback) {
             if (callback == null) {
