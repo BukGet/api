@@ -264,7 +264,7 @@ _actions = {
     'in': _in,
     'not in': _nin,
     'all': _all,
-#    'and': _and,           # These technically should ever be called and were
+#    'and': _and,           # These technically should never be called and were
 #    'or': _or,             # originally added for feature completion.  If it
 #    'nor': _nor,           # ends up that these actually are used, then I will
 #    'not': _not,           # have to figure out an efficient way to impliment
