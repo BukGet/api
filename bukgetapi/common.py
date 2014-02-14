@@ -227,28 +227,57 @@ def plugins_up_to_date(plugins_list, server):
         data.append(entry)
     return data
 
-# These are all for the gen_search function
-def _eq(value): return value
-def _neq(value): return {'$ne': value}
-def _lt(value): return {'$lt': value}
-def _lte(value): return {'$lte': value}
-def _gt(value): return {'$gt': value}
-def _gte(value): return {'$gte': value}
-def _like(value): return re.compile(r'%s' % item['value'], re.IGNORECASE)
-def _ex(value): return {'$exists': True}
-def _nex(value): return {'$exists': False}
-def _in(value): if isinstance(value, list): return {'$in': value}
-def _nin(value): if isinstance(value, list): return {'$nin': value}
-def _all(value): if isinstance(value, list): return {'$all': value}
 
-def gen_search(filters):
-    '''
-    Returns a MongoDB-compliant search string from the API input format.
-    '''
-    f = {}
-    for item in filters:
-        f[item['field']] = _actions[item['action']](item['value'])
-    return f
+# These are all for the gen_search function
+def _eq(value):
+    return value
+
+
+def _neq(value): 
+    return {'$ne': value}
+
+
+def _lt(value): 
+    return {'$lt': value}
+
+
+def _lte(value): 
+    return {'$lte': value}
+
+
+def _gt(value): 
+    return {'$gt': value}
+
+
+def _gte(value): 
+    return {'$gte': value}
+
+
+def _like(value): 
+    return re.compile(r'%s' % item['value'], re.IGNORECASE)
+
+
+def _ex(value): 
+    return {'$exists': True}
+
+
+def _nex(value): 
+    return {'$exists': False}
+
+
+def _in(value): 
+    if isinstance(value, list): 
+        return {'$in': value}
+
+
+def _nin(value): 
+    if isinstance(value, list): 
+        return {'$nin': value}
+
+
+def _all(value): 
+    if isinstance(value, list): 
+        return {'$all': value}
 
 
 _actions = {
@@ -270,6 +299,16 @@ _actions = {
 #    'not': _not,           # have to figure out an efficient way to impliment
                             # them.
 }
+
+
+def gen_search(filters):
+    '''
+    Returns a MongoDB-compliant search string from the API input format.
+    '''
+    f = {}
+    for item in filters:
+        f[item['field']] = _actions[item['action']](item['value'])
+    return f
 
 
 def plugin_search(filters, fields, sort, start=None, size=None, sub=False):
