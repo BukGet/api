@@ -559,6 +559,19 @@ if (cluster.isMaster) {
         res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
     });
 
+    app.get('/api2/bukkit/plugins', function (req, res, next) {
+       res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    });
+
+    app.get('/api2/authors', function (req, res, next) {
+        res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    });
+
+    app.get('/api2/categories', function (req, res, next) {
+        res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    });
+
+
     //Start webserver
     app.listen(config.port, config.address);
     console.log('Worker ' + cluster.worker.id + ' running!');
