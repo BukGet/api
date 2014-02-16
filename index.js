@@ -473,11 +473,11 @@ if (cluster.isMaster) {
             'authors': 1,
         }).toArray(function (err, docs) {
             if (err) {
-                res.status(500);
+                res.send(500);
                 return next();
             }
 
-            res.jsonp(docs);
+            res.send(docs);
             return next();
         });
     });
@@ -488,7 +488,7 @@ if (cluster.isMaster) {
             'versions.version': 1
         }).toArray(function (err, plugins) {
             if (err) {
-                res.status(500);
+                res.send(500);
                 return next();
             }
 
@@ -499,7 +499,7 @@ if (cluster.isMaster) {
                 vcount += plugins[plugin]['versions'].length;
             }
 
-            res.jsonp({
+            res.send({
                 'plugin_count': pcount,
                 'version_count': vcount
             });
@@ -513,11 +513,11 @@ if (cluster.isMaster) {
             'plugins': 0
         }).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
             if (err) {
-                res.status(500);
+                res.send(500);
                 return next();
             }
 
-            res.jsonp(docs);
+            res.send(docs);
             return next();
         });
     });
@@ -537,13 +537,26 @@ if (cluster.isMaster) {
 
         db.webstats.find({}, fields).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
             if (err) {
-                res.status(500);
+                res.send(500);
                 return next();
             }
 
-            res.jsonp(docs);
+            res.send(docs);
             return next();
         });
+    });
+
+    //Deprecation stuff
+    app.get('/2/bukkit/plugins', function (req, res, next) {
+       res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    });
+
+    app.get('/2/authors', function (req, res, next) {
+        res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    });
+
+    app.get('/2/categories', function (req, res, next) {
+        res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
     });
 
     //Start webserver
