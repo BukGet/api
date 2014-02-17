@@ -265,7 +265,7 @@ if (cluster.isMaster) {
                     return callback(null);
                 }
 
-                if (version != undefined) {
+                if (version != undefined && p['versions'] != null) {
                     if (version.toLowerCase() == "latest") {
                         p['versions'] = [p['versions'][0]];
                     } else if (version.toLowerCase() == "alpha" || version.toLowerCase() == "beta" || version.toLowerCase() == "release") {

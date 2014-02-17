@@ -52,8 +52,7 @@ module.exports = function (app, db, common) {
         var size = req.query.size == null ? undefined : parseInt(req.query.size)
         common.plugin_details(req.params.server, req.params.slug, req.params.version, fields, function(data) {
             if (data == null) {
-                res.send(404, "Plugin Does Not Exist");
-                
+                return res.send(404, "Plugin Does Not Exist");
             }
             if (size != undefined) {
                 data['versions'].length = size;
