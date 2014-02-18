@@ -448,7 +448,6 @@ if (cluster.isMaster) {
 
     //Middlewares
     app.use(jsonpParser);
-
     app.use(function (req, res, next) {
         res.header('Access-Control-Allow-Origin', '*');
         next();
@@ -461,7 +460,8 @@ if (cluster.isMaster) {
 
     //Redirect
     app.get('/', function(req, res) {
-
+        res.header('Location', '/3');
+        res.send(302);
     });
 
     //Handle stats requests
@@ -570,7 +570,6 @@ if (cluster.isMaster) {
     app.get('/api2/categories', function (req, res, next) {
         res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
     });
-
 
     //Start webserver
     app.listen(config.port, config.address);
