@@ -32,48 +32,49 @@ if (cluster.isMaster) {
     db.collection('categories');
 
     function setContentLength(res, length) {
-      if (res.getHeader('Content-Length') === undefined &&
-          res.contentLength === undefined) {
-        res.setHeader('Content-Length', length);
-      }
+        if (res.getHeader('Content-Length') === undefined && res.contentLength === undefined) {
+            res.setHeader('Content-Length', length);
+        }
     }
 
     function formatJSONP(req, res, body) {
-      if (!body) {
-        setContentLength(res, 0);
-        return null;
-      }
-
-      if (body instanceof Error) {
-        // snoop for RestError or HttpError, but don't rely on instanceof
-        if ((body.restCode || body.httpCode) && body.body) {
-          body = body.body;
-        } else {
-          body = {
-            message: body.message
-          };
+        if (!body) {
+            setContentLength(res, 0);
+            return null;
         }
-      }
 
-      if (Buffer.isBuffer(body))
-        body = body.toString('base64');
+        if (body instanceof Error) {
+            // snoop for RestError or HttpError, but don't rely on instanceof
+            if ((body.restCode || body.httpCode) && body.body) {
+                body = body.body;
+            } else {
+                body = {
+                    message: body.message
+                };
+            }
+        }
 
-      var callback = req.query.callback || req.query.jsonp;
-      var data;
-      if(callback) {
-        data = callback + '(' + JSON.stringify(body) + ');';
-      } else {
-        data = JSON.stringify(body);
-      }
-      setContentLength(res, Buffer.byteLength(data));
-      return data;
+        if (Buffer.isBuffer(body)) {
+            body = body.toString('base64');
+        }
+
+        var callback = req.query.callback || req.query.jsonp;
+        var data;
+        if(callback) {
+            data = callback + '(' + JSON.stringify(body) + ');';
+        } else {
+            data = JSON.stringify(body);
+        }
+
+        setContentLength(res, Buffer.byteLength(data));
+        return data;
     }
 
     function jsonpParser(req, res, next) {
-      if (req.query.callback || req.query.jsonp) {
-        res.contentType = 'application/javascript'; 
-      }
-      next();
+        if (req.query.callback || req.query.jsonp) {
+            res.contentType = 'application/javascript'; 
+        }
+        next();
     }
 
     //Common methods
