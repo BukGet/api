@@ -77,7 +77,11 @@ if (cluster.isMaster) {
   function jsonpParser(req, res, next) {
     if (req.query.callback || req.query.jsonp) {
       res.contentType = 'application/javascript'; 
+    } else {
+      res.contentType = 'application/json';
     }
+
+    res.header('Access-Control-Allow-Origin', '*');
 
     next();
   }
@@ -519,16 +523,10 @@ if (cluster.isMaster) {
   app.pre(restify.pre.sanitizePath());
 
   //Middlewares
-  app.use(jsonpParser);
-
-  app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    next();
-  });
-
   app.use(restify.queryParser());
   app.use(restify.bodyParser())
-
+  
+  app.use(jsonpParser);
   //Include api handlers
   require('./v3')(app, db, common);
 
