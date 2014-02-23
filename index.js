@@ -146,6 +146,9 @@ if (cluster.isMaster) {
                     start = 0;
                 }
                 db.plugins.find(filters, the_fields).sort(sort, d).skip(start).limit(size).toArray(function (err, docs) {
+                    if (err || docs == null) {
+                        return callback(null);
+                    }
                     callback(docs);
                 })
             } else {
@@ -335,29 +338,35 @@ if (cluster.isMaster) {
             for (var i = 0; i < filters.length; i++) {
                 var item = filters[i];
                 switch (item['action']) {
+                case 'equals':
                 case '=':
                     f[item['field']] = item['value'];
                     break;
+                case 'not-equal':
                 case '!=':
                     f[item['field']] = {
                         '$ne': item['value']
                     };
                     break;
+                case 'less-than':
                 case '<':
                     f[item['field']] = {
                         '$lt': item['value']
                     };
                     break;
+                case 'less-or-equal-than':
                 case '<=':
                     f[item['field']] = {
                         '$lte': item['value']
                     };
                     break;
+                case 'more-than':
                 case '>':
                     f[item['field']] = {
                         '$gt': item['value']
                     };
                     break;
+                case 'more-or-equal-than':
                 case '>=':
                     f[item['field']] = {
                         '$gte': item['value']

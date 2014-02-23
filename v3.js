@@ -88,7 +88,7 @@ module.exports = function (app, db, common) {
 				}
 			}
 
-			res.send(404, '{"error": "could not find version"}');
+			res.send(404, {"error": "could not find version"});
 		});
     });
 
@@ -170,11 +170,11 @@ module.exports = function (app, db, common) {
             var start = req.query.start == null ? undefined : parseInt(req.query.start)
             var size = req.query.size == null ? undefined : parseInt(req.query.size)
             var sort = req.query.sort == null ? 'slug' : req.query.sort
-            var field = req.params.field;
-            var value = req.params.value;
+            var field = req.params[0];
+            var value = req.params[2];
             filters = [{
                 'field': field,
-                'action': req.params.action,
+                'action': req.params[1],
                 'value': value
             }]
         } else {
@@ -186,7 +186,7 @@ module.exports = function (app, db, common) {
         }
         common.plugin_search(filters, fields, sort, start, size, false, function (callback) {
             if (callback == null) {
-                return res.send(400, '{"error": "invalid post"}');
+                return res.send(400, {"error": "invalid search"});
             }
             res.send(callback);
         });
@@ -196,7 +196,7 @@ module.exports = function (app, db, common) {
         search(req, res, next);
     });
 
-    app.get('/3/search/:field/:action/:value', function (req, res, next) {
+    app.get(/^\/3\/search\/([a-zA-Z0-9_\.~-]+)\/(\=|\!\=|\<|\<\=|\>|\>\=|[a-z]+)\/([a-zA-Z0-9_\.~-]+)/, function (req, res, next) {
         search(req, res, next);
     });
 }
