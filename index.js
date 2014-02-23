@@ -78,10 +78,11 @@ if (cluster.isMaster) {
     if (req.query.callback || req.query.jsonp) {
       res.contentType = 'application/javascript'; 
     }
+
     next();
   }
 
-
+  // Search Type Map
   var types = {
     '=': function (item, sub, reference) {
       reference[item['field']] = item['value'];
@@ -194,7 +195,7 @@ if (cluster.isMaster) {
         '_id': 0
       }
 
-      for (var i = 0; i < fields.length; i++) {
+      for (var i = 0, len = fields.length; i < len; i++) {
         if (fields[i] != '') {
           if (fields[i].charAt(0) == '-') {
             f[fields[i].substr(1)] = 0;
@@ -260,7 +261,7 @@ if (cluster.isMaster) {
 
         db.plugins.find(filters, the_fields).sort(sort, d).skip(start).limit(size).toArray(function (err, docs) {
           callback(docs);
-        })
+        });
       } else {
         db.plugins.find(filters, the_fields).sort(sort, d).toArray(function (err, docs) {
           if (err || docs == null) {
@@ -268,7 +269,7 @@ if (cluster.isMaster) {
           }
 
           callback(docs);
-        })
+        });
       }
     },
 
@@ -322,15 +323,20 @@ if (cluster.isMaster) {
     ca_convert: function (data, callback) {
       // Reformats the data to what the API should be returning.
       var dset = [];
+      var i = 0;
+      var item;
+      var dlen = data.length;
 
-      for (var i = 0; i < data.length; i++) {
+      for (; i < dlen; i++) {
+        item = data[i];
+
         dset.push({
-          'name': data[i]['_id'],
-          'count': data[i]['value']
+          'name': item['_id'],
+          'count': item['value']
         });
       }
 
-      callback(dset);
+      return callback(dset);
     },
 
     list_authors: function (callback) {
@@ -375,13 +381,19 @@ if (cluster.isMaster) {
           return callback(null);
         }
 
+        var i;
+        var found;
+        var versionsLen;
+
         if (version != undefined && p['versions'] != null) {
           if (version.toLowerCase() == "latest") {
             p['versions'] = [p['versions'][0]];
           } else if (version.toLowerCase() == "alpha" || version.toLowerCase() == "beta" || version.toLowerCase() == "release") {
-            var found = false;
+            i = 0;
+            found = false;
+            versionsLen = p['versions'].length;
 
-            for (var i = 0; i < p['versions'].length; i++) {
+            for (; i < versionsLen; i++) {
               if (p['versions'][i]['type'].toLowerCase() == version.toLowerCase()) {
                 p['versions'] = [p['versions'][i]];
                 found = true;
@@ -392,9 +404,11 @@ if (cluster.isMaster) {
               p['versions'] = [];
             }
           } else {
-            var found = false;
+            i = 0;
+            found = false;
+            versionsLen = p['versions'].length;
 
-            for (var i = 0; i < p['versions'].length; i++) {
+            for (; i < versionsLen; i++) {
               if (p['versions'][i]['version'] == version) {
                 p['versions'] = [p['versions'][i]];
                 found = true;
@@ -426,19 +440,30 @@ if (cluster.isMaster) {
         '$or': slugs,
         'server': server
       }).toArray(function (err, docs) {
-        for (var i = 0; i < docs.length; i++) {
+        var i = 0, doc, docLen = docs.length;
+        var x, versions, version, versionLen;
+
+        for (; i < docLen; i++) {
+          doc = docs[i];
+          versions = doc['versions'];
+
           var entry = {
-            'slug': docs[i]['slug'],
-            'plugin_name': docs[i]['plugin_name'],
+            'slug': doc['slug'],
+            'plugin_name': doc['plugin_name'],
             'versions': {
-              'latest': docs[i]['versions'][0]['version'],
+              'latest': versions[0]['version']
             },
           }
 
-          for (var x = 0; x < docs[i]['versions'].length; x++) {
-            if (docs[i]['versions'][x]['type'] == 'Release' || docs[i]['versions'][x]['type'] == 'Beta' || docs[i]['versions'][x]['type'] == 'Alpha') {
-              if (entry['versions'][docs[i]['versions'][x]['type'].toLowerCase()] == null) {
-                entry['versions'][docs[i]['versions'][x]['type'].toLowerCase()] = docs[i]['versions'][x]['version'];
+          x = 0;
+          versionLen = versions.length;
+
+          for (; x < versionLen; x++) {
+            version = versions[x];
+
+            if (version['type'] == 'Release' || version['type'] == 'Beta' || version['type'] == 'Alpha') {
+              if (entry['versions'][version['type'].toLowerCase()] == null) {
+                entry['versions'][version['type'].toLowerCase()] = version['version'];
               }
             }
           }
@@ -451,18 +476,25 @@ if (cluster.isMaster) {
     },
 
     plugin_search: function (filters, fields, sort, start, size, sub, callback) {
-      // A generalized sort function for the database. Returns a list of plugins with the fields specified in the inclusion and exclusion variables.
+      // A generalized sort function for the database. 
+      // Returns a list of plugins with the fields specified in the inclusion and exclusion variables.
+      
       var f = {};
+      var i = 0;
+      var item;
+      var action;
+      var filterLen = filters.length;
 
       if (sub == undefined) {
         sub = false;
       }
 
-      for (var i = 0, len = filters.length; i < len; i++) {
-        var item = filters[i];
+      for (; i < filterLen; i++) {
+        item = filters[i];
+        action = item['action'];
 
-        if (types[item['action']]) {
-          types[item['action']](item, sub, f);
+        if (types[action]) {
+          types[action](item, sub, f);
         }
 
         if (sub) {
@@ -471,7 +503,7 @@ if (cluster.isMaster) {
 
         common.query(f, fields, sort, start, size, function (the_callback) {
           callback(the_callback);
-        })
+        });
       }
     }
   };
