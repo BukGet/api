@@ -5,17 +5,20 @@ var cluster = require('cluster');
 if (cluster.isMaster) {
   // Count the machine's CPU cores
   var cpuCount = require('os').cpus().length - 1;
+
   // Create a worker for each cpu core - 1
   for (var i = 0, il=cpuCount; i < il; i++) {
     cluster.fork();
   }
+
   // Listen for dying workers
   cluster.on('exit', function (worker) {
     // Replace the dead worker, we're not sentimental
     console.log('Worker ' + worker.id + ' died');
+
     cluster.fork();
   });
-// Code to run if we're in a worker process
+
 } else {
   //Imports
   var config = require('./config');
@@ -60,6 +63,7 @@ if (cluster.isMaster) {
 
     var callback = req.query.callback || req.query.jsonp;
     var data;
+
     if(callback) {
       data = callback + '(' + JSON.stringify(body) + ');';
     } else {
@@ -214,6 +218,7 @@ if (cluster.isMaster) {
           docs[i]['id'] = docs[i]['_id'];
           delete docs[i]['_id'];
         }
+
         callback(docs);
       });
     },
@@ -227,6 +232,7 @@ if (cluster.isMaster) {
           document['id'] = document['_id'];
           document['_id'];
         }
+
         callback(document);
       })
     },
@@ -244,12 +250,14 @@ if (cluster.isMaster) {
       for (var i in fields) {
         the_fields[fields[i]] = 1;
       }
+
       the_fields['_id'] = 0;
 
       if (size != undefined) {
         if (start == undefined) {
           start = 0;
         }
+
         db.plugins.find(filters, the_fields).sort(sort, d).skip(start).limit(size).toArray(function (err, docs) {
           callback(docs);
         })
@@ -258,6 +266,7 @@ if (cluster.isMaster) {
           if (err || docs == null) {
             return callback(null);
           }
+
           callback(docs);
         })
       }
@@ -351,6 +360,7 @@ if (cluster.isMaster) {
 
       if (version != undefined && (version == 'release' || version == 'alpha' || version == 'beta')) {
         filters['versions.type'] = (version.charAt(0).toUpperCase() + version.slice(1));
+
         if (fields != null && fields.length != 0) {
           fields.append('versions.type');
         }
@@ -370,23 +380,27 @@ if (cluster.isMaster) {
             p['versions'] = [p['versions'][0]];
           } else if (version.toLowerCase() == "alpha" || version.toLowerCase() == "beta" || version.toLowerCase() == "release") {
             var found = false;
+
             for (var i = 0; i < p['versions'].length; i++) {
               if (p['versions'][i]['type'].toLowerCase() == version.toLowerCase()) {
                 p['versions'] = [p['versions'][i]];
                 found = true;
               }
             }
+
             if (!found) {
               p['versions'] = [];
             }
           } else {
             var found = false;
+
             for (var i = 0; i < p['versions'].length; i++) {
               if (p['versions'][i]['version'] == version) {
                 p['versions'] = [p['versions'][i]];
                 found = true;
               }
             }
+
             if (!found) {
               p['versions'] = [];
             }
@@ -401,11 +415,13 @@ if (cluster.isMaster) {
       // Takes a list of plugin slugs and returns an array of objects with the plugin and most recent version.
       var data = [];
       var slugs = [];
+
       for (var i = 0; i < plugins_list.length; i++) {
         slugs.push({
           'slug': plugins_list[i]
         });
       }
+
       db.plugins.find({
         '$or': slugs,
         'server': server
@@ -418,6 +434,7 @@ if (cluster.isMaster) {
               'latest': docs[i]['versions'][0]['version'],
             },
           }
+
           for (var x = 0; x < docs[i]['versions'].length; x++) {
             if (docs[i]['versions'][x]['type'] == 'Release' || docs[i]['versions'][x]['type'] == 'Beta' || docs[i]['versions'][x]['type'] == 'Alpha') {
               if (entry['versions'][docs[i]['versions'][x]['type'].toLowerCase()] == null) {
@@ -425,8 +442,10 @@ if (cluster.isMaster) {
               }
             }
           }
+
           data.push(entry);
         }
+
         callback(data);
       })
     },
@@ -445,7 +464,6 @@ if (cluster.isMaster) {
         if (types[item['action']]) {
           types[item['action']](item, sub, f);
         }
-        
 
         if (sub) {
           return callback(f);
@@ -455,7 +473,6 @@ if (cluster.isMaster) {
           callback(the_callback);
         })
       }
-
     }
   };
 
@@ -465,16 +482,18 @@ if (cluster.isMaster) {
     'application/javascript': formatJSONP
     }
   });
+
   app.pre(restify.pre.userAgentConnection());
   app.pre(restify.pre.sanitizePath());
-  //redirect(app);
 
   //Middlewares
   app.use(jsonpParser);
+
   app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     next();
   });
+
   app.use(restify.queryParser());
   app.use(restify.bodyParser())
 
@@ -526,6 +545,7 @@ if (cluster.isMaster) {
         'plugin_count': pcount,
         'version_count': vcount
       });
+
       return next();
     });
   });
@@ -596,5 +616,6 @@ if (cluster.isMaster) {
 
   //Start webserver
   app.listen(config.port, config.address);
+  
   console.log('Worker ' + cluster.worker.id + ' running!');
 }
