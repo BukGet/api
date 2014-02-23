@@ -91,7 +91,7 @@ if (cluster.isMaster) {
       reference[item['field']] = {
         '$ne': item['value']
       };
-    }
+    },
 
     '<': function (item, sub, reference) {
       reference[item['field']] = {
@@ -616,6 +616,6 @@ if (cluster.isMaster) {
 
   //Start webserver
   app.listen(config.port, config.address);
-  
+
   console.log('Worker ' + cluster.worker.id + ' running!');
 }
