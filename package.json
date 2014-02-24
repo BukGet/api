@@ -1,0 +1,15 @@
+{
+  "name": "bukget-api",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "David Marby",
+  "dependencies": {
+    "mongode": "~0.1.6",
+    "restify": "~2.6.1",
+    "cluster": "~0.7.7"
+  }
+}

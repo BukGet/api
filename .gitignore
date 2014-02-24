@@ -1,4 +1,2 @@
-bukget.ini
-*.pyc
-db2.db
-static/cache.db
+node_modules
+.DS_Store
