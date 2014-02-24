@@ -4,7 +4,7 @@ module.exports = function (app, db, common) {
   // 
   // Ecmascript 6 would make this easier...
   // let [ fields, start, size, sort ] = handle_parameters(req);
-  function handle_parameters (req, callback) {
+  function handle_parameters (req, full, callback) {
     if (req.params.server == null) {
       req.params.server = undefined;
     }
@@ -13,7 +13,12 @@ module.exports = function (app, db, common) {
       req.params.version = undefined;
     }
 
-    var fields = ((req.query.fields == null ? 'slug,plugin_name,description' : req.query.fields).split(','));
+    var fields;
+    if (full) {
+        fields = ((req.query.fields == null ? '' : req.query.fields).split(','));
+    } else {
+        fields = ((req.query.fields == null ? 'slug,plugin_name,description' : req.query.fields).split(','));
+    }
     var start = req.query.start == null ? undefined : parseInt(req.query.start);
     var size = req.query.size == null ? undefined : parseInt(req.query.size);
     var sort = req.query.sort == null ? 'slug' : req.query.sort;
@@ -22,7 +27,7 @@ module.exports = function (app, db, common) {
   }
 
   function geninfo (req, res, next) {
-    handle_parameters(req, function (fields, start, size, sort) {
+    handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_geninfo(size, function (callback) {
         res.send(callback);
       });
@@ -30,7 +35,7 @@ module.exports = function (app, db, common) {
   }
 
   function plugin_list (req, res, next) {
-    handle_parameters(req, function (fields, start, size, sort) {
+    handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_plugins(req.params.server, fields, sort, start, size, function (callback) {
         res.send(callback);
       });
@@ -38,7 +43,7 @@ module.exports = function (app, db, common) {
   }
 
   function plugin_details (req, res, next) {
-    handle_parameters(req, function (fields, start, size, sort) {
+    handle_parameters(req, true, function (fields, start, size, sort) {
       common.plugin_details(req.params.server, req.params.slug, req.params.version, fields, function (data) {
         if (data == null) {
           return res.send(404, "Plugin Does Not Exist");
@@ -54,7 +59,7 @@ module.exports = function (app, db, common) {
   }
 
   function author_plugins (req, res, next) {
-    handle_parameters(req, function (fields, start, size, sort) {
+    handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_author_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
         res.send(callback);
       });
@@ -62,7 +67,7 @@ module.exports = function (app, db, common) {
   }
 
   function category_plugins (req, res, next) {
-    handle_parameters(req, function (fields, start, size, sort) {
+    handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_category_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
         res.send(callback);
       });
