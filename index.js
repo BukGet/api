@@ -251,23 +251,20 @@ if (cluster.isMaster) {
         d = -1;
       }
 
-      var the_fields = {};
-      for (var i in fields) {
-        the_fields[fields[i]] = 1;
-      }
-
-      the_fields['_id'] = 0;
+      common.fieldgen(fields, function (callback) {
+        fields = callback;
+      });
 
       if (size != undefined) {
         if (start == undefined) {
           start = 0;
         }
 
-        db.plugins.find(filters, the_fields).sort(sort, d).skip(start).limit(size).toArray(function (err, docs) {
+        db.plugins.find(filters, fields).sort(sort, d).skip(start).limit(size).toArray(function (err, docs) {
           callback(docs);
         });
       } else {
-        db.plugins.find(filters, the_fields).sort(sort, d).toArray(function (err, docs) {
+        db.plugins.find(filters, fields).sort(sort, d).toArray(function (err, docs) {
           if (err || docs == null) {
             return callback(null);
           }
