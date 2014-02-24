@@ -44,7 +44,7 @@ module.exports = function (app, db, common) {
           return res.send(404, "Plugin Does Not Exist");
         }
 
-        if (size != undefined) {
+        if (size != undefined && data['versions'] != null) {
           data['versions'].length = size;
         }
 
