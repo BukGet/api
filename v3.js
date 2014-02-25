@@ -15,7 +15,7 @@ module.exports = function (app, db, common) {
 
     var fields;
     if (full) {
-        fields = ((req.query.fields == null ? '' : req.query.fields).split(','));
+        fields = ((req.query.fields == null ? '' : req.query.fields.split(',')));
     } else {
         fields = ((req.query.fields == null ? 'slug,plugin_name,description' : req.query.fields).split(','));
     }

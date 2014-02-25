@@ -328,7 +328,7 @@ if (cluster.isMaster) {
       var item;
       var dlen = data.length;
 
-      for (; i < dlen; i++) {
+      for (var i = 0, dlen = data.length; i < dlen; i++) {
         item = data[i];
 
         dset.push({
@@ -381,47 +381,38 @@ if (cluster.isMaster) {
         if (err || p == null) {
           return callback(null);
         }
-
-        var i;
-        var found;
-        var versionsLen;
+        var found = false;
+        var the_versions;
 
         if (version != undefined && p['versions'] != null) {
           if (version.toLowerCase() == "latest") {
-            p['versions'] = [p['versions'][0]];
+            the_versions = [p['versions'][0]];
           } else if (version.toLowerCase() == "alpha" || version.toLowerCase() == "beta" || version.toLowerCase() == "release") {
-            i = 0;
-            found = false;
-            versionsLen = p['versions'].length;
-
-            for (; i < versionsLen; i++) {
+            for (var i = 0, versionsLen = p['versions'].length; i < versionsLen; i++) {
               if (p['versions'][i]['type'].toLowerCase() == version.toLowerCase()) {
-                p['versions'] = [p['versions'][i]];
+                the_versions = [p['versions'][i]];
                 found = true;
               }
             }
 
             if (!found) {
-              p['versions'] = [];
+              the_versions = [];
             }
           } else {
-            i = 0;
-            found = false;
-            versionsLen = p['versions'].length;
-
-            for (; i < versionsLen; i++) {
+            for (var i = 0, versionsLen = p['versions'].length; i < versionsLen; i++) {
               if (p['versions'][i]['version'] == version) {
-                p['versions'] = [p['versions'][i]];
+                the_versions = [p['versions'][i]];
                 found = true;
               }
             }
 
             if (!found) {
-              p['versions'] = [];
+              the_versions = [];
             }
           }
         }
 
+        p['versions'] = the_versions;
         callback(p);
       });
     },
@@ -490,7 +481,7 @@ if (cluster.isMaster) {
         sub = false;
       }
 
-      for (; i < filterLen; i++) {
+      for (var i = 0, filterLen = filters.length; i < filterLen; i++) {
         item = filters[i];
         action = item['action'];
 
