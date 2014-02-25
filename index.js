@@ -324,10 +324,8 @@ if (cluster.isMaster) {
     ca_convert: function (data, callback) {
       // Reformats the data to what the API should be returning.
       var dset = [];
-      var i = 0;
       var item;
-      var dlen = data.length;
-
+      
       for (var i = 0, dlen = data.length; i < dlen; i++) {
         item = data[i];
 
@@ -472,10 +470,8 @@ if (cluster.isMaster) {
       // Returns a list of plugins with the fields specified in the inclusion and exclusion variables.
       
       var f = {};
-      var i = 0;
       var item;
       var action;
-      var filterLen = filters.length;
 
       if (sub == undefined) {
         sub = false;
