@@ -444,7 +444,7 @@ if (cluster.isMaster) {
         var i = 0, doc, docLen = docs.length;
         var x, versions, version, versionLen;
 
-        for (; i < docLen; i++) {
+        for (var i = 0, docLen = docs.length; i < docLen; i++) {
           doc = docs[i];
           versions = doc['versions'];
 
@@ -459,7 +459,7 @@ if (cluster.isMaster) {
           x = 0;
           versionLen = versions.length;
 
-          for (; x < versionLen; x++) {
+          for (var i = 0, versionLen = versions.length; x < versionLen; x++) {
             version = versions[x];
 
             if (version['type'] == 'Release' || version['type'] == 'Beta' || version['type'] == 'Alpha') {
