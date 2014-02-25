@@ -369,7 +369,7 @@ if (cluster.isMaster) {
         filters['versions.type'] = (version.charAt(0).toUpperCase() + version.slice(1));
 
         if (fields != null && fields.length != 0) {
-          fields.append('versions.type');
+          fields.push('versions.type');
         }
       }
 
