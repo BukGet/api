@@ -107,17 +107,17 @@ module.exports = function (app, db, common) {
   app.get('/3/plugins/:server/:slug/:version/download', function (req, res, next) {
     common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function(data) {
       if (data == null) {
-        res.send(404, "Plugin Does Not Exist");
+        return res.send(404, "Plugin Does Not Exist");
       }
 
       if (req.params.version.toLowerCase() == "latest") {
         res.header('Location', data['versions'][0]['download']);
-        res.send(302);
+        return res.send(302);
       } else {
         for (var i = 0, il = data['versions'].length; i < il; i++) {
           if (data['versions'][i]['version'] == req.params.version) {
             res.header('Location', data['versions'][i]['download']);
-            res.send(302);
+            return res.send(302);
           }
         }
       }
