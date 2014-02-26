@@ -325,7 +325,7 @@ if (cluster.isMaster) {
       // Reformats the data to what the API should be returning.
       var dset = [];
       var item;
-      
+
       for (var i = 0, dlen = data.length; i < dlen; i++) {
         item = data[i];
 
@@ -366,7 +366,7 @@ if (cluster.isMaster) {
       if (version != undefined && (version == 'release' || version == 'alpha' || version == 'beta')) {
         filters['versions.type'] = (version.charAt(0).toUpperCase() + version.slice(1));
 
-        if (fields != null && fields.length != 0) {
+        if (fields != '' && fields != null && fields.length != 0) {
           fields.push('versions.type');
         }
       }
@@ -380,7 +380,7 @@ if (cluster.isMaster) {
           return callback(null);
         }
         var found = false;
-        var the_versions;
+        var the_versions = p['versions'];
 
         if (version != undefined && p['versions'] != null) {
           if (version.toLowerCase() == "latest") {
