@@ -565,7 +565,8 @@ if (cluster.isMaster) {
   });
 
   app.get('/stats/trend/:days', function (req, res, next) {
-    db.webstats.find({}, {
+    var days = (new Date().getTime() / 1000) - (86400 * req.params.days);
+    db.webstats.find({ timestamp: { $gte: days } }, {
       '_id': 0,
       'plugins': 0
     }).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
@@ -586,13 +587,13 @@ if (cluster.isMaster) {
     }
 
     var plugins = req.params.names.split(',');
-    var index = 0;
 
-    for (index; index < plugins.length; index++) {
+    for (var index = 0, pluginsLen = plugins.length; index < pluginsLen; index++) {
       fields['plugins.' + plugins[index]] = 1;
     }
 
-    db.webstats.find({}, fields).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
+    var days = (new Date().getTime() / 1000) - (86400 * req.params.days);
+    db.webstats.find({ timestamp: { $gte: days } }, fields).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
       if (err) {
         res.send(500);
         return next();
