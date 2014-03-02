@@ -5,7 +5,7 @@ var cluster = require('cluster');
 if (cluster.isMaster) {
   var MiniOps = require('miniops');
   var restify = require('restify');
-  var miniOps = new MiniOps();
+  var miniOps = new MiniOps(24);
 
   var stats = restify.createServer();
   stats.use(restify.jsonp());
