@@ -3,12 +3,23 @@ var cluster = require('cluster');
 
 // Code to run if we're in the master process
 if (cluster.isMaster) {
+  var MiniOps = require('miniops');
+  var restify = require('restify');
+  var miniOps = new MiniOps();
+
+  var stats = restify.createServer();
+  stats.use(restify.jsonp());
+  stats.get('/ops', miniOps.dataHub());
+  stats.listen(9133);
   // Count the machine's CPU cores
   var cpuCount = require('os').cpus().length - 1;
 
   // Create a worker for each cpu core - 1
   for (var i = 0, il=cpuCount; i < il; i++) {
-    cluster.fork();
+    var worker = cluster.fork();
+    worker.on('message', function(msg) {
+      miniOps.recorder()(msg.req, msg.res, msg.route, msg.error);
+    });
   }
 
   // Listen for dying workers
@@ -22,9 +33,9 @@ if (cluster.isMaster) {
 } else {
   //Imports
   var config = require('./config');
-  var restify = require('restify');
   var mongode = require('mongode');
   var ObjectID = require('mongode').ObjectID;
+  var restify = require('restify');
 
   //Connect to database
   var db = mongode.connect(config.database.host + config.database.name);
@@ -33,58 +44,6 @@ if (cluster.isMaster) {
   db.collection('geninfo');
   db.collection('authors');
   db.collection('categories');
-
-  function setContentLength(res, length) {
-    if (res.getHeader('Content-Length') === undefined && res.contentLength === undefined) {
-      res.setHeader('Content-Length', length);
-    }
-  }
-
-  function formatJSONP(req, res, body) {
-    if (!body) {
-      setContentLength(res, 0);
-      return null;
-    }
-
-    if (body instanceof Error) {
-      // snoop for RestError or HttpError, but don't rely on instanceof
-      if ((body.restCode || body.httpCode) && body.body) {
-        body = body.body;
-      } else {
-        body = {
-          message: body.message
-        };
-      }
-    }
-
-    if (Buffer.isBuffer(body)) {
-      body = body.toString('base64');
-    }
-
-    var callback = req.query.callback || req.query.jsonp;
-    var data;
-
-    if(callback) {
-      data = callback + '(' + JSON.stringify(body) + ');';
-    } else {
-      data = JSON.stringify(body);
-    }
-
-    setContentLength(res, Buffer.byteLength(data));
-    return data;
-  }
-
-  function jsonpParser(req, res, next) {
-    if (req.query.callback || req.query.jsonp) {
-      res.contentType = 'application/javascript'; 
-    } else {
-      res.contentType = 'application/json';
-    }
-
-    res.header('Access-Control-Allow-Origin', '*');
-
-    next();
-  }
 
   // Search Type Map
   var types = {
@@ -497,27 +456,28 @@ if (cluster.isMaster) {
   };
 
   //Initialize express app
-  var app = restify.createServer({
-    formatters: {
-    'application/javascript': formatJSONP
-    }
-  });
+  var app = restify.createServer();
 
   app.pre(restify.pre.userAgentConnection());
   app.pre(restify.pre.sanitizePath());
 
   //Middlewares
+  app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  });
   app.use(restify.queryParser());
   app.use(restify.bodyParser())
-  
-  app.use(jsonpParser);
+  app.use(restify.jsonp());
+
   //Include api handlers
   require('./v3')(app, db, common);
 
   //Redirect
-  app.get('/', function(req, res) {
+  app.get('/', function(req, res, next) {
     res.header('Location', '/3');
     res.send(302);
+    next();
   });
 
   //Handle stats requests
@@ -534,7 +494,7 @@ if (cluster.isMaster) {
       }
 
       res.send(docs);
-      return next();
+      next();
     });
   });
 
@@ -559,8 +519,7 @@ if (cluster.isMaster) {
         'plugin_count': pcount,
         'version_count': vcount
       });
-
-      return next();
+      next();
     });
   });
 
@@ -576,7 +535,7 @@ if (cluster.isMaster) {
       }
 
       res.send(docs);
-      return next();
+      next();
     });
   });
 
@@ -600,33 +559,48 @@ if (cluster.isMaster) {
       }
 
       res.send(docs);
-      return next();
+      next();
     });
   });
 
   //Deprecation stuff
   app.get('/2/bukkit/plugins', function (req, res, next) {
      res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+     next();
   });
 
   app.get('/2/authors', function (req, res, next) {
     res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    next();
   });
 
   app.get('/2/categories', function (req, res, next) {
     res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    next();
   });
 
   app.get('/api2/bukkit/plugins', function (req, res, next) {
      res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+     next();
   });
 
   app.get('/api2/authors', function (req, res, next) {
     res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    next();
   });
 
   app.get('/api2/categories', function (req, res, next) {
     res.send(['API', 'Deprecated', 'Please', 'update', 'your', 'software']);
+    next();
+  });
+
+  app.get('/favicon.ico', function (req, res, next) {
+    res.writeHead(204);
+    res.end();
+  });
+
+  app.on('after', function(req, res, route, error) {
+    process.send({ res: { statusCode : res.statusCode }, req: { url: req.url }, route: route, error: error });
   });
 
   //Start webserver

@@ -30,6 +30,7 @@ module.exports = function (app, db, common) {
     handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_geninfo(size, function (callback) {
         res.send(callback);
+        next();
       });
     });
   }
@@ -38,6 +39,7 @@ module.exports = function (app, db, common) {
     handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_plugins(req.params.server, fields, sort, start, size, function (callback) {
         res.send(callback);
+        next();
       });
     });
   }
@@ -46,7 +48,8 @@ module.exports = function (app, db, common) {
     handle_parameters(req, true, function (fields, start, size, sort) {
       common.plugin_details(req.params.server, req.params.slug, req.params.version, fields, function (data) {
         if (data == null) {
-          return res.send(404, "Plugin Does Not Exist");
+          res.send(404, "Plugin Does Not Exist");
+          return next();
         }
 
         if (size != undefined && data['versions'] != null) {
@@ -54,6 +57,7 @@ module.exports = function (app, db, common) {
         }
 
         res.send(data);
+        next();
       });
     });
   }
@@ -62,6 +66,7 @@ module.exports = function (app, db, common) {
     handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_author_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
         res.send(callback);
+        next();
       });
     });
   }
@@ -70,6 +75,7 @@ module.exports = function (app, db, common) {
     handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_category_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
         res.send(callback);
+        next();
       });
     });
   }
@@ -85,6 +91,7 @@ module.exports = function (app, db, common) {
   app.get('/3/geninfo/:idnum', function (req, res, next) {
     common.get_geninfo(req.params.idnum, function (callback) {
       res.send(callback);
+      next();
     });
   });
 
@@ -107,28 +114,33 @@ module.exports = function (app, db, common) {
   app.get('/3/plugins/:server/:slug/:version/download', function (req, res, next) {
     common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function(data) {
       if (data == null) {
-        return res.send(404, "Plugin Does Not Exist");
+        res.send(404, "Plugin Does Not Exist");
+        return next();
       }
 
       if (req.params.version.toLowerCase() == "latest") {
         res.header('Location', data['versions'][0]['download']);
-        return res.send(302);
+        res.send(302);
+        return next();
       } else {
         for (var i = 0, il = data['versions'].length; i < il; i++) {
           if (data['versions'][i]['version'] == req.params.version) {
             res.header('Location', data['versions'][i]['download']);
-            return res.send(302);
+            res.send(302);
+            return next();
           }
         }
       }
 
       res.send(404, {"error": "could not find version"});
+      next();
     });
   });
 
   app.get('/3/authors', function (req, res, next) {
     common.list_authors(function (callback) {
       res.send(callback);
+      next();
     });
   });
 
@@ -143,6 +155,7 @@ module.exports = function (app, db, common) {
   app.get('/3/categories', function (req, res, next) {
     common.list_categories(function (callback) {
       res.send(callback);
+      next();
     });
   });
 
@@ -159,6 +172,7 @@ module.exports = function (app, db, common) {
     var server = req.params.server == null ? 'bukkit' : req.params.server;
     common.plugins_up_to_date(slugs, server, function (callback) {
       res.send(callback);
+      next();
     });
   });
 
@@ -168,6 +182,7 @@ module.exports = function (app, db, common) {
 
     common.plugins_up_to_date(slugs, server, function (callback) {
       res.send(callback);
+      next();
     });
   });
 
@@ -196,12 +211,14 @@ module.exports = function (app, db, common) {
 
     common.plugin_search(filters, fields, sort, start, size, false, function (callback) {
       if (callback == null) {
-        return res.send(400, {
+        res.send(400, {
           "error": "invalid search"
         });
+        return next();
       }
 
       res.send(callback);
+      next();
     });
   }
 
