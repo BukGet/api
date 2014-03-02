@@ -112,7 +112,7 @@ module.exports = function (app, db, common) {
   });
 
   app.get('/3/plugins/:server/:slug/:version/download', function (req, res, next) {
-    common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function(data) {
+    common.plugin_details(req.params.server, req.params.slug, req.params.version, {}, function (data) {
       if (data == null) {
         res.send(404, "Plugin Does Not Exist");
         return next();

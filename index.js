@@ -17,7 +17,7 @@ if (cluster.isMaster) {
   // Create a worker for each cpu core - 1
   for (var i = 0, il=cpuCount; i < il; i++) {
     var worker = cluster.fork();
-    worker.on('message', function(msg) {
+    worker.on('message', function (msg) {
       miniOps.recorder()(msg.req, msg.res, msg.route, msg.error);
     });
   }
@@ -474,7 +474,7 @@ if (cluster.isMaster) {
   require('./v3')(app, db, common);
 
   //Redirect
-  app.get('/', function(req, res, next) {
+  app.get('/', function (req, res, next) {
     res.header('Location', '/3');
     res.send(302);
     next();
@@ -599,7 +599,7 @@ if (cluster.isMaster) {
     res.end();
   });
 
-  app.on('after', function(req, res, route, error) {
+  app.on('after', function (req, res, route, error) {
     process.send({ res: { statusCode : res.statusCode }, req: { url: req.url }, route: route, error: error });
   });
 
