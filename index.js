@@ -27,7 +27,10 @@ if (cluster.isMaster) {
     // Replace the dead worker, we're not sentimental
     console.log('Worker ' + worker.id + ' died');
 
-    cluster.fork();
+    var worker = cluster.fork();
+    worker.on('message', function (msg) {
+      miniOps.recorder()(msg.req, msg.res, msg.route, msg.error);
+    });
   });
 
 } else {
