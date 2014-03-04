@@ -65,6 +65,12 @@ module.exports = function (app, db, common) {
   function author_plugins (req, res, next) {
     handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_author_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
+        if (callback == null) {
+          res.send(400, {
+            "error": "invalid author"
+          });
+          return next();
+        }
         res.send(callback);
         next();
       });
@@ -74,6 +80,12 @@ module.exports = function (app, db, common) {
   function category_plugins (req, res, next) {
     handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_category_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
+        if (callback == null) {
+          res.send(400, {
+            "error": "invalid category"
+          });
+          return next();
+        }
         res.send(callback);
         next();
       });
