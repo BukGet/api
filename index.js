@@ -446,15 +446,15 @@ if (cluster.isMaster) {
         if (types[action]) {
           types[action](item, sub, f);
         }
-
-        if (sub) {
-          return callback(f);
-        }
-
-        common.query(f, fields, sort, start, size, function (the_callback) {
-          callback(the_callback);
-        });
       }
+
+      if (sub) {
+        return callback(f);
+      }
+
+      common.query(f, fields, sort, start, size, function (the_callback) {
+        callback(the_callback);
+      });
     }
   };
 
