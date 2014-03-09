@@ -38,6 +38,12 @@ module.exports = function (app, db, common) {
   function plugin_list (req, res, next) {
     handle_parameters(req, false, function (fields, start, size, sort) {
       common.list_plugins(req.params.server, fields, sort, start, size, function (callback) {
+        if (callback == null) {
+          res.send(400, {
+            "error": "invalid params"
+          });
+          return next();
+        }
         res.send(callback);
         next();
       });
