@@ -352,6 +352,7 @@ if (cluster.isMaster) {
               if (p['versions'][i]['type'].toLowerCase() == version.toLowerCase()) {
                 the_versions = [p['versions'][i]];
                 found = true;
+                break;
               }
             }
 
@@ -363,6 +364,7 @@ if (cluster.isMaster) {
               if (p['versions'][i]['version'] == version) {
                 the_versions = [p['versions'][i]];
                 found = true;
+                break;
               }
             }
 
