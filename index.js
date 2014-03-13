@@ -516,20 +516,37 @@ if (cluster.isMaster) {
         vcount += plugins[plugin]['versions'].length;
       }
 
-      res.send({
-        'plugin_count': pcount,
-        'version_count': vcount
+      var days = (new Date().getTime() / 1000) - (86400 * 1);
+      db.webstats.find({ timestamp: { $gte: days } }, { '_id': 0, 'downloads' : 1 }).sort('_id', -1).limit(1).toArray(function (the_err, docs) {
+        if (the_err || docs == null || docs[0] == null) {
+          res.send({
+            'plugin_count': pcount,
+            'version_count': vcount,
+            'downloads': 0
+          });
+          return next();
+        }
+
+        res.send({
+          'plugin_count': pcount,
+          'version_count': vcount,
+          'downloads': docs[0]['downloads']
+        });
+        next();
       });
-      next();
     });
   });
 
   app.get('/stats/trend/:days', function (req, res, next) {
-    var days = (new Date().getTime() / 1000) - (86400 * req.params.days);
-    db.webstats.find({ timestamp: { $gte: days } }, {
+    var filter = {
       '_id': 0,
       'plugins': 0
-    }).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
+    };
+    if (req.query.plugins) {
+      filter['plugins'] = 1;
+    } 
+    var days = (new Date().getTime() / 1000) - (86400 * req.params.days);
+    db.webstats.find({ timestamp: { $gte: days } }, filter).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
       if (err) {
         res.send(500);
         return next();
