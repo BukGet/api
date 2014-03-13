@@ -2,11 +2,17 @@
   "name": "bukget-api",
   "version": "0.0.1",
   "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
-  "repository": "",
-  "author": "David Marby",
+  "repository": { 
+    "type": "git",
+    "url": "https://github.com/BukGet/api.git"
+  },
+  "homepage": "http://bukget.org",
+  "author": "David Marby <david@dmarby.se> http://dmarby.se",
   "dependencies": {
     "mongode": "~0.1.6",
     "restify": "~2.6.1",
