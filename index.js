@@ -517,23 +517,11 @@ if (cluster.isMaster) {
       }
 
       var days = (new Date().getTime() / 1000) - (86400 * 1);
-      db.webstats.find({ timestamp: { $gte: days } }, { '_id': 0, 'downloads' : 1 }).sort('_id', -1).limit(1).toArray(function (the_err, docs) {
-        if (the_err || docs == null || docs[0] == null) {
-          res.send({
-            'plugin_count': pcount,
-            'version_count': vcount,
-            'downloads': 0
-          });
-          return next();
-        }
-
-        res.send({
-          'plugin_count': pcount,
-          'version_count': vcount,
-          'downloads': docs[0]['downloads']
-        });
-        next();
+      res.send({
+        'plugin_count': pcount,
+        'version_count': vcount
       });
+      next();
     });
   });
 
