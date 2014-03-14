@@ -516,7 +516,6 @@ if (cluster.isMaster) {
         vcount += plugins[plugin]['versions'].length;
       }
 
-      var days = (new Date().getTime() / 1000) - (86400 * 1);
       res.send({
         'plugin_count': pcount,
         'version_count': vcount
