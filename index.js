@@ -477,15 +477,12 @@ if (cluster.isMaster) {
   app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', ALLOW_HEADERS);
-    
+
     if (res.methods && res.methods.length > 0) {
       methods = res.methods.join(', ');
       res.setHeader('Access-Control-Allow-Methods', methods);
     }
-
-    if (res.etag && !res.getHeader('Etag'))
-      res.setHeader('Etag', res.etag);
-
+    
     next();
   });
   app.use(restify.queryParser());
