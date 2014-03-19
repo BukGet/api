@@ -462,26 +462,9 @@ if (cluster.isMaster) {
   app.pre(restify.pre.userAgentConnection());
   app.pre(restify.pre.sanitizePath());
 
-  //Middlewares
-  var ALLOW_HEADERS = [
-      'Accept',
-      'Accept-Version',
-      'Content-Length',
-      'Content-MD5',
-      'Content-Type',
-      'Date',
-      'Api-Version',
-      'Response-Time' 
-  ].join(', ');
-
+  //Middleware
   /*app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', ALLOW_HEADERS);
-
-    if (res.methods && res.methods.length > 0) {
-      methods = res.methods.join(', ');
-      res.setHeader('Access-Control-Allow-Methods', methods);
-    }
     next();
   });*/
   app.use(restify.fullResponse());
