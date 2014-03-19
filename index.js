@@ -474,7 +474,7 @@ if (cluster.isMaster) {
       'Response-Time' 
   ].join(', ');
 
-  app.use(function (req, res, next) {
+  /*app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', ALLOW_HEADERS);
 
@@ -482,9 +482,9 @@ if (cluster.isMaster) {
       methods = res.methods.join(', ');
       res.setHeader('Access-Control-Allow-Methods', methods);
     }
-    
     next();
-  });
+  });*/
+  app.use(restify.fullResponse());
   app.use(restify.queryParser());
   app.use(restify.bodyParser())
   app.use(restify.jsonp());
