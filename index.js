@@ -101,7 +101,7 @@ if (cluster.isMaster) {
     },
 
     'in': function (item, sub, reference) {
-      if (item['value'].isArray()) {
+      if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
           '$in': item['value']
         }
@@ -109,7 +109,7 @@ if (cluster.isMaster) {
     },
 
     'not in': function (item, sub, reference) {
-      if (item['value'].isArray()) {
+      if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
           '$nin': item['value']
         }
@@ -117,7 +117,7 @@ if (cluster.isMaster) {
     },
 
     'all': function (item, sub, reference) {
-      if (item['value'].isArray()) {
+      if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
           '$all': item['value']
         }
@@ -125,25 +125,25 @@ if (cluster.isMaster) {
     },
 
     'and': function (item, sub, reference) {
-      if (item['value'].isArray() && item['field'] == '') {
+      if (Object.prototype.toString.call(item['value']) === '[object Array]' && item['field'] == '') {
         reference['$and'] = (item['value'] == null ? sub : item['value']);
       }
     },
 
     'or': function (item, sub, reference) {
-      if (item['value'].isArray() && item['field'] == '') {
+      if (Object.prototype.toString.call(item['value']) === '[object Array]' && item['field'] == '') {
         reference['$or'] = (item['value'] == null ? sub : item['value']);
       }
     },
 
     'nor': function (item, sub, reference) {
-      if (item['value'].isArray() && item['field'] == '') {
+      if (Object.prototype.toString.call(item['value']) === '[object Array]' && item['field'] == '') {
         reference['$nor'] = (item['value'] == null ? sub : item['value']);
       }
     },
 
     'not': function (item, sub, reference) {
-      if (item['value'].isArray() && item['field'] == '') {
+      if (Object.prototype.toString.call(item['value']) === '[object Array]' && item['field'] == '') {
         reference['$not'] = (item['value'] == null ? sub : item['value']);
       }
     }
