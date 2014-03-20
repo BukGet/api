@@ -1,4 +1,4 @@
-## BukGet
+## BukGet [![Build Status](https://travis-ci.org/BukGet/api.svg?branch=master)](https://travis-ci.org/BukGet/api)
 BukGet is a JSON API into dev.bukkit.org.  The idea is to provide some sort of
 an interface into DBO's contents as Curse doesn't natively have one for us to
 interact with.
