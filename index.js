@@ -462,12 +462,46 @@ if (cluster.isMaster) {
   app.pre(restify.pre.userAgentConnection());
   app.pre(restify.pre.sanitizePath());
 
-  //Middleware
-  /*app.use(function (req, res, next) {
+  var ALLOW_HEADERS = [
+      'Accept',
+      'Accept-Version',
+      'Content-Length',
+      'Content-MD5',
+      'Content-Type',
+      'Date',
+      'Api-Version',
+      'Response-Time',
+      'Origin', 
+      'X-Requested-With'
+  ].join(', ');
+
+  function setHeaders (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', ALLOW_HEADERS);
+    if (res.methods && res.methods.length > 0) {
+        if (res.methods.indexOf('OPTIONS') === -1) res.methods.push('OPTIONS');
+        res.setHeader('Access-Control-Allow-Methods', res.methods.join(', '));
+    }
+  }
+
+  function optionsHandler (req, res, next) {
+    if (req.method.toLowerCase() === 'options') {
+      setHeaders(req, res);
+      res.send(204);
+      next();
+    } else {
+      res.send(new restify.MethodNotAllowedError());
+      next();
+    }
+  }
+
+  app.on('MethodNotAllowed', optionsHandler);
+
+  //Middleware
+  app.use(function (req, res, next) {
+    setHeaders(req, res);
     next();
-  });*/
-  app.use(restify.fullResponse());
+  });
   app.use(restify.queryParser());
   app.use(restify.bodyParser())
   app.use(restify.jsonp());
