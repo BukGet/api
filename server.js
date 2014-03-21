@@ -54,13 +54,7 @@ module.exports = function (database, callback) {
 
     'exists': function (item, sub, reference) {
       reference[item['field']] = {
-        '$exists': true
-      };
-    },
-
-    'nexists': function (item, sub, reference) {
-      reference[item['field']] = {
-        '$exists': false
+        '$exists': Boolean(item['value'])
       };
     },
 
@@ -107,8 +101,8 @@ module.exports = function (database, callback) {
     },
 
     'not': function (item, sub, reference) {
-      if (Object.prototype.toString.call(item['value']) === '[object Array]' && item['field'] == '') {
-        reference['$not'] = (item['value'] == null ? sub : item['value']);
+      if (Object.prototype.toString.call(item['value']) === '[object Object]') {
+        reference[item['field']] = { '$not' : (item['value'] == null ? sub : item['value']) };
       }
     }
   };
@@ -116,6 +110,10 @@ module.exports = function (database, callback) {
   // Aliases
   types['equals'] = types['='];
   types['not-equals'] = types['!='];
+  types['less'] = types['<'];
+ 	types['less-equal'] = types['<='];
+  types['more'] = types['>'];
+ 	types['more-equal'] = types['>='];
 
   //Common methods
   var common = {
