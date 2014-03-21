@@ -482,7 +482,7 @@ module.exports = function (database, callback) {
 
   //Handle stats requests
   app.get('/stats/naughty_list', function (req, res, next) {
-    db.plugins.find({ '_use_dbo': { '$exists': true } }, {
+    db.plugins.find({ "_use_dbo": { "$exists": true } }, {
       '_id': 0,
       'slug': 1,
       'plugin_name': 1,
