@@ -35,7 +35,7 @@ if (cluster.isMaster) {
 
 } else {
   var config = require('./config');
-  require('./server')(function(callback){
+  require('./server')(config.database.host + config.database.name, function (callback) {
     //Start webserver
     callback.listen(config.port, config.address);
   });

@@ -1,12 +1,11 @@
-module.exports = function (callback) {
+module.exports = function (database, callback) {
 	//Imports
-  var config = require('./config');
   var mongode = require('mongode');
   var ObjectID = require('mongode').ObjectID;
   var restify = require('restify');
 
   //Connect to database
-  var db = mongode.connect(config.database.host + config.database.name);
+  var db = mongode.connect(database);
   db.collection('plugins');
   db.collection('webstats');
   db.collection('geninfo');
@@ -162,7 +161,7 @@ module.exports = function (callback) {
       }, function (err, document) {
         if (document != null) {
           document['id'] = document['_id'];
-          document['_id'];
+          delete document['_id'];
         }
 
         callback(document);
@@ -530,34 +529,20 @@ module.exports = function (callback) {
       'plugins': 0
     };
     if (req.query.plugins) {
-      filter['plugins'] = 1;
-    } 
+    	if (req.query.plugins == "all") { 
+	      filter = { '_id': 0 }
+    	} else {
+	    	filter = { '_id': 0, 'timestamp': 1 }
+		    var plugins = req.query.plugins.split(',');
+
+		    for (var index = 0, pluginsLen = plugins.length; index < pluginsLen; index++) {
+		      filter['plugins.' + plugins[index]] = 1;
+		    }
+	  	}
+    }
+
     var days = (new Date().getTime() / 1000) - (86400 * req.params.days);
     db.webstats.find({ timestamp: { $gte: days } }, filter).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
-      if (err) {
-        res.send(500);
-        return next();
-      }
-
-      res.send(docs);
-      next();
-    });
-  });
-
-  app.get('/stats/trend/:days/:names', function (req, res, next) {
-    var fields = {
-      '_id': 0,
-      'timestamp': 1
-    }
-
-    var plugins = req.params.names.split(',');
-
-    for (var index = 0, pluginsLen = plugins.length; index < pluginsLen; index++) {
-      fields['plugins.' + plugins[index]] = 1;
-    }
-
-    var days = (new Date().getTime() / 1000) - (86400 * req.params.days);
-    db.webstats.find({ timestamp: { $gte: days } }, fields).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
       if (err) {
         res.send(500);
         return next();

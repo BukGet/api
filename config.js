@@ -5,5 +5,6 @@ module.exports = exports = {
   database: {
     host: 'mongodb://127.0.0.1/', // MongoDB host
     name: 'bukget', // MongoDB database name
+    test_name: 'bukget_test' // MongoDB database name used for tests
   }
 }
