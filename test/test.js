@@ -555,6 +555,20 @@ describe('Updates', function() {
         done();
       });
   });
+  it('returns list of latest versions by md5', function (done) {
+    request(instance)
+      .get('/3/updates?hashes=49ab15446ae1bfce8801433cd75f8fc9')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err,res) {
+        if (err) {
+          throw err;
+        }
+        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
+        done();
+      });
+  });
   after(function (done) {
     db.plugins.remove({}, function callback(err, res) { done(); });
   });

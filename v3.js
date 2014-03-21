@@ -188,7 +188,8 @@ module.exports = function (app, db, common) {
   app.post('/3/updates', function (req, res, next) {
     var slugs = (req.params.slugs == null ? '' : req.params.slugs).split(',');
     var server = req.params.server == null ? 'bukkit' : req.params.server;
-    common.plugins_up_to_date(slugs, server, function (callback) {
+    var hashes = (req.params.hashes == null ? '' : req.params.hashes).split(',');
+    common.plugins_up_to_date(slugs, hashes, server, function (callback) {
       res.send(callback);
       next();
     });
@@ -197,8 +198,8 @@ module.exports = function (app, db, common) {
   app.get('/3/updates', function (req, res, next) {
     var slugs = (req.query.slugs == null ? '' : req.query.slugs).split(',');
     var server = req.query.server == null ? 'bukkit' : req.query.server;
-
-    common.plugins_up_to_date(slugs, server, function (callback) {
+    var hashes = (req.params.hashes == null ? '' : req.params.hashes).split(',');
+    common.plugins_up_to_date(slugs, hashes, server, function (callback) {
       res.send(callback);
       next();
     });

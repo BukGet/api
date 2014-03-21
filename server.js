@@ -341,16 +341,24 @@ module.exports = function (database, callback) {
       });
     },
 
-    plugins_up_to_date: function (plugins_list, server, callback) {
+    plugins_up_to_date: function (plugins_list, hash_list, server, callback) {
       // Takes a list of plugin slugs and returns an array of objects with the plugin and most recent version.
       var data = [];
       var slugs = [];
 
-      for (var i = 0; i < plugins_list.length; i++) {
-        slugs.push({
-          'slug': plugins_list[i]
-        });
-      }
+      if (plugins_list != '') {
+	      for (var i = 0; i < plugins_list.length; i++) {
+	        slugs.push({
+	          'slug': plugins_list[i]
+	        });
+	      }
+	    }
+
+	    if (hash_list != '') {
+	      for (var i = 0; i < hash_list.length; i++) {
+	        slugs.push({ "versions" : { "$elemMatch": { "md5": hash_list[i] } } });
+	      }
+	    }
 
       db.plugins.find({
         '$or': slugs,
@@ -358,6 +366,9 @@ module.exports = function (database, callback) {
       }).toArray(function (err, docs) {
         var doc, versions, version;
 
+        if (docs == null) {
+        	return callback([]);
+        }
         for (var i = 0, docLen = docs.length; i < docLen; i++) {
           doc = docs[i];
           versions = doc['versions'];
