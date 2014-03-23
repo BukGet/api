@@ -189,7 +189,8 @@ module.exports = function (app, db, common) {
     var slugs = (req.params.slugs == null ? '' : req.params.slugs).split(',');
     var server = req.params.server == null ? 'bukkit' : req.params.server;
     var hashes = (req.params.hashes == null ? '' : req.params.hashes).split(',');
-    common.plugins_up_to_date(slugs, hashes, server, function (callback) {
+    var filenames = (req.params.filenames == null ? '' : req.params.filenames).split(',');
+    common.plugins_up_to_date(slugs, hashes, filenames, server, function (callback) {
       res.send(callback);
       next();
     });
@@ -198,8 +199,9 @@ module.exports = function (app, db, common) {
   app.get('/3/updates', function (req, res, next) {
     var slugs = (req.query.slugs == null ? '' : req.query.slugs).split(',');
     var server = req.query.server == null ? 'bukkit' : req.query.server;
-    var hashes = (req.params.hashes == null ? '' : req.params.hashes).split(',');
-    common.plugins_up_to_date(slugs, hashes, server, function (callback) {
+    var hashes = (req.query.hashes == null ? '' : req.query.hashes).split(',');
+    var filenames = (req.query.filenames == null ? '' : req.query.filenames).split(',');
+    common.plugins_up_to_date(slugs, hashes, filenames, server, function (callback) {
       res.send(callback);
       next();
     });

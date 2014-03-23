@@ -341,7 +341,7 @@ module.exports = function (database, callback) {
       });
     },
 
-    plugins_up_to_date: function (plugins_list, hash_list, server, callback) {
+    plugins_up_to_date: function (plugins_list, hash_list, file_list, server, callback) {
       // Takes a list of plugin slugs and returns an array of objects with the plugin and most recent version.
       var data = [];
       var slugs = [];
@@ -359,6 +359,12 @@ module.exports = function (database, callback) {
 	        slugs.push({ "versions" : { "$elemMatch": { "md5": hash_list[i] } } });
 	      }
 	    }
+
+      if (file_list != '') {
+        for (var i = 0; i < file_list.length; i++) {
+          slugs.push({ "versions" : { "$elemMatch": { "filename": file_list[i] } } });
+        }
+      }
 
       db.plugins.find({
         '$or': slugs,
