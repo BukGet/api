@@ -160,6 +160,8 @@ module.exports = function (database, callback) {
         if (document != null) {
           document['id'] = document['_id'];
           delete document['_id'];
+        } else {
+          document = {};
         }
 
         callback(document);
