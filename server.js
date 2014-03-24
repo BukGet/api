@@ -383,7 +383,7 @@ module.exports = function (database, callback) {
             'slug': doc['slug'],
             'plugin_name': doc['plugin_name'],
             'versions': {
-              'latest': {'version': versions[0]['version'], 'download': versions[0]['download'] }
+              'latest': {'version': versions[0]['version'], 'download': versions[0]['download'], 'md5': versions[0]['md5'] }
             },
           }
 
@@ -392,7 +392,7 @@ module.exports = function (database, callback) {
 
             if (version['type'] == 'Release' || version['type'] == 'Beta' || version['type'] == 'Alpha') {
               if (entry['versions'][version['type'].toLowerCase()] == null) {
-                entry['versions'][version['type'].toLowerCase()] = { 'version': version['version'], 'download': version['download'] };
+                entry['versions'][version['type'].toLowerCase()] = { 'version': version['version'], 'download': version['download'], 'md5': version['md5'] };
               }
             }
           }

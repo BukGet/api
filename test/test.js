@@ -497,7 +497,7 @@ describe('Categories', function() {
 });
 
 describe('Updates', function() {
-  var update_versions = { 'latest': { 'version': plugin_two.versions[0]['version'], 'download': 'http://dev.bukkit.org/media/files/599/604/AbitOfRealism.jar' } };
+  var update_versions = { 'latest': { 'version': plugin_two.versions[0]['version'], 'download': 'http://dev.bukkit.org/media/files/599/604/AbitOfRealism.jar', 'md5': '236c18df1d15e149fe91675c08efa8b5' } };
   before(function (done) {
     db.plugins.insert(plugin_two, {safe: true}, function (err, records) {
       var versions = plugin_two.versions;
@@ -506,7 +506,7 @@ describe('Updates', function() {
 
         if (version['type'] == 'Release' || version['type'] == 'Beta' || version['type'] == 'Alpha') {
           if (update_versions[version['type'].toLowerCase()] == null) {
-            update_versions[version['type'].toLowerCase()] = { 'version': version['version'], 'download' : version['download'] };
+            update_versions[version['type'].toLowerCase()] = { 'version': version['version'], 'download' : version['download'], 'md5': version['md5'] };
           }
         }
       }
