@@ -59,25 +59,37 @@ module.exports = function (database, callback) {
     },
 
     'in': function (item, sub, reference) {
+      var list = [];
+      for (i in item['value']) {
+        list.push(new RegExp('^' + item['value'][i] + '$', "i"));
+      }
       if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
-          '$in': item['value']
+          '$in': list
         }
       }
     },
 
     'not in': function (item, sub, reference) {
+      var list = [];
+      for (i in item['value']) {
+        list.push(new RegExp('^' + item['value'][i] + '$', "i"));
+      }
       if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
-          '$nin': item['value']
+          '$nin': list
         }
       }
     },
 
     'all': function (item, sub, reference) {
+      var list = [];
+      for (i in item['value']) {
+        list.push(new RegExp('^' + item['value'][i] + '$', "i"));
+      }
       if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
-          '$all': item['value']
+          '$all': list
         }
       }
     },
@@ -104,7 +116,7 @@ module.exports = function (database, callback) {
       if (Object.prototype.toString.call(item['value']) === '[object Object]') {
         reference[item['field']] = { '$not' : (item['value'] == null ? sub : item['value']) };
       }
-    }
+    } 
   };
 
   // Aliases
