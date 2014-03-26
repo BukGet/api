@@ -54,7 +54,7 @@ module.exports = function (app, db, common) {
     handle_parameters(req, true, function (fields, start, size, sort) {
       common.plugin_details(req.params.server, req.params.slug, req.params.version, fields, function (data) {
         if (data == null) {
-          res.send(404, "Plugin Does Not Exist");
+          res.send(404, { "error" : "Plugin Does Not Exist" });
           return next();
         }
 
@@ -132,7 +132,7 @@ module.exports = function (app, db, common) {
   app.get('/3/plugins/:server/:slug/:version/download', function (req, res, next) {
     common.plugin_details(req.params.server, req.params.slug, req.params.version, [], function (data) {
       if (data == null) {
-        res.send(404, "Plugin Does Not Exist");
+        res.send(404, { "error" : "Plugin Does Not Exist" });
         return next();
       }
 
