@@ -98,7 +98,7 @@ module.exports = function (app, db, common) {
     });
   }
 
-  app.get('/3', function (req, res, next) {
+  app.get('/3/', function (req, res, next) {
     geninfo(req, res, next);
   });
 
