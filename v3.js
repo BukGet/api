@@ -125,24 +125,20 @@ module.exports = function (app, db, common) {
     plugin_details(req, res, next);
   });
 
-  app.get('/3/plugins/:server/:slug/:version', function (req, res, next) {
-    plugin_details(req, res, next);
-  });
-
-  app.get('/3/plugins/:server/:slug/:version/download', function (req, res, next) {
-    common.plugin_details(req.params.server, req.params.slug, req.params.version, [], function (data) {
+  app.get(/^\/3\/plugins\/(.*)\/(.*)\/(.*)\/download/, function (req, res, next) {
+    common.plugin_details(req.params[0], req.params[1], req.params[2], [], function (data) {
       if (data == null) {
         res.send(404, { "error" : "Plugin Does Not Exist" });
         return next();
       }
 
-      if (req.params.version.toLowerCase() == "latest") {
+      if (req.params[2].toLowerCase() == "latest") {
         res.header('Location', data['versions'][0]['download']);
         res.send(302);
         return next();
       } else {
         for (var i = 0, il = data['versions'].length; i < il; i++) {
-          if (data['versions'][i]['version'] == req.params.version) {
+          if (data['versions'][i]['version'] == req.params[2]) {
             res.header('Location', data['versions'][i]['download']);
             res.send(302);
             return next();
@@ -154,6 +150,14 @@ module.exports = function (app, db, common) {
       next();
     });
   });
+
+  app.get(/^\/3\/plugins\/(.*)\/(.*)\/(.*)/, function (req, res, next) {
+    req.params.server = req.params[0];
+    req.params.slug = req.params[1];
+    req.params.version = req.params[2];
+    plugin_details(req, res, next);
+  });
+
 
   app.get('/3/authors', function (req, res, next) {
     common.list_authors(function (callback) {
