@@ -763,7 +763,7 @@ describe('Search', function() {
   it("in", function (done) {
     request(instance)
       .post('/3/search')
-      .send({ "filters": JSON.stringify([{"field": "slug", "action": "in", "value": ["clearthechat", "abitofrealism"] }]) })
+      .send({ "filters": JSON.stringify([{"field": "slug", "action": "in", "value": ["clearthechat"] }]) })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -771,7 +771,7 @@ describe('Search', function() {
         if (err) {
           throw err;
         }
-        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ 'description': plugin_two.description, 'plugin_name': plugin_two.plugin_name, 'slug': plugin_two.slug }, { 'description': plugin.description, 'plugin_name': plugin.plugin_name, 'slug': plugin.slug }]));
+        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ 'description': plugin.description, 'plugin_name': plugin.plugin_name, 'slug': plugin.slug }]));
         done();
       });
   });

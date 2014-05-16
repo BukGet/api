@@ -1,6 +1,7 @@
  //Include the cluster module
 var cluster = require('cluster');
-
+var config = require('./config');
+  
 // Code to run if we're in the master process
 if (cluster.isMaster) {
   var MiniOps = require('miniops');
@@ -34,7 +35,6 @@ if (cluster.isMaster) {
   });
 
 } else {
-  var config = require('./config');
   require('./server')(config.database.host + config.database.name, function (callback) {
     //Start webserver
     callback.listen(config.port, config.address);
