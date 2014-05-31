@@ -835,6 +835,21 @@ describe('Search', function() {
         done();
       });
   });
+  it("likeor", function (done) {
+    request(instance)
+      .post('/3/search')
+      .send({ "filters": JSON.stringify([{"field": "", "action": "likeor", "value": [{ 'slug': 'freal' }, { 'main': 'exak.ClearTheChat.Cl'}] }]) })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err,res) {
+        if (err) {
+          throw err;
+        }
+        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ 'description': plugin_two.description, 'plugin_name': plugin_two.plugin_name, 'slug': plugin_two.slug }, { 'description': plugin.description, 'plugin_name': plugin.plugin_name, 'slug': plugin.slug }]));
+        done();
+      });
+  });
   it("nor", function (done) {
     request(instance)
       .post('/3/search')

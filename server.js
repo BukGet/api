@@ -106,6 +106,15 @@ module.exports = function (database, callback) {
       }
     },
 
+    'likeor': function (item, sub, reference) {
+      reference['$or'] = [];
+      for (i in item['value']) {
+        var key = Object.keys(item['value'][i])[0];
+        reference['$or'][i] = {};
+        reference['$or'][i][key] = new RegExp(item['value'][i][key], "i");
+      }
+    },
+
     'nor': function (item, sub, reference) {
       if (Object.prototype.toString.call(item['value']) === '[object Array]' && item['field'] == '') {
         reference['$nor'] = (item['value'] == null ? sub : item['value']);
