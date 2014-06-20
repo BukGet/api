@@ -14,6 +14,9 @@ if (cluster.isMaster) {
   stats.listen(9133);
   // Count the machine's CPU cores
   var cpuCount = require('os').cpus().length - 1;
+  if (cpuCount < 1) {
+    cpuCount = 1;
+  }
 
   // Create a worker for each cpu core - 1
   for (var i = 0, il=cpuCount; i < il; i++) {
