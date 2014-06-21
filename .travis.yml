@@ -4,4 +4,8 @@ node_js:
 services:
   - mongodb
 notifications:
-  email: false
+  email:
+    recipients:
+      - david@dmarby.se
+    on_success: change
+    on_failure: always
