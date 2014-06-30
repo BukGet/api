@@ -524,7 +524,6 @@ describe('Updates', function() {
           throw err;
         }
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions, 'hash': '49ab15446ae1bfce8801433cd75f8fc9' }]));
-        delete update_versions.current; // remove current results for any other tests (all that follow do not contain hash based searches
         done();
       });
   });
@@ -538,6 +537,7 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
+        if (update_versions.current) delete update_versions.current;
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
         done();
       });
@@ -552,6 +552,7 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
+        if (update_versions.current) delete update_versions.current;
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
         done();
       });
@@ -566,6 +567,7 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
+        if (update_versions.current) delete update_versions.current;
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
         done();
       });
@@ -580,6 +582,7 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
+        if (update_versions.current) delete update_versions.current;
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions, 'file': 'AbitOfRealism.jar' }]));
         done();
       });
