@@ -425,7 +425,7 @@ module.exports = function (database, callback) {
               }
             }
             if (hash_list && hash_list[i] && hash_list[i] == version['md5']) {
-              entry['versions']['search'] = { 'version': version['version'], 'download': version['download'], 'md5': version['md5'] };
+              entry['versions']['current'] = { 'version': version['version'], 'download': version['download'], 'md5': version['md5'] };
             }
           }
 
