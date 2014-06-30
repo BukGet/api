@@ -513,6 +513,21 @@ describe('Updates', function() {
       done();
     });
   });
+  it('returns list of latest versions by md5', function (done) {
+    request(instance)
+      .get('/3/updates?hashes=49ab15446ae1bfce8801433cd75f8fc9')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err,res) {
+        if (err) {
+          throw err;
+        }
+        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions, 'hash': '49ab15446ae1bfce8801433cd75f8fc9' }]));
+        delete update_versions.current; // remove current results for any other tests (all that follow do not contain hash based searches
+        done();
+      });
+  });
   it('returns list of latest versions via get', function (done) {
     request(instance)
       .get('/3/updates?slugs=abitofrealism')
@@ -523,7 +538,6 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
-        delete update_versions.current; // remove current results from any searches not completed with hash
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
         done();
       });
@@ -538,7 +552,6 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
-        delete update_versions.current; // remove current results from any searches not completed with hash
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
         done();
       });
@@ -553,22 +566,7 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
-        delete update_versions.current; // remove current results from any searches not completed with hash
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
-        done();
-      });
-  });
-  it('returns list of latest versions by md5', function (done) {
-    request(instance)
-      .get('/3/updates?hashes=49ab15446ae1bfce8801433cd75f8fc9')
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err,res) {
-        if (err) {
-          throw err;
-        }
-        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions, 'hash': '49ab15446ae1bfce8801433cd75f8fc9' }]));
         done();
       });
   });
@@ -582,7 +580,6 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
-        delete update_versions.current; // remove current results from any searches not completed with hash
         JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions, 'file': 'AbitOfRealism.jar' }]));
         done();
       });
