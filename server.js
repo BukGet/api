@@ -409,6 +409,12 @@ module.exports = function (database, callback) {
               'latest': {'version': versions[0]['version'], 'download': versions[0]['download'], 'md5': versions[0]['md5'] }
             },
           }
+          if (hash_list && hash_list[i]) {
+            entry.hash = hash_list[i];
+          }
+          if (file_list && file_list[i]) {
+            entry.file = file_list[i];
+          }
 
           for (var x = 0, versionLen = versions.length; x < versionLen; x++) {
             version = versions[x];
@@ -417,6 +423,9 @@ module.exports = function (database, callback) {
               if (entry['versions'][version['type'].toLowerCase()] == null) {
                 entry['versions'][version['type'].toLowerCase()] = { 'version': version['version'], 'download': version['download'], 'md5': version['md5'] };
               }
+            }
+            if (hash_list && hash_list[i] && hash_list[i] == version['md5']) {
+              entry['versions']['current'] = { 'version': version['version'], 'download': version['download'], 'md5': version['md5'] };
             }
           }
 
