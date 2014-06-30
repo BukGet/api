@@ -580,7 +580,7 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
-        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }, 'file': 'AbitOfRealism.jar']));
+        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions, 'file': 'AbitOfRealism.jar' }]));
         done();
       });
   });
