@@ -4,6 +4,12 @@ node_js:
 services:
   - mongodb
 notifications:
+  irc:
+    channels:
+      - "irc.esper.net#bukget"
+    skip_join: true
+    on_success: change
+    on_failure: always
   email:
     recipients:
       - david@dmarby.se
