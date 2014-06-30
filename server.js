@@ -49,7 +49,7 @@ module.exports = function (database, callback) {
     },
 
     'like': function (item, sub, reference) {
-      reference[item['field']] = new RegExp(item['value'], "i");
+      reference[item['field']] = new RegExp(item['value'], 'i');
     },
 
     'exists': function (item, sub, reference) {
@@ -61,7 +61,7 @@ module.exports = function (database, callback) {
     'in': function (item, sub, reference) {
       var list = [];
       for (i in item['value']) {
-        list.push(new RegExp('^' + item['value'][i] + '$', "i"));
+        list.push(new RegExp('^' + item['value'][i] + '$', 'i'));
       }
       if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
@@ -73,7 +73,7 @@ module.exports = function (database, callback) {
     'not in': function (item, sub, reference) {
       var list = [];
       for (i in item['value']) {
-        list.push(new RegExp('^' + item['value'][i] + '$', "i"));
+        list.push(new RegExp('^' + item['value'][i] + '$', 'i'));
       }
       if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
@@ -85,7 +85,7 @@ module.exports = function (database, callback) {
     'all': function (item, sub, reference) {
       var list = [];
       for (i in item['value']) {
-        list.push(new RegExp('^' + item['value'][i] + '$', "i"));
+        list.push(new RegExp('^' + item['value'][i] + '$', 'i'));
       }
       if (Object.prototype.toString.call(item['value']) === '[object Array]') {
         reference[item['field']] = {
@@ -111,7 +111,7 @@ module.exports = function (database, callback) {
       for (i in item['value']) {
         var key = Object.keys(item['value'][i])[0];
         reference['$or'][i] = {};
-        reference['$or'][i][key] = new RegExp(item['value'][i][key], "i");
+        reference['$or'][i][key] = new RegExp(item['value'][i][key], 'i');
       }
     },
 
@@ -330,9 +330,9 @@ module.exports = function (database, callback) {
         var the_versions = p['versions'];
 
         if (version != undefined && p['versions'] != null) {
-          if (version.toLowerCase() == "latest") {
+          if (version.toLowerCase() == 'latest') {
             the_versions = [p['versions'][0]];
-          } else if (version.toLowerCase() == "alpha" || version.toLowerCase() == "beta" || version.toLowerCase() == "release") {
+          } else if (version.toLowerCase() == 'alpha' || version.toLowerCase() == 'beta' || version.toLowerCase() == 'release') {
             for (var i = 0, versionsLen = p['versions'].length; i < versionsLen; i++) {
               if (p['versions'][i]['type'].toLowerCase() == version.toLowerCase()) {
                 the_versions = [p['versions'][i]];
@@ -379,13 +379,13 @@ module.exports = function (database, callback) {
 
 	    if (hash_list != '') {
 	      for (var i = 0; i < hash_list.length; i++) {
-	        slugs.push({ "versions" : { "$elemMatch": { "md5": hash_list[i] } } });
+	        slugs.push({ 'versions' : { '$elemMatch': { 'md5': hash_list[i] } } });
 	      }
 	    }
 
       if (file_list != '') {
         for (var i = 0; i < file_list.length; i++) {
-          slugs.push({ "versions" : { "$elemMatch": { "filename": file_list[i] } } });
+          slugs.push({ 'versions' : { '$elemMatch': { 'filename': file_list[i] } } });
         }
       }
 
@@ -529,7 +529,7 @@ module.exports = function (database, callback) {
 
   //Handle stats requests
   app.get('/stats/naughty_list', function (req, res, next) {
-    db.plugins.find({ "_use_dbo": { "$exists": true } }, {
+    db.plugins.find({ '_use_dbo': { '$exists': true } }, {
       '_id': 0,
       'slug': 1,
       'plugin_name': 1,
@@ -576,7 +576,7 @@ module.exports = function (database, callback) {
       'plugins': 0
     };
     if (req.query.plugins) {
-    	if (req.query.plugins == "all") { 
+    	if (req.query.plugins == 'all') { 
 	      filter = { '_id': 0 }
     	} else {
 	    	filter = { '_id': 0, 'timestamp': 1 }

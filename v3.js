@@ -40,7 +40,7 @@ module.exports = function (app, db, common) {
       common.list_plugins(req.params.server, fields, sort, start, size, function (callback) {
         if (callback == null) {
           res.send(400, {
-            "error": "invalid params"
+            'error': 'invalid params'
           });
           return next();
         }
@@ -54,7 +54,7 @@ module.exports = function (app, db, common) {
     handle_parameters(req, true, function (fields, start, size, sort) {
       common.plugin_details(req.params.server, req.params.slug, req.params.version, fields, function (data) {
         if (data == null) {
-          res.send(404, { "error" : "Plugin Does Not Exist" });
+          res.send(404, { 'error' : 'Plugin Does Not Exist' });
           return next();
         }
 
@@ -73,7 +73,7 @@ module.exports = function (app, db, common) {
       common.list_author_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
         if (callback == null) {
           res.send(400, {
-            "error": "invalid author"
+            'error': 'invalid author'
           });
           return next();
         }
@@ -88,7 +88,7 @@ module.exports = function (app, db, common) {
       common.list_category_plugins(req.params.server, req.params.name, fields, sort, start, size, function (callback) {
         if (callback == null) {
           res.send(400, {
-            "error": "invalid category"
+            'error': 'invalid category'
           });
           return next();
         }
@@ -128,11 +128,11 @@ module.exports = function (app, db, common) {
   app.get(/^\/3\/plugins\/(.*)\/(.*)\/(.*)\/download/, function (req, res, next) {
     common.plugin_details(req.params[0], req.params[1], req.params[2], [], function (data) {
       if (data == null) {
-        res.send(404, { "error" : "Plugin Does Not Exist" });
+        res.send(404, { 'error' : 'Plugin Does Not Exist' });
         return next();
       }
 
-      if (req.params[2].toLowerCase() == "latest") {
+      if (req.params[2].toLowerCase() == 'latest') {
         res.header('Location', data['versions'][0]['download']);
         res.send(302);
         return next();
@@ -146,7 +146,7 @@ module.exports = function (app, db, common) {
         }
       }
 
-      res.send(404, {"error": "could not find version"});
+      res.send(404, {'error': 'could not find version'});
       next();
     });
   });
@@ -237,7 +237,7 @@ module.exports = function (app, db, common) {
     common.plugin_search(filters, fields, sort, start, size, false, function (callback) {
       if (callback == null) {
         res.send(400, {
-          "error": "invalid search"
+          'error': 'invalid search'
         });
         return next();
       }
