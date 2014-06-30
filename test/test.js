@@ -565,7 +565,8 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
-        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
+        update_versions.search = {"version":"0.3","download":"http://dev.bukkit.org/media/files/597/975/AbitOfRealism.jar","md5":"49ab15446ae1bfce8801433cd75f8fc9"};
+        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions, 'hash': '49ab15446ae1bfce8801433cd75f8fc9' }]));
         done();
       });
   });
@@ -579,7 +580,7 @@ describe('Updates', function() {
         if (err) {
           throw err;
         }
-        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }]));
+        JSON.stringify(res.res.body).should.equal(JSON.stringify([{ "slug": plugin_two.slug, "plugin_name": plugin_two.plugin_name, "versions": update_versions }, 'file': 'AbitOfRealism.jar']));
         done();
       });
   });
