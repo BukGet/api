@@ -588,9 +588,9 @@ describe('Updates', function() {
         done();
       });
   });
-  it('returns additional fields correctly', function (done) {
+  it('returns extra fields correctly', function (done) {
     request(instance)
-      .get('/3/updates?additional_fields=website&filenames=AbitOfRealism.jar')
+      .get('/3/updates?extra_fields=website&filenames=AbitOfRealism.jar')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -603,9 +603,9 @@ describe('Updates', function() {
         done();
       });
   });
-  it('returns additional version fields correctly', function (done) {
+  it('returns extra version fields correctly', function (done) {
     request(instance)
-      .get('/3/updates?additional_version_fields=status&filenames=AbitOfRealism.jar')
+      .get('/3/updates?extra_version_fields=status&filenames=AbitOfRealism.jar')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)

@@ -194,9 +194,9 @@ module.exports = function (app, db, common) {
     var server = req.params.server == null ? 'bukkit' : req.params.server;
     var hashes = (req.params.hashes == null ? '' : req.params.hashes).split(',');
     var filenames = (req.params.filenames == null ? '' : req.params.filenames).split(',');
-    var additional_fields = ((req.params.additional_fields == null ? '' : req.params.additional_fields.split(',')));
-    var additional_version_fields = ((req.query.additional_version_fields == null ? '' : req.query.additional_version_fields.split(',')));
-    common.plugins_up_to_date(slugs, hashes, filenames, server, additional_fields, additional_version_fields, function (callback) {
+    var extra_fields = ((req.params.extra_fields == null ? '' : req.params.extra_fields.split(',')));
+    var extra_version_fields = ((req.query.extra_version_fields == null ? '' : req.query.extra_version_fields.split(',')));
+    common.plugins_up_to_date(slugs, hashes, filenames, server, extra_fields, extra_version_fields, function (callback) {
       res.send(callback);
       next();
     });
@@ -207,9 +207,9 @@ module.exports = function (app, db, common) {
     var server = req.query.server == null ? 'bukkit' : req.query.server;
     var hashes = (req.query.hashes == null ? '' : req.query.hashes).split(',');
     var filenames = (req.query.filenames == null ? '' : req.query.filenames).split(',');
-    var additional_fields = ((req.query.additional_fields == null ? '' : req.query.additional_fields.split(',')));
-    var additional_version_fields = ((req.query.additional_version_fields == null ? '' : req.query.additional_version_fields.split(',')));
-    common.plugins_up_to_date(slugs, hashes, filenames, server, additional_fields, additional_version_fields, function (callback) {
+    var extra_fields = ((req.query.extra_fields == null ? '' : req.query.extra_fields.split(',')));
+    var extra_version_fields = ((req.query.extra_version_fields == null ? '' : req.query.extra_version_fields.split(',')));
+    common.plugins_up_to_date(slugs, hashes, filenames, server, extra_fields, extra_version_fields, function (callback) {
       res.send(callback);
       next();
     });
