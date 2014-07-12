@@ -364,7 +364,7 @@ module.exports = function (database, callback) {
       });
     },
 
-    plugins_up_to_date: function (plugins_list, hash_list, file_list, server, callback) {
+    plugins_up_to_date: function (plugins_list, hash_list, file_list, server, additional_fields, additional_version_fields, callback) {
       // Takes a list of plugin slugs and returns an array of objects with the plugin and most recent version.
       var data = [];
       var slugs = [];
@@ -409,6 +409,15 @@ module.exports = function (database, callback) {
               'latest': {'version': versions[0]['version'], 'download': versions[0]['download'], 'md5': versions[0]['md5'] }
             },
           }
+
+          for (var i in additional_fields) {
+            entry[additional_fields[i]] = doc[additional_fields[i]];
+          }
+
+          for (var i in additional_version_fields) {
+            entry['versions']['latest'][additional_version_fields[i]] = versions[0][additional_version_fields[i]];
+          }
+
           if (hash_list && hash_list[i]) {
             entry.hash = hash_list[i];
           }
@@ -422,10 +431,16 @@ module.exports = function (database, callback) {
             if (version['type'] == 'Release' || version['type'] == 'Beta' || version['type'] == 'Alpha') {
               if (entry['versions'][version['type'].toLowerCase()] == null) {
                 entry['versions'][version['type'].toLowerCase()] = { 'version': version['version'], 'download': version['download'], 'md5': version['md5'] };
+                for (var i in additional_version_fields) {
+                  entry['versions'][version['type'].toLowerCase()][additional_version_fields[i]] = version[additional_version_fields[i]];
+                }
               }
             }
             if (hash_list && hash_list[i] && hash_list[i] == version['md5']) {
               entry['versions']['current'] = { 'version': version['version'], 'download': version['download'], 'md5': version['md5'] };
+              for (var i in additional_version_fields) {
+                entry['versions']['current'][additional_version_fields[i]] = version[additional_version_fields[i]];
+              }
             }
           }
 
