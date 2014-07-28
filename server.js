@@ -1,5 +1,5 @@
 module.exports = function (database, callback) {
-	//Imports
+  //Imports
   var mongode = require('mongode');
   var ObjectID = require('mongode').ObjectID;
   var restify = require('restify');
@@ -132,9 +132,9 @@ module.exports = function (database, callback) {
   types['equals'] = types['='];
   types['not-equals'] = types['!='];
   types['less'] = types['<'];
- 	types['less-equal'] = types['<='];
+  types['less-equal'] = types['<='];
   types['more'] = types['>'];
- 	types['more-equal'] = types['>='];
+  types['more-equal'] = types['>='];
 
   //Common methods
   var common = {
@@ -370,18 +370,18 @@ module.exports = function (database, callback) {
       var slugs = [];
 
       if (plugins_list != '') {
-	      for (var i = 0; i < plugins_list.length; i++) {
-	        slugs.push({
-	          'slug': plugins_list[i]
-	        });
-	      }
-	    }
+        for (var i = 0; i < plugins_list.length; i++) {
+          slugs.push({
+            'slug': plugins_list[i]
+          });
+        }
+      }
 
-	    if (hash_list != '') {
-	      for (var i = 0; i < hash_list.length; i++) {
-	        slugs.push({ 'versions' : { '$elemMatch': { 'md5': hash_list[i] } } });
-	      }
-	    }
+      if (hash_list != '') {
+        for (var i = 0; i < hash_list.length; i++) {
+          slugs.push({ 'versions' : { '$elemMatch': { 'md5': hash_list[i] } } });
+        }
+      }
 
       if (file_list != '') {
         for (var i = 0; i < file_list.length; i++) {
@@ -396,7 +396,7 @@ module.exports = function (database, callback) {
         var doc, versions, version;
 
         if (docs == null) {
-        	return callback([]);
+          return callback([]);
         }
         for (var i = 0, docLen = docs.length; i < docLen; i++) {
           doc = docs[i];
@@ -591,16 +591,16 @@ module.exports = function (database, callback) {
       'plugins': 0
     };
     if (req.query.plugins) {
-    	if (req.query.plugins == 'all') { 
-	      filter = { '_id': 0 }
-    	} else {
-	    	filter = { '_id': 0, 'timestamp': 1 }
-		    var plugins = req.query.plugins.split(',');
+      if (req.query.plugins == 'all') { 
+        filter = { '_id': 0 }
+      } else {
+        filter = { '_id': 0, 'timestamp': 1 }
+        var plugins = req.query.plugins.split(',');
 
-		    for (var index = 0, pluginsLen = plugins.length; index < pluginsLen; index++) {
-		      filter['plugins.' + plugins[index]] = 1;
-		    }
-	  	}
+        for (var index = 0, pluginsLen = plugins.length; index < pluginsLen; index++) {
+          filter['plugins.' + plugins[index]] = 1;
+        }
+      }
     }
 
     var days = (new Date().getTime() / 1000) - (86400 * req.params.days);
@@ -652,10 +652,10 @@ module.exports = function (database, callback) {
   });
 
   if (process.send != null) {
-	  app.on('after', function (req, res, route, error) {
-	    process.send({ res: { statusCode : res.statusCode }, req: { url: req.url }, route: route, error: error });
-	  });
-	}
+    app.on('after', function (req, res, route, error) {
+      process.send({ res: { statusCode : res.statusCode }, req: { url: req.url }, route: route, error: error });
+    });
+  }
 
-	callback(app);
+  callback(app);
 }
