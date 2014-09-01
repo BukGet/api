@@ -651,6 +651,10 @@ module.exports = function (database, callback) {
     res.end();
   });
 
+  app.on('NotFound', function (req, res, next) {
+    res.send(404, { error: 'Invalid route' });
+  });
+
   if (process.send != null) {
     app.on('after', function (req, res, route, error) {
       process.send({ res: { statusCode : res.statusCode }, req: { url: req.url }, route: route, error: error });
