@@ -16,7 +16,6 @@
   "dependencies": {
     "cors": "^2.5.3",
     "miniops": "^0.1.0",
-    "mongode": "^0.1.6",
     "monk": "^1.0.1",
     "restify": "^3.0.1"
   },
