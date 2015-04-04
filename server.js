@@ -531,6 +531,7 @@ module.exports = function (database, callback) {
   app.use(restify.queryParser());
   app.use(restify.bodyParser())
   app.use(restify.jsonp());
+  app.use(restify.gzipResponse());
 
   //Include api handlers
   require('./v3')(app, db, common);
