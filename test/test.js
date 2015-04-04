@@ -1,22 +1,23 @@
 var should = require('should'); 
 var request = require('supertest');  
-var mongode = require('mongode');
 var config = require('../config');
-var ObjectID = require('mongode').ObjectID;
 
 var instance;
-var db = mongode.connect(config.database.host + config.database.test_name);
-db.collection('plugins');
-db.collection('webstats');
-db.collection('geninfo');
-db.collection('authors');
-db.collection('categories');
+var db = require('monk')(config.database.host + config.database.test_name);
+var plugins = db.get('plugins');
+var webstats = db.get('webstats');
+var geninfo = db.get('geninfo');
+var authors = db.get('authors');
+var categories = db.get('categories');
 //Cleanup when testing locally to make sure it's not DB related
-db.plugins.remove({}, function callback (err, res) {});
-db.webstats.remove({}, function callback (err, res) {});
-db.geninfo.remove({}, function callback (err, res) {});
-db.authors.remove({}, function callback (err, res) {});
-db.categories.remove({}, function callback (err, res) {});
+plugins.remove({}, function callback (err, res) {});
+webstats.remove({}, function callback (err, res) {});
+geninfo.remove({}, function callback (err, res) {});
+authors.remove({}, function callback (err, res) {});
+categories.remove({}, function callback (err, res) {});
+
+authors.id = function (str) { return str; };
+categories.id = function (str) { return str; };
 
 require('../server')(config.database.host + config.database.test_name, function (callback) { instance = callback; }); 
 
@@ -41,8 +42,8 @@ describe('Stats', function() {
   var naughty_plugin;
   var webstat_test;
   before(function (done) {
-    db.plugins.insert(plugin_two, {safe: true}, function (err, records) {
-      db.webstats.insert(webstat, {safe: true}, function (err, records) {
+    plugins.insert(plugin_two, {safe: true}, function (err, records) {
+      webstats.insert(webstat, {safe: true}, function (err, records) {
         naughty_plugin = [{
           'plugin_name': plugin_two.plugin_name,
           'authors': plugin_two.authors,
@@ -138,8 +139,8 @@ describe('Stats', function() {
       });
   });
   after(function (done) {
-    db.plugins.remove({}, function callback (err, res) { 
-       db.webstats.remove({}, function callback (err, res) { done(); });
+    plugins.remove({}, function callback (err, res) { 
+       webstats.remove({}, function callback (err, res) { done(); });
     });
   });
 });
@@ -147,8 +148,8 @@ describe('Stats', function() {
 describe('Misc', function() {
   var plugin_list;
   before(function (done) {
-    db.plugins.insert(plugin, {safe: true}, function (err, records) {
-      db.plugins.insert(plugin_two, {safe: true}, function (err, records) {
+    plugins.insert(plugin, {safe: true}, function (err, records) {
+      plugins.insert(plugin_two, {safe: true}, function (err, records) {
         plugin_list = [{
           'description': plugin_two.description,
           'plugin_name': plugin_two.plugin_name,
@@ -177,14 +178,14 @@ describe('Misc', function() {
       });
   });
   after(function (done) {
-    db.plugins.remove({}, function callback(err, res) { done(); });
+    plugins.remove({}, function callback(err, res) { done(); });
   });
 });
 
 describe('Geninfo', function() {
-  var test_data = [{'timestamp':1391688444,'parser':'bukkit','changes':[{'version':'2.4.8','plugin':'notebook'},{'version':'0.3','plugin':'playerbar'},{'version':'0.4','plugin':'pvpessentials'},{'version':'0.0.4','plugin':'saveonempty'},{'version':'1.1.6','plugin':'contrabanner'},{'version':'3.8.2','plugin':'craftbook'},{'version':'1.2','plugin':'exp-2-money'},{'version':'1.1','plugin':'monitorfishing'},{'version':'1.0','plugin':'googlesave'}],'duration':441,'type':'speedy','_id': ObjectID('52f37afcaab9e60332667aa2') }]; 
+  var test_data = [{'timestamp':1391688444,'parser':'bukkit','changes':[{'version':'2.4.8','plugin':'notebook'},{'version':'0.3','plugin':'playerbar'},{'version':'0.4','plugin':'pvpessentials'},{'version':'0.0.4','plugin':'saveonempty'},{'version':'1.1.6','plugin':'contrabanner'},{'version':'3.8.2','plugin':'craftbook'},{'version':'1.2','plugin':'exp-2-money'},{'version':'1.1','plugin':'monitorfishing'},{'version':'1.0','plugin':'googlesave'}],'duration':441,'type':'speedy','_id': geninfo.id('52f37afcaab9e60332667aa2') }]; 
   before(function (done) {
-    db.geninfo.insert(test_data, {safe: true}, function (err, records) {
+    geninfo.insert(test_data, {safe: true}, function (err, records) {
       test_data[0]['id'] = test_data[0]['_id'];
       delete test_data[0]['_id'];
       done();
@@ -219,16 +220,16 @@ describe('Geninfo', function() {
       });
   });
   after(function (done) {
-    db.geninfo.remove({}, function callback(err, res) { done(); });
+    geninfo.remove({}, function callback(err, res) { done(); });
   });
 });
 
 describe('Plugins', function() {
   var plugin_list;
   before(function (done) {
-    db.plugins.insert(plugin, {safe: true}, function (err, records) {
+    plugins.insert(plugin, {safe: true}, function (err, records) {
       delete plugin['_id'];
-      db.plugins.insert(plugin_two, {safe: true}, function (err, records) {
+      plugins.insert(plugin_two, {safe: true}, function (err, records) {
         delete plugin_two['_id'];
         plugin_list = [{
           'description': plugin_two.description,
@@ -380,14 +381,14 @@ describe('Plugins', function() {
       });
   });
   after(function (done) {
-    db.plugins.remove({}, function callback(err, res) { done(); });
+    plugins.remove({}, function callback(err, res) { done(); });
   });
 });
 
 describe('Authors', function() {
   before(function (done) {
-    db.plugins.insert(plugin, {safe: true}, function (err, records) {
-      db.authors.insert(author, {safe: true}, function (err, records) {
+    plugins.insert(plugin, {safe: true}, function (err, records) {
+      authors.insert(author, {safe: true}, function (err, records) {
         done();
       });
     });
@@ -435,16 +436,16 @@ describe('Authors', function() {
       });
   });
   after(function (done) {
-    db.authors.remove({}, function callback(err, res) { 
-      db.plugins.remove({}, function callback(err, res) { done(); });
+    authors.remove({}, function callback(err, res) { 
+      plugins.remove({}, function callback(err, res) { done(); });
     });
   });
 });
 
 describe('Categories', function() {
   before(function (done) {
-    db.plugins.insert(plugin_two, {safe: true}, function (err, records) {
-      db.categories.insert(category, {safe: true}, function (err, records) {
+    plugins.insert(plugin_two, {safe: true}, function (err, records) {
+      categories.insert(category, {safe: true}, function (err, records) {
         done();
       });
     });
@@ -492,15 +493,15 @@ describe('Categories', function() {
       });
   });
   after(function (done) {
-    db.categories.remove({}, function callback(err, res) { 
-      db.plugins.remove({}, function callback(err, res) { done(); });
+    categories.remove({}, function callback(err, res) { 
+      plugins.remove({}, function callback(err, res) { done(); });
     });
   });
 });
 
 describe('Updates', function() {
   before(function (done) {
-    db.plugins.insert(plugin_two, {safe: true}, function (err, records) {
+    plugins.insert(plugin_two, {safe: true}, function (err, records) {
       var versions = plugin_two.versions;
       for (var x = 0, versionLen = versions.length; x < versionLen; x++) {
         var version = versions[x];
@@ -622,14 +623,14 @@ describe('Updates', function() {
       });
   });
   after(function (done) {
-    db.plugins.remove({}, function callback(err, res) { done(); });
+    plugins.remove({}, function callback(err, res) { done(); });
   });
 });
 
 describe('Search', function() {
   before(function (done) {
-    db.plugins.insert(plugin_two, {safe: true}, function (err, records) {
-      db.plugins.insert(plugin, {safe: true}, function (err, records) {
+    plugins.insert(plugin_two, {safe: true}, function (err, records) {
+      plugins.insert(plugin, {safe: true}, function (err, records) {
         done();
       });
     });
@@ -934,6 +935,6 @@ describe('Search', function() {
       });
   });
   after(function (done) {
-    db.plugins.remove({}, function callback(err, res) { done(); });
+    plugins.remove({}, function callback(err, res) { done(); });
   });
 });

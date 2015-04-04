@@ -1,4 +1,4 @@
-module.exports = function (app, db, common) {
+module.exports = function (app, common) {
 
   // This could become a middleware in an ideal reality.
   // 
@@ -14,11 +14,13 @@ module.exports = function (app, db, common) {
     }
 
     var fields;
+    
     if (full) {
-        fields = ((req.query.fields == null ? '' : req.query.fields.split(',')));
+        fields = ((req.query.fields == null ? '' : req.query.fields).split(','));
     } else {
         fields = ((req.query.fields == null ? 'slug,plugin_name,description' : req.query.fields).split(','));
     }
+
     var start = req.query.start == null ? undefined : parseInt(req.query.start);
     var size = req.query.size == null ? undefined : parseInt(req.query.size);
     var sort = req.query.sort == null ? 'slug' : req.query.sort;

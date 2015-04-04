@@ -1,16 +1,15 @@
 module.exports = function (database, callback) {
   //Imports
-  var mongode = require('mongode');
-  var ObjectID = require('mongode').ObjectID;
   var restify = require('restify');
+  var cors = require('cors');
 
   //Connect to database
-  var db = mongode.connect(database);
-  db.collection('plugins');
-  db.collection('webstats');
-  db.collection('geninfo');
-  db.collection('authors');
-  db.collection('categories');
+  var db = require('monk')(database);
+  var plugins = db.get('plugins');
+  var webstats = db.get('webstats');
+  var geninfo = db.get('geninfo');
+  var authors = db.get('authors');
+  var categories = db.get('categories');
 
   // Search Type Map
   var types = {
@@ -140,19 +139,15 @@ module.exports = function (database, callback) {
   var common = {
     fieldgen: function (fields, callback) {
       // Generates the field listing based on the include and exclude lists.
-      var f = {
-        '_id': 0
-      }
+      var f = [
+        '-_id'
+      ]
 
-      for (var i = 0, len = fields.length; i < len; i++) {
-        if (fields[i] != '') {
-          if (fields[i].charAt(0) == '-') {
-            f[fields[i].substr(1)] = 0;
-          } else {
-            f[fields[i]] = 1;
-          }
+      fields.forEach(function (field) {
+        if (field != '' && f.indexOf(field) === -1) {
+          f.push(field)
         }
-      }
+      })
 
       callback(f);
     },
@@ -163,7 +158,7 @@ module.exports = function (database, callback) {
         size = 1;
       }
 
-      db.geninfo.find().sort('_id', -1).limit(size).toArray(function (err, docs) {
+      geninfo.find({}, { limit: 5, sort: { '_id': -1 } }, function (error, docs) {
         for (var i in docs) {
           docs[i]['id'] = docs[i]['_id'];
           delete docs[i]['_id'];
@@ -175,9 +170,9 @@ module.exports = function (database, callback) {
 
     get_geninfo: function (idnum, callback) {
       // Returns a specific generation ID's information.
-      db.geninfo.findOne({
-        '_id': ObjectID(idnum)
-      }, function (err, document) {
+      geninfo.findOne({
+        '_id': geninfo.id(idnum)
+      }, function (error, document) {
         if (document != null) {
           document['id'] = document['_id'];
           delete document['_id'];
@@ -198,27 +193,36 @@ module.exports = function (database, callback) {
         d = -1;
       }
 
-      common.fieldgen(fields, function (callback) {
-        fields = callback;
-      });
+      common.fieldgen(fields, function (generated_fields) {
+        var the_sort = {}
+        the_sort[sort] = d
 
-      if (size != undefined) {
-        if (start == undefined) {
-          start = 0;
+        var options = {
+          fields: generated_fields,
+          sort: the_sort
         }
 
-        db.plugins.find(filters, fields).sort(sort, d).skip(start).limit(size).toArray(function (err, docs) {
-          callback(docs);
-        });
-      } else {
-        db.plugins.find(filters, fields).sort(sort, d).toArray(function (err, docs) {
-          if (err || docs == null) {
-            return callback(null);
+        if (size != undefined) {
+          if (start == undefined) {
+            start = 0;
           }
 
-          callback(docs);
-        });
-      }
+          options.skip = start;
+          options.limit = size;
+
+          plugins.find(filters, options, function (error, docs) {
+            callback(docs);
+          });
+        } else {
+          plugins.find(filters, options, function (error, docs) {
+            if (error || docs == null) {
+              return callback(null);
+            }
+
+            callback(docs);
+          });
+        }
+      });
     },
 
     list_plugins: function (server, fields, sort, start, size, callback) {
@@ -287,7 +291,7 @@ module.exports = function (database, callback) {
 
     list_authors: function (callback) {
       // Returns a list of plugin authors and the number of plugins each one has created/worked on.
-      db.authors.find().sort('_id').toArray(function (err, docs) {
+      authors.find({}, { sort: '_id' }, function (error, docs) {
         common.ca_convert(docs, function (the_callback) {
           callback(the_callback);
         })
@@ -296,7 +300,7 @@ module.exports = function (database, callback) {
 
     list_categories: function (callback) {
       // Returns a list of plugin categories and the count of plugins that fall under each category.
-      db.categories.find().sort('_id').toArray(function (err, docs) {
+      categories.find({}, { sort: '_id' }, function (error, docs) {
         common.ca_convert(docs, function (the_callback) {
           callback(the_callback);
         })
@@ -322,8 +326,8 @@ module.exports = function (database, callback) {
         fields = callback;
       });
 
-      db.plugins.findOne(filters, fields, function (err, p) {
-        if (err || p == null) {
+      plugins.findOne(filters, fields, function (error, p) {
+        if (error || p == null) {
           return callback(null);
         }
         var found = false;
@@ -389,10 +393,10 @@ module.exports = function (database, callback) {
         }
       }
 
-      db.plugins.find({
+      plugins.find({
         '$or': slugs,
         'server': server
-      }).toArray(function (err, docs) {
+      }, function (error, docs) {
         var doc, versions, version;
 
         if (docs == null) {
@@ -488,53 +492,15 @@ module.exports = function (database, callback) {
   app.pre(restify.pre.userAgentConnection());
   app.pre(restify.pre.sanitizePath());
 
-  var ALLOW_HEADERS = [
-      'Accept',
-      'Accept-Version',
-      'Content-Length',
-      'Content-MD5',
-      'Content-Type',
-      'Date',
-      'Api-Version',
-      'Response-Time',
-      'Origin', 
-      'X-Requested-With'
-  ].join(', ');
-
-  function setHeaders (req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', ALLOW_HEADERS);
-    if (res.methods && res.methods.length > 0) {
-        if (res.methods.indexOf('OPTIONS') === -1) res.methods.push('OPTIONS');
-        res.setHeader('Access-Control-Allow-Methods', res.methods.join(', '));
-    }
-  }
-
-  function optionsHandler (req, res, next) {
-    if (req.method.toLowerCase() === 'options') {
-      setHeaders(req, res);
-      res.send(204);
-      next();
-    } else {
-      res.send(new restify.MethodNotAllowedError());
-      next();
-    }
-  }
-
-  app.on('MethodNotAllowed', optionsHandler);
-
   //Middleware
-  app.use(function (req, res, next) {
-    setHeaders(req, res);
-    next();
-  });
+  app.use(cors());
   app.use(restify.queryParser());
   app.use(restify.bodyParser())
   app.use(restify.jsonp());
   app.use(restify.gzipResponse());
 
   //Include api handlers
-  require('./v3')(app, db, common);
+  require('./v3')(app, common);
 
   //Redirect
   app.get('/', function (req, res, next) {
@@ -545,13 +511,15 @@ module.exports = function (database, callback) {
 
   //Handle stats requests
   app.get('/stats/naughty_list', function (req, res, next) {
-    db.plugins.find({ '_use_dbo': { '$exists': true } }, {
-      '_id': 0,
-      'slug': 1,
-      'plugin_name': 1,
-      'authors': 1,
-    }).toArray(function (err, docs) {
-      if (err) {
+    plugins.find({ '_use_dbo': { '$exists': true } }, { 
+      fields: [
+        '-_id',
+        'slug',
+        'plugin_name',
+        'authors',
+      ]
+    }, function (error, docs) {
+      if (error) {
         res.send(500);
         return next();
       }
@@ -562,11 +530,13 @@ module.exports = function (database, callback) {
   });
 
   app.get('/stats/todays_trends', function (req, res, next) {
-    db.plugins.find({}, {
-      'slug': 1,
-      'versions.version': 1
-    }).toArray(function (err, plugins) {
-      if (err) {
+    plugins.find({}, { 
+      fields: [
+        'slug',
+        'versions.version'
+      ]
+    }, function (error, plugins) {
+      if (error) {
         res.send(500);
         return next();
       }
@@ -587,26 +557,33 @@ module.exports = function (database, callback) {
   });
 
   app.get('/stats/trend/:days', function (req, res, next) {
-    var filter = {
-      '_id': 0,
-      'plugins': 0
-    };
+    var fields = [
+      '-_id',
+      '-plugins'
+    ]
+
     if (req.query.plugins) {
       if (req.query.plugins == 'all') { 
-        filter = { '_id': 0 }
+        fields = ['-_id']
       } else {
-        filter = { '_id': 0, 'timestamp': 1 }
+        fields = ['-_id', 'timestamp']
         var plugins = req.query.plugins.split(',');
 
         for (var index = 0, pluginsLen = plugins.length; index < pluginsLen; index++) {
-          filter['plugins.' + plugins[index]] = 1;
+          fields.push('plugins.' + plugins[index])
         }
       }
     }
 
     var days = (new Date().getTime() / 1000) - (86400 * req.params.days);
-    db.webstats.find({ timestamp: { $gte: days } }, filter).sort('_id', -1).limit(parseInt(req.params.days)).toArray(function (err, docs) {
-      if (err) {
+    var options = {
+      fields: fields,
+      limit: parseInt(req.params.days),
+      sort: { '_id': -1 }
+    }
+
+    webstats.find({ timestamp: { $gte: days } }, options, function (error, docs) {
+      if (error) {
         res.send(500);
         return next();
       }
@@ -660,6 +637,14 @@ module.exports = function (database, callback) {
     app.on('after', function (req, res, route, error) {
       process.send({ res: { statusCode : res.statusCode }, req: { url: req.url }, route: route, error: error });
     });
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    app.on('uncaughtException', function (req, res, route, error) {
+      console.log(error.stack)
+      console.log(route)
+      res.send(500, { error: 'Internal server error' })
+    })
   }
 
   callback(app);
