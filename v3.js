@@ -233,11 +233,23 @@ module.exports = function (app, common) {
         'value': value
       }];
     } else {
-      var filters = req.params.filters == null ? [] : JSON.parse(req.params.filters);
+      var filters
+
+      if (req.params.filters === null) {
+        filters = []
+      } else {
+        try {
+          filters = JSON.parse(req.params.filters)
+        } catch (error) {
+          filters = req.params.filters
+        } 
+      }
+
+      filters = req.params.filters == null ? [] : filters
       var fields = ((req.params.fields == null ? 'slug,plugin_name,description' : req.params.fields).split(','));
       var start = req.params.start == null ? undefined : parseInt(req.params.start);
       var size = req.params.size == null ? undefined : parseInt(req.params.size);
-      var sort = req.params.sort == null ? 'slug' : req.params.sort;
+      var sort = (req.params.sort == null || typeof req.params.sort === 'function') ? 'slug' : req.params.sort;
     }
 
     common.plugin_search(filters, fields, sort, start, size, false, function (callback) {

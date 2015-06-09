@@ -934,6 +934,36 @@ describe('Search', function() {
         done();
       });
   });
+  it('doesn\'t break when invalid filter is specified', function (done) {
+    request(instance)
+      .post('/3/search')
+      .send([ { field: 'plugin_name', action: 'like', value: 'mc' }, { field: 'versions.game_version', action: 'like', value: '1.4.5' } ])
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err,res) {
+        if (err) {
+          throw err;
+        }
+
+        done();
+      });
+  });
+  it('doesn\t break on search for some reason', function (done) {
+        request(instance)
+      .post('/3/search')
+      .send({ filters: [ { field: 'plugin_name', action: 'like', value: 'mc' }, { field: 'versions.game_version', action: 'like', value: '1.4.5' } ] })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err,res) {
+        if (err) {
+          throw err;
+        }
+
+        done();
+      });
+  });
   after(function (done) {
     plugins.remove({}, function callback(err, res) { done(); });
   });

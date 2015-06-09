@@ -639,13 +639,14 @@ module.exports = function (database, callback) {
     });
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    app.on('uncaughtException', function (req, res, route, error) {
+  app.on('uncaughtException', function (req, res, route, error) {
+    if (process.env.NODE_ENV === 'development') {
       console.log(error.stack)
       console.log(route)
-      res.send(500, { error: 'Internal server error' })
-    })
-  }
+    }
+
+    res.send(500, { error: 'Internal server error' })
+  })
 
   callback(app);
 }
